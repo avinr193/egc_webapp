@@ -64,19 +64,20 @@ class SignInButton extends React.Component {
     return (
       (this.state.enabled ? 
         <div>
-        <FlatButton onClick={() => this.signIn()} labelStyle={{color:"#FFFFFF"}} label={this.state.label} 
-        backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"/>
-        </div> :
+          <FlatButton onClick={() => this.signIn()} labelStyle={{color:"#FFFFFF"}} label={this.state.label} 
+          backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"/>
+        </div> 
+        :
         <div>
-        <IconMenu 
-        iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-        anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-        targetOrigin={{horizontal: 'right', vertical: 'top'}}
-        iconStyle={{color: "#FFFFFF"}}
-        >
-        <MenuItem onClick={() => this.signOut()} primaryText="Sign out" />
-        <MenuItem primaryText="Close"/>
-        </IconMenu>
+          <IconMenu 
+          iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
+          anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+          targetOrigin={{horizontal: 'right', vertical: 'top'}}
+          iconStyle={{color: "#FFFFFF"}}
+          >
+          <MenuItem onClick={() => this.signOut()} primaryText="Sign out" />
+          <MenuItem primaryText="Close"/>
+          </IconMenu>
         </div>)
       )
   }
@@ -123,14 +124,12 @@ const App = () => (
 const Navigation = () => (
   <nav>
   <ul id="paginate">
-  <li style={{padding:5}}><NavLink exact to='/home'><img style={{height:"90%", width:"100%"}} src={require('./egc.png')} alt="egc logo"/></NavLink></li>
-  <li><NavLink exact activeClassName="current" to='/attendance'>Attendance</NavLink></li>
-  <li><NavLink exact activeClassName="current" to='/voting'>Voting</NavLink></li>
-  <li><NavLink exact activeClassName="current" to='/admin'>Admin</NavLink></li>
-  <li><NavLink exact activeClassName="current" to='/about'>About</NavLink></li>
-  <li>
-  <SignInButton />
-  </li>
+    <li style={{padding:5}}><NavLink exact to='/home'><img style={{height:"90%", width:"100%"}} src={require('./egc.png')} alt="egc logo"/></NavLink></li>
+    <li><NavLink exact activeClassName="current" to='/attendance'>Attendance</NavLink></li>
+    <li><NavLink exact activeClassName="current" to='/voting'>Voting</NavLink></li>
+    <li><NavLink exact activeClassName="current" to='/admin'>Admin</NavLink></li>
+    <li><NavLink exact activeClassName="current" to='/about'>About</NavLink></li>
+    <li><SignInButton /></li>
   </ul>
   </nav>
   );

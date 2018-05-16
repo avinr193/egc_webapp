@@ -112,9 +112,9 @@ class AttendanceWindow extends React.Component {
     return (
       (this.state.enabled ?
         <div>
-        <p>Please sign-in to mark your attendance!</p>
-        <p style = {{color:"#DAA520"}}>If sign-in button doesn't work, make sure pop-ups are enabled and try again</p>
-        <p style = {{color:"#DAA520"}}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
+          <p>Please sign-in to mark your attendance!</p>
+          <p style = {{color:"#DAA520"}}>If sign-in button doesn't work, make sure pop-ups are enabled and try again</p>
+          <p style = {{color:"#DAA520"}}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
         </div> 
         : 
         <div>
