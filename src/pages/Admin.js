@@ -78,13 +78,14 @@ class AdminWindow extends React.Component {
   }
 
 changeEvent(event, index, value){
+	firebase.database().ref().child(this.state.currentEvent).child("attendance").off('value');
   	this.setState({
   		currentEvent: value,
   		att_list: []
   	}, function () {
   		var master = this;
   		var event = firebase.database().ref().child(this.state.currentEvent).child("attendance");
-  		event.off('value');
+  		event.off();
   	event.on('value', function(datasnapshot) {
   		var names = [];
   		var dataArr = datasnapshot.toJSON();

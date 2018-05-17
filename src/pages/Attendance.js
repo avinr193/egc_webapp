@@ -1,6 +1,8 @@
 import React from 'react'
 
 import FlatButton from 'material-ui/FlatButton';
+import DropDownMenu from 'material-ui/DropDownMenu';
+import MenuItem from 'material-ui/MenuItem';
 
 var firebase = require("firebase");
 
@@ -18,6 +20,7 @@ class AttendanceWindow extends React.Component {
     this.state = {
       enabled: false,
       currentEvent: "sample_EGC_Meeting",
+      event_list: [],
       user: null,
       logged: false,
       att: "Pending",
@@ -42,6 +45,28 @@ class AttendanceWindow extends React.Component {
         })
       }
     });
+
+    var database = firebase.database().ref();
+    var master = this;
+    database.on('value', function(datasnapshot) {
+      var events = [];
+      for (var key in datasnapshot.toJSON()){
+        const eventObj = {
+          event: key
+        }
+        events.push(eventObj);
+      }
+      master.setState({
+        event_list: events
+      })
+    });
+  }
+
+  changeEvent(event, index, value){
+    this.setState({
+      currentEvent: value,
+      logged: false
+    })
   }
 
   logAtt(){
@@ -111,6 +136,10 @@ class AttendanceWindow extends React.Component {
   }
 
   render() {
+    var eventsList = [];
+    for(var j = 0; j < this.state.event_list.length; j++){
+        eventsList.push(<MenuItem key={j} value={(this.state.event_list[j]).event} primaryText={(this.state.event_list[j]).event}></MenuItem>);
+    }
     return (
       (!this.state.enabled ?
         <div>
@@ -120,6 +149,9 @@ class AttendanceWindow extends React.Component {
         </div> 
         : 
         <div>
+        <DropDownMenu maxHeight={300} value={this.state.currentEvent} onChange={this.changeEvent.bind(this)}>
+            {eventsList}
+          </DropDownMenu>
           <p> Signed-In: {this.state.user.displayName} </p>
           <p> Email: {this.state.user.email} </p>
           <p> Attendance Logged: {this.state.att} </p>
