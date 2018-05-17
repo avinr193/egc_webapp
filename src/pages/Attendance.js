@@ -10,11 +10,13 @@ const Attendance = () => (
   </div>
 );
 
+export default Attendance
+
 class AttendanceWindow extends React.Component {
 	constructor(props){
     super(props);
     this.state = {
-      enabled: true,
+      enabled: false,
       currentEvent: "sample_EGC_Meeting",
       user: null,
       logged: false,
@@ -29,17 +31,17 @@ class AttendanceWindow extends React.Component {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.setState({
-          enabled: false,
+          enabled: true,
           user: user
         })
-      } 
-      else{
-       this.setState({
-         enabled: true,
-         user: null
-       })
-     }
-   });
+      }
+      else {
+        this.setState({
+          enabled: false,
+          user: null
+        })
+      }
+    });
   }
 
   logAtt(){
@@ -110,7 +112,7 @@ class AttendanceWindow extends React.Component {
 
   render() {
     return (
-      (this.state.enabled ?
+      (!this.state.enabled ?
         <div>
           <p>Please sign-in to mark your attendance!</p>
           <p style = {{color:"#DAA520"}}>If sign-in button doesn't work, make sure pop-ups are enabled and try again</p>
@@ -135,5 +137,3 @@ class AttendanceWindow extends React.Component {
     )
   }
 }
-
-export default Attendance

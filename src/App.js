@@ -119,7 +119,7 @@ const App = () => (
   <Main />
   </div>
   </MuiThemeProvider>
-  );
+);
 
 const Navigation = () => (
   <nav>
@@ -132,18 +132,18 @@ const Navigation = () => (
     <li><SignInButton /></li>
   </ul>
   </nav>
-  );
+);
 
 const Main = () => (
   <Switch>
-  <Route exact path='/home' component={Home}></Route>
-  <Route exact path='/about' component={About}></Route>
-  <Route exact path='/attendance' component={Attendance}></Route>
-  <Route exact path='/voting' component={Voting}></Route>
-  <Route exact path='/admin' component={Admin}></Route>
+    <Route exact path='/home' component={Home}></Route>
+    <Route exact path='/about' component={About}></Route>
+    <Route exact path='/attendance' component={Attendance}></Route>
+    <Route exact path='/voting' component={Voting}></Route>
+    <Route exact path='/admin' component={Admin}></Route>
 
-  <Redirect exact from="*" to="/attendance"/>
+    <Redirect exact from="*" to="/attendance"/>
   </Switch>
-  );
+);
 
 export default App;
