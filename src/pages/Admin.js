@@ -44,6 +44,7 @@ class AdminWindow extends React.Component {
 
     var master = this;
 
+
     var database = firebase.database().ref();
     database.on('value', function(datasnapshot) {
     	var events = [];
@@ -58,18 +59,10 @@ class AdminWindow extends React.Component {
   		})
     });
 
-   	var names = this.grabAttList();
-   	master.setState({
-  		att_list: names
-  	})
-  }
-
-  grabAttList() {
-	var event = firebase.database().ref().child(this.state.currentEvent).child("attendance");
-  	var names = [];
-  	event.off();
+  	var event = firebase.database().ref().child(this.state.currentEvent).child("attendance");
   	event.on('value', function(datasnapshot) {
-  	  		var dataArr = datasnapshot.toJSON();
+  		var names = [];
+  		var dataArr = datasnapshot.toJSON();
   		for (var key in dataArr){
   			const attObj = {
   				name: key.toUpperCase(),
@@ -78,23 +71,34 @@ class AdminWindow extends React.Component {
   			}
     		names.push(attObj);
   		}
+  		master.setState({
+  			att_list: names
+  		})
   	});
-  	return names;
   }
 
-  componentWillUnmount() {
-    firebase.database().ref().child(this.state.currentEvent).child("attendance").off();
-    firebase.database().ref().off();
-  }
-
-  changeEvent(event, index, value){
+changeEvent(event, index, value){
   	this.setState({
   		currentEvent: value,
+  		att_list: []
   	}, function () {
-  		var names = this.grabAttList();
-  		this.setState({
+  		var master = this;
+  		var event = firebase.database().ref().child(this.state.currentEvent).child("attendance");
+  		event.off('value');
+  	event.on('value', function(datasnapshot) {
+  		var names = [];
+  		var dataArr = datasnapshot.toJSON();
+  		for (var key in dataArr){
+  			const attObj = {
+  				name: key.toUpperCase(),
+  				email: (dataArr[key]).EMAIL,
+  				time: (dataArr[key]).TIME_SUCCESS.toString()
+  			}
+    		names.push(attObj);
+  		}
+  		master.setState({
   			att_list: names
-  		});
+  		})});
   	})
   }
 
@@ -121,7 +125,6 @@ class AdminWindow extends React.Component {
           	<DropDownMenu maxHeight={300} value={this.state.currentEvent} onChange={this.changeEvent.bind(this)}>
         		{eventsList}
       		</DropDownMenu>
-      		<p></p>
           	<div>Attendance:</div>
           	<List>
           		{namesList}
