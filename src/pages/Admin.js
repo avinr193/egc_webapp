@@ -126,6 +126,7 @@ changeEvent(event, index, value){
           	<DropDownMenu maxHeight={300} value={this.state.currentEvent} onChange={this.changeEvent.bind(this)}>
         		{eventsList}
       		</DropDownMenu>
+      		<p></p>
           	<div>Attendance:</div>
           	<List>
           		{namesList}

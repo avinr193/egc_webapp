@@ -101,7 +101,7 @@ class AttendanceWindow extends React.Component {
     var database = firebase.database().ref();
     var today = new Date();
     var timestamp = today.getHours().toString() + ":" +  today.getMinutes().toString();
-    database.child(this.state.currentEvent).child("attendance").child(this.state.user.displayName).set({
+    database.child(this.state.currentEvent).child("attendance").child(this.state.user.displayName.toUpperCase()).set({
     TIME_SUCCESS : timestamp,
     EMAIL : this.state.user.email
     });
@@ -152,6 +152,7 @@ class AttendanceWindow extends React.Component {
         <DropDownMenu maxHeight={300} value={this.state.currentEvent} onChange={this.changeEvent.bind(this)}>
             {eventsList}
           </DropDownMenu>
+          <p></p>
           <p> Signed-In: {this.state.user.displayName} </p>
           <p> Email: {this.state.user.email} </p>
           <p> Attendance Logged: {this.state.att} </p>
