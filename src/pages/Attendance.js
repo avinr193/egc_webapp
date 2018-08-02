@@ -1,26 +1,30 @@
 import React from 'react'
+import { connect } from 'react-redux'
 
 import FlatButton from 'material-ui/FlatButton';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 
-var firebase = require("firebase");
+import firebase from '../firebase'
+import { addAtt }  from '../firebase'
 
-const Attendance = () => (
+import { setEvent, fetchAttendanceThunk } from '../store/actions'
+
+const Attendance = ({events, currentDate, currentEvent, onChangeEvent}) => (
   <div className='attendance'>
-  <AttendanceWindow />
+  <AttendanceWindow events={events} currentDate={currentDate} 
+  currentEvent={currentEvent} onChangeEvent={onChangeEvent}/>
   </div>
 );
-
-export default Attendance
 
 class AttendanceWindow extends React.Component {
 	constructor(props){
     super(props);
     this.state = {
       enabled: false,
-      currentEvent: "sample_EGC_Meeting",
-      event_list: [],
+      currentOrganization: "Engineering Governing Council",
+      currentYear: "2018",
+      currentEvent: "General Council",
       user: null,
       logged: false,
       att: "Pending",
@@ -45,26 +49,11 @@ class AttendanceWindow extends React.Component {
         })
       }
     });
-
-    var database = firebase.database().ref();
-    var master = this;
-    database.on('value', function(datasnapshot) {
-      var events = [];
-      for (var key in datasnapshot.toJSON()){
-        const eventObj = {
-          event: key
-        }
-        events.push(eventObj);
-      }
-      master.setState({
-        event_list: events
-      })
-    });
   }
 
   changeEvent(event, index, value){
+    if(value){this.props.onChangeEvent(value);}
     this.setState({
-      currentEvent: value,
       logged: false
     })
   }
@@ -98,13 +87,10 @@ class AttendanceWindow extends React.Component {
   }
 
   loginSuccess(userLat, userLong){
-    var database = firebase.database().ref();
-    var today = new Date();
+    var today = new Date(); 
     var timestamp = today.getHours().toString() + ":" +  today.getMinutes().toString();
-    database.child(this.state.currentEvent).child("attendance").child(this.state.user.displayName.toUpperCase()).set({
-    TIME_SUCCESS : timestamp,
-    EMAIL : this.state.user.email
-    });
+    addAtt(this.props.currentDate, this.props.currentEvent, this.state.user.displayName.toUpperCase(), timestamp, 
+    this.state.user.email, userLat, userLong);
     this.setState({
       logged: true,
       lat:userLat,
@@ -137,8 +123,8 @@ class AttendanceWindow extends React.Component {
 
   render() {
     var eventsList = [];
-    for(var j = 0; j < this.state.event_list.length; j++){
-        eventsList.push(<MenuItem key={j} value={(this.state.event_list[j]).event} primaryText={(this.state.event_list[j]).event}></MenuItem>);
+    for(var j = 0; j < this.props.events.length; j++){
+        eventsList.push(<MenuItem key={j} value={this.props.events[j]} primaryText={this.props.events[j]}></MenuItem>);
     }
     return (
       (!this.state.enabled ?
@@ -149,7 +135,7 @@ class AttendanceWindow extends React.Component {
         </div> 
         : 
         <div>
-        <DropDownMenu maxHeight={300} value={this.state.currentEvent} onChange={this.changeEvent.bind(this)}>
+        <DropDownMenu maxHeight={300} value={this.props.currentEvent} onChange={this.changeEvent.bind(this)}>
             {eventsList}
           </DropDownMenu>
           <p></p>
@@ -170,3 +156,14 @@ class AttendanceWindow extends React.Component {
     )
   }
 }
+
+const mapState = (state) => ({
+    events: state.events,
+    currentDate: state.currentDate,
+    currentEvent: state.currentEvent
+})
+
+const mapDispatch = (dispatch) => ({
+  onChangeEvent(newEvent){ dispatch(setEvent(newEvent)); dispatch(fetchAttendanceThunk()) }
+})
+ export default connect(mapState, mapDispatch)(Attendance);

@@ -1,20 +1,16 @@
 import React from 'react'
 
-import {List, ListItem} from 'material-ui/List';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-
-var firebase = require("firebase");
+import firebase from '../../firebase'
 
 const Admin = () => (
 	<div className = "admin">
-		<AdminWindow />
+		<AdminEvntWindow />
     </div>
 );
 
 export default Admin
 
-class AdminWindow extends React.Component {
+class AdminEvntWindow extends React.Component {
 	constructor(props){
     super(props);
     this.state = {
@@ -104,15 +100,6 @@ changeEvent(event, index, value){
   }
 
   render() {
-  	var namesList = [];
-    for(var i = 0; i < this.state.att_list.length; i++){
-        namesList.push(<ListItem key={i} primaryText={(this.state.att_list[i]).name} secondaryText={"Time Logged: " + (this.state.att_list[i]).time}></ListItem>);
-    }
-
-    var eventsList = [];
-    for(var j = 0; j < this.state.event_list.length; j++){
-        eventsList.push(<MenuItem key={j} value={(this.state.event_list[j]).event} primaryText={(this.state.event_list[j]).event}></MenuItem>);
-    }
 
     return (
       (!this.state.enabled ?
@@ -123,14 +110,7 @@ changeEvent(event, index, value){
         </div> 
         : 
         <div>
-          	<DropDownMenu maxHeight={300} value={this.state.currentEvent} onChange={this.changeEvent.bind(this)}>
-        		{eventsList}
-      		</DropDownMenu>
-      		<p></p>
-          	<div>Attendance:</div>
-          	<List>
-          		{namesList}
-          	</List>
+            <div>Event Manager</div>
         </div>
       )
     )
