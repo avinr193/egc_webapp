@@ -13,6 +13,7 @@ export const ActionTypes = {
 
 /*ACTION CREATORS*/
 export const fetchEvents = (events) => ({type: ActionTypes.FETCH_EVENTS, events})
+export const fetchOrgs = (organizations) => ({type: ActionTypes.FETCH_ORGS, organizations})
 export const fetchAtt = (attendance) => ({type: ActionTypes.FETCH_ATT, attendance})
 export const fetchDate = (date) => ({type:ActionTypes.FETCH_DATE, date})
 export const setEvent = (newEvent) => ({type:ActionTypes.SET_EVENT, newEvent})
@@ -38,6 +39,18 @@ export function fetchEventsThunk () {
     })
     .then(() => dispatch(fetchEvents(events)))
     .then(() => dispatch(setEvent(events[0])))
+    }
+}
+
+export function fetchOrgsThunk () {
+    return dispatch => {
+    const organizations = [];
+    database.ref(`/`).once('value', snap => {
+     snap.forEach(data => {
+        organizations.push(data.key)
+     })
+    })
+    .then(() => dispatch(fetchOrgs(organizations)))
     }
 }
 

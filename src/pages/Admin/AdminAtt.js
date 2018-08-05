@@ -62,41 +62,23 @@ download(filename, text) {
   document.body.removeChild(element);
 }
 
-ConvertToCSV(objArray) {
-            var array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
-            var str = '';
-
-            for (var i = 0; i < array.length; i++) {
-                var line = '';
-                for (var index in array[i]) {
-                    if (line !== '') line += ','
-
-                    line += array[i][index];
-                }
-
-                str += line + '\r\n';
-            }
-
-            return str;
-        }
-
-  downloadReport(){
-      var jsonArr = [];
-      var dataArr = this.props.attendance;
-      console.log(dataArr)
-      for (var key in dataArr){
-        const attObj = {
-          NAME: (dataArr[key]).name.toUpperCase(),
-          EMAIL: (dataArr[key]).email,
-          TIME_SUCCESS: (dataArr[key]).time
-        }
-        jsonArr.push(attObj);
+downloadReport(){
+    var jsonArr = [];
+    var dataArr = this.props.attendance;
+    console.log(dataArr)
+    for (var key in dataArr){
+      const attObj = {
+        NAME: (dataArr[key]).name.toUpperCase(),
+        EMAIL: (dataArr[key]).email,
+        TIME_SUCCESS: (dataArr[key]).time
       }
-      const Json2csvParser = require('json2csv').Parser;
-      const fields = ['NAME', 'EMAIL', 'TIME_SUCCESS'];
-      const json2csvParser = new Json2csvParser({ fields });
-      const csv = json2csvParser.parse(jsonArr);
-      this.download("test.csv", csv);
+      jsonArr.push(attObj);
+    }
+    const Json2csvParser = require('json2csv').Parser;
+    const fields = ['NAME', 'EMAIL', 'TIME_SUCCESS'];
+    const json2csvParser = new Json2csvParser({ fields });
+    const csv = json2csvParser.parse(jsonArr);
+    this.download("test.csv", csv);
   }
 
   render() {
