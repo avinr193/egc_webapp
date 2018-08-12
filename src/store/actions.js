@@ -8,7 +8,8 @@ export const ActionTypes = {
     FETCH_DATE: "FETCH_DATE",
     FETCH_ATT: "FETCH_ATT",
     FETCH_USER: "FETCH_USER",
-    SET_EVENT: "SET_EVENT"
+    SET_EVENT: "SET_EVENT",
+    SET_ORG: "SET_ORG"
 }
 
 /*ACTION CREATORS*/
@@ -17,6 +18,7 @@ export const fetchOrgs = (organizations) => ({type: ActionTypes.FETCH_ORGS, orga
 export const fetchAtt = (attendance) => ({type: ActionTypes.FETCH_ATT, attendance})
 export const fetchDate = (date) => ({type:ActionTypes.FETCH_DATE, date})
 export const setEvent = (newEvent) => ({type:ActionTypes.SET_EVENT, newEvent})
+export const setOrg = (newOrg) => ({type:ActionTypes.SET_ORG, newOrg})
 
 /*THUNKS*/
 export function fetchDateThunk () {
@@ -30,7 +32,7 @@ export function fetchDateThunk () {
 export function fetchEventsThunk () {
     return dispatch => {
     const events = [];
-    database.ref(`/Engineering Governing Council/`).once('value', snap => {
+    database.ref(`/Engineering Governing Council/2018/`).once('value', snap => {
      snap.forEach(data => {
      for (var event in data.val()){
         events.push(event)
@@ -51,6 +53,7 @@ export function fetchOrgsThunk () {
      })
     })
     .then(() => dispatch(fetchOrgs(organizations)))
+    .then(() => dispatch(setOrg(organizations[0])))
     }
 }
 
@@ -58,7 +61,7 @@ export function fetchAttendanceThunk () {
     return (dispatch,getState) => {
         var state = getState();
         const attendance = [];
-        database.ref(`/Engineering Governing Council/2018/${state.currentEvent}/${state.currentDate}/attendance/people`).once('value', snap => {
+        database.ref(`/Engineering Governing Council/2018/events/${state.currentEvent}/${state.currentDate}/attendance/people`).once('value', snap => {
         snap.forEach(data => {
             const attObj = {
                 name: data.key.toUpperCase(),
@@ -75,7 +78,7 @@ export function fetchAttendanceThunk () {
 /*LISTENERS*/
 export function watchEventAdded (dispatch) {
     return dispatch => {
-    database.ref(`/Engineering Governing Council/2018/`).on('child_added', (snap) => {    
+    database.ref(`/Engineering Governing Council/2018/events/`).on('child_added', (snap) => {    
         dispatch(fetchEventsThunk());
     });
     }
@@ -83,7 +86,7 @@ export function watchEventAdded (dispatch) {
 
 export function watchAttendanceAdded (dispatch) {
     return dispatch => {
-    database.ref(`/Engineering Governing Council/2018/`).on('child_changed', (snap) => {    
+    database.ref(`/Engineering Governing Council/2018/events/`).on('child_changed', (snap) => {    
         dispatch(fetchAttendanceThunk());
     });
     }

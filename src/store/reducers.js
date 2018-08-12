@@ -22,6 +22,10 @@ const currentEvent = (state = '', action) => {
     return (action.type === ActionTypes.SET_EVENT) ? action.newEvent : state
 }
 
+const currentOrg = (state = 'Engineering Governing Council', action) => {
+    return (action.type === ActionTypes.SET_ORG) ? action.newOrg : state
+}
+
 export default combineReducers ({
-    events, organizations, attendance, currentDate, currentEvent
+    events, organizations, attendance, currentDate, currentEvent, currentOrg
 })

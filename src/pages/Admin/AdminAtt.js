@@ -12,7 +12,7 @@ import { setEvent, fetchAttendanceThunk } from '../../store/actions'
 const Admin = ({events, attendance, currentDate, currentEvent, onChangeEvent}) => (
 	<div className = "admin">
 		<AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
-    currentEvent={currentEvent}/>
+    currentEvent={currentEvent} currentDate = {currentDate}/>
     </div>
 );
 

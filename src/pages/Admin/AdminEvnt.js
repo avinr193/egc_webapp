@@ -1,6 +1,8 @@
 import React from 'react'
+import moment from 'moment'
 import { connect } from 'react-redux'
 import firebase from '../../firebase'
+import { addEvent } from '../../firebase'
 
 import FlatButton from 'material-ui/FlatButton';
 import {List, ListItem} from 'material-ui/List';
@@ -10,9 +12,11 @@ import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
 
-const Admin = ({ events, orgs }) => (
+import { setOrg, fetchEventsThunk } from '../../store/actions'
+
+const Admin = ({ events, orgs, currentOrg, onChangeOrg }) => (
 	<div className = "admin">
-		<AdminEvntWindow events = {events} orgs = {orgs} />
+		<AdminEvntWindow events = {events} orgs = {orgs} currentOrg = {currentOrg} onChangeOrg = {onChangeOrg}/>
     </div>
 );
 
@@ -25,12 +29,11 @@ class AdminEvntWindow extends React.Component {
 			event_name: '',
 			event_date: {},
 			event_time_start: {},
-			event_time_end: {},
-			current_org: ''
+			event_time_end: {}
 		}
 		
 		this.handleEvent = this.handleEvent.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
+		this.trySubmit = this.trySubmit.bind(this);
   }
 
   componentDidMount() {
@@ -55,13 +58,27 @@ class AdminEvntWindow extends React.Component {
     this.setState({ [e.target.name]: e.target.value });
 	}
 
-	setEvent = (org) => {this.setState({'current_org': org})}	
-	setTimeStart = (time_start) => {this.setState({'event_time_start':time_start})}
-	setTimeEnd = (time_end) => {this.setState({'event_time_end':time_end})}
-	setDate = (date) => {this.setState({'event_date':date})}
+	changeOrg = (event, index, value) => {
+		if(value){this.props.onChangeOrg(value);}
+	}	
+	setTimeStart = (e, time_start) => {this.setState({'event_time_start':time_start})}
+	setTimeEnd = (e, time_end) => {this.setState({'event_time_end':time_end})}
+	setDate = (e, date) => {this.setState({'event_date':date})}
 
-	handleSubmit (e) {
-		console.log("NAME: " + this.state.event_name + " DATE: " + this.state.event_date);
+	trySubmit (e) {
+		e.preventDefault();
+		let name = this.state.event_name.toUpperCase();
+		let date = moment(this.state.event_date).format('M-D');
+		let year = moment(this.state.event_date).format('YYYY');
+		let time_start = moment(this.state.event_time_start).format('hh:mm A');
+		let time_end = moment(this.state.event_time_end).format('hh:mm A');
+		if(!(date && year && time_start && time_end && name)){
+			this.setState({'error':true,'submitted':false});
+			return false;
+		}
+		addEvent(this.props.currentOrg,year, date, time_start, time_end, name);
+		this.setState({'submitted':true,'error':false});
+		return true;
 	}
 
   render() {
@@ -83,40 +100,40 @@ class AdminEvntWindow extends React.Component {
           	<p style = {{color:"#DAA520"}}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
         </div> 
 				: 
+				<div>
+				<DropDownMenu maxHeight={300} value={this.props.currentOrg} onChange={this.changeOrg}>
+        	{orgsList}
+      	</DropDownMenu>
+				<div style={{"padding":"10px"}}></div>
         <div style={{"display":"flex"}}>
 					  <div style={{"flex":"1"}}> 
 						<div style = {{"font-weight": "bold"}}>Add Event</div>
-						<form onSubmit={this.handleSubmit} style={{"padding":"5px"}}>
-							<label>Organization Name:&nbsp; <div></div>
-								<DropDownMenu maxHeight={300} value={this.state.current_org} onChange={this.setEvent}>
-        				{orgsList}
-      					</DropDownMenu>
-  						</label>
+						<form onSubmit={this.trySubmit}>
 							<div></div>
 							<label>
 								<TextField name="event_name" value={this.state.event_name} onChange={this.handleEvent}
 								hintText="e.g. General Council" floatingLabelText="Event Name" style={{"margin-top":"0px"}}/>
   						</label>
-							<div style={{"padding":"10px"}}></div>
-							<label>
-								Period Attendance is active:
-								<TimePicker value={this.state.event_time_start} hintText="Choose Start Time" onChange={this.setTimeStart}/>
-								<TimePicker value={this.state.event_time_end} hintText="Choose End Time" onChange={this.setTimeEnd}/>
-								<DatePicker value={this.state.event_date} firstDayOfWeek={0} hintText="Choose Date" onChange={this.setDate}/>
-							</label>
-  						<FlatButton labelStyle={{color:"#FFFFFF"}} label="Add Event" 
+							<TimePicker value={this.state.event_time_start} hintText="Choose Start Time (default: now)" onChange={this.setTimeStart}/>
+							<TimePicker value={this.state.event_time_end} hintText="Choose End Time (default: now)" onChange={this.setTimeEnd}/>
+							<DatePicker value={this.state.event_date} firstDayOfWeek={0} hintText="Choose Date (default: today)" onChange={this.setDate}/>
+  						<div style={{"padding":"10px"}}></div>
+							<FlatButton labelStyle={{color:"#FFFFFF"}} label="Add Event" 
 							backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" 
-							type="submit" value="Submit" />
+							type="submit" />
 						</form>
+						{this.state.error ? <div style={{"color":"red","padding":"10px"}}>Please fill in all fields.</div> : null}
+						{this.state.submitted ? <div style={{"color":"green","padding":"10px"}}>Event added successfully!</div> : null}
 						</div>
 						<div style={{"flex":"1"}}> 
-						<div style = {{"font-weight": "bold", "margin-top":"25px"}}>View Events</div>
+						<div style = {{"font-weight": "bold"}}>View Events</div>
 						<List>
           	{eventsList}
          	 	</List>
 							<div></div>
 							</div>
         </div>
+				</div>
       )
     )
   }
@@ -124,9 +141,11 @@ class AdminEvntWindow extends React.Component {
 
 const mapState = (state) => ({
 	events: state.events,
-	orgs: state.organizations
+	orgs: state.organizations,
+	currentOrg: state.currentOrg
 })
 const mapDispatch = (dispatch) => ({
+	onChangeOrg(newOrg){ dispatch(setOrg(newOrg)); dispatch(fetchEventsThunk())}
 })
 
 export default connect(mapState, mapDispatch)(Admin);
