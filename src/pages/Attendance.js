@@ -10,9 +10,9 @@ import { addAtt }  from '../firebase'
 
 import { setEvent, fetchAttendanceThunk } from '../store/actions'
 
-const Attendance = ({events, currentDate, currentEvent, onChangeEvent}) => (
+const Attendance = ({liveEvents, currentDate, currentEvent, onChangeEvent}) => (
   <div className='attendance'>
-  <AttendanceWindow events={events} currentDate={currentDate} 
+  <AttendanceWindow liveEvents={liveEvents} currentDate={currentDate} 
   currentEvent={currentEvent} onChangeEvent={onChangeEvent}/>
   </div>
 );
@@ -22,9 +22,6 @@ class AttendanceWindow extends React.Component {
     super(props);
     this.state = {
       enabled: false,
-      currentOrganization: "Engineering Governing Council",
-      currentYear: "2018",
-      currentEvent: "General Council",
       user: null,
       logged: false,
       att: "Pending",
@@ -123,8 +120,10 @@ class AttendanceWindow extends React.Component {
 
   render() {
     var eventsList = [];
-    for(var j = 0; j < this.props.events.length; j++){
-        eventsList.push(<MenuItem key={j} value={this.props.events[j]} primaryText={this.props.events[j]}></MenuItem>);
+    for(var j = 0; j < this.props.liveEvents.length; j++){
+        eventsList.push(<MenuItem key={j} 
+        value={this.props.liveEvents[j].event} primaryText={this.props.liveEvents[j].event 
+          + " - " + this.props.liveEvents[j].organization.match(/[A-Z]/g).join('')}></MenuItem>);
     }
     return (
       (!this.state.enabled ?
@@ -158,7 +157,7 @@ class AttendanceWindow extends React.Component {
 }
 
 const mapState = (state) => ({
-    events: state.events,
+    liveEvents: state.liveEvents,
     currentDate: state.currentDate,
     currentEvent: state.currentEvent
 })

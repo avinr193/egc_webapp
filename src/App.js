@@ -7,7 +7,10 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Main from './components/Main'
 import Navigation from './components/Navigation'
 
-import { fetchEventsThunk, fetchAttendanceThunk, watchEventAdded, watchAttendanceAdded, fetchDateThunk, fetchOrgsThunk } from './store/actions'
+import { watchEventAdded, watchAttendanceAdded, fetchDateThunk, fetchOrgsThunk, 
+  watchEventDateAdded, 
+  fetchLiveEventsThunk,
+  watchLiveEvents} from './store/actions'
 
 import './styles/App.css';
 
@@ -36,12 +39,13 @@ const mapState = () => {
   return {};
 }
  const mapDispatch = dispatch => {
-  dispatch(fetchEventsThunk())
-  dispatch(fetchAttendanceThunk())
   dispatch(fetchOrgsThunk())
+  dispatch(fetchLiveEventsThunk())
   dispatch(fetchDateThunk())
   dispatch(watchEventAdded())
+  dispatch(watchEventDateAdded())
   dispatch(watchAttendanceAdded())
+  dispatch(watchLiveEvents())
   return {
   }
 }

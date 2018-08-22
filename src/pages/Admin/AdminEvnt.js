@@ -16,7 +16,7 @@ import { setOrg, fetchEventsThunk } from '../../store/actions'
 
 const Admin = ({ events, orgs, currentOrg, onChangeOrg }) => (
 	<div className = "admin">
-		<AdminEvntWindow events = {events} orgs = {orgs} currentOrg = {currentOrg} onChangeOrg = {onChangeOrg}/>
+		<AdminEvntWindow events={events} orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}/>
     </div>
 );
 
@@ -76,7 +76,7 @@ class AdminEvntWindow extends React.Component {
 			this.setState({'error':true,'submitted':false});
 			return false;
 		}
-		addEvent(this.props.currentOrg,year, date, time_start, time_end, name);
+		addEvent(this.props.currentOrg, year, date, time_start, time_end, name);
 		this.setState({'submitted':true,'error':false});
 		return true;
 	}
@@ -145,7 +145,9 @@ const mapState = (state) => ({
 	currentOrg: state.currentOrg
 })
 const mapDispatch = (dispatch) => ({
-	onChangeOrg(newOrg){ dispatch(setOrg(newOrg)); dispatch(fetchEventsThunk())}
+	onChangeOrg(newOrg){ 
+		dispatch(setOrg(newOrg)); 
+		dispatch(fetchEventsThunk())}
 })
 
 export default connect(mapState, mapDispatch)(Admin);
