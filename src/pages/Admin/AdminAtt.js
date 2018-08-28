@@ -10,15 +10,16 @@ import FlatButton from 'material-ui/FlatButton';
 import Toggle from 'material-ui/Toggle';
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 
-import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventsThunk, fetchEventDatesThunk, checkEventLive } from '../../store/actions'
+import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventsThunk, fetchEventDatesThunk, checkEventLive, setAttPath } from '../../store/actions'
 
 const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
-                 currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive }) => (
+                 currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath }) => (
 	<div className = "admin">
 		<AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
     currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
     onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg}
-    onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}/>
+    onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}
+    onSetAttPath={onSetAttPath} attPath={attPath}/>
   </div>
 );
 
@@ -27,8 +28,7 @@ class AdminWindow extends React.Component {
     super(props);
     this.state = {
       enabled: false,
-      user: null,
-      attSwitchVal: "opening"
+      user: null
     }
   }
 
@@ -51,29 +51,23 @@ class AdminWindow extends React.Component {
 
 changeEvent(event, index, value){
   if(value){
-    this.props.onChangeEvent(value, this.state.attSwitchVal);
+    this.props.onChangeEvent(value);
   }
-  this.setState({
-    attSwitchVal: "opening"
-  })
+  this.props.onSetAttPath("opening");
 }
 
 changeDate(event, index, value){
   if(value){
     let newVal = this.props.eventDates[value];
-    this.setState({
-      attSwitchVal: "opening"
-    })
-    this.props.onChangeDate(newVal, this.state.attSwitchVal);
+    this.props.onSetAttPath("opening");
+    this.props.onChangeDate(newVal);
   }
 }
 
 changeAttType(event, value){
   if(value){
-    this.setState({
-      attSwitchVal: value
-    })
-    this.props.onChangeAtt(value, this.state.attSwitchVal)
+    this.props.onSetAttPath(value);
+    this.props.onChangeAtt(value)
   }
 }
 
@@ -114,7 +108,7 @@ download(filename, text) {
       'event':this.props.currentEvent,
       'organization':this.props.currentOrg,
       'date':this.props.currentDate,
-      'attPath':this.state.attSwitchVal
+      'attPath':this.props.attPath
     }
     if(isInputChecked){
       addLiveEvent(liveEvent)
@@ -122,7 +116,7 @@ download(filename, text) {
     else{
       removeLiveEvent(liveEvent)
     }
-    this.props.onSetEventLive(this.state.attSwitchVal);
+    this.props.onSetEventLive();
   }
 
   render() {
@@ -173,8 +167,9 @@ download(filename, text) {
           { (this.props.eventDate.props) ? 
           (this.props.eventDate.props.closingAtt) ? 
           <div>
-             <RadioButtonGroup name="whichAtt" defaultSelected="opening" onChange={this.changeAttType.bind(this)}
-             style={{"maxWidth":"125px","marginLeft":"42%"}}>
+             <RadioButtonGroup name="whichAtt" defaultSelected="opening" valueSelected={this.props.attPath}
+              onChange={this.changeAttType.bind(this)}
+             style={{"maxWidth":"125px","marginLeft":"45%"}}>
                 <RadioButton
                   value="opening"
                   label="opening"
@@ -208,24 +203,29 @@ const mapState = (state) => ({
     eventDate: state.eventDate,
     eventDates: state.eventDates,
     currentOrg: state.currentOrg,
-    isEventLive: state.isEventLive
+    isEventLive: state.isEventLive,
+    attPath: state.attPath
 })
  const mapDispatch = (dispatch) => {
+  dispatch(setAttPath("opening"));
   dispatch(fetchEventsThunk());
    return {
-    onChangeEvent(newEvent,attPath){
+    onChangeEvent(newEvent){
       dispatch(setEvent(newEvent));
-      dispatch(fetchEventDatesThunk(attPath));
+      dispatch(fetchEventDatesThunk());
     }, 
-    onChangeDate(newEventDate, attPath){
+    onChangeDate(newEventDate){
       dispatch(setEventDate(newEventDate));
-      dispatch(fetchAttendanceThunk(attPath));
+      dispatch(fetchAttendanceThunk());
     },
     onChangeAtt(newAttPath){
       dispatch(fetchAttendanceThunk(newAttPath));
     },
     onSetEventLive(attPath){
       dispatch(checkEventLive(attPath))
+    },
+    onSetAttPath(attPath){
+      dispatch(setAttPath(attPath));
     }
   }
  }

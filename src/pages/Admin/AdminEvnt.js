@@ -136,7 +136,7 @@ class AdminEvntWindow extends React.Component {
 							<TimePicker value={this.state.event_time_start} hintText="Choose Start Time (default: now)" onChange={this.setTimeStart}/>
 							<TimePicker value={this.state.event_time_end} hintText="Choose End Time (default: now)" onChange={this.setTimeEnd}/>
 							<DatePicker value={this.state.event_date} firstDayOfWeek={0} hintText="Choose Date (default: today)" onChange={this.setDate}/>
-							<div style={{"maxWidth":"200px","marginLeft":"20%"}}>
+							<div style={{"maxWidth":"200px","marginLeft":"33%"}}>
 							<Checkbox label="Closing Attendance" checked={this.state.closingAtt}
 												onCheck={this.updateCheck}/></div>
 							<div style={{"padding":"10px"}}></div>

@@ -88,7 +88,7 @@ class AttendanceWindow extends React.Component {
   loginSuccess(userLat, userLong){
     var today = new Date(); 
     var timestamp = today.getHours().toString() + ":" +  today.getMinutes().toString();
-    if(!isLiveEvent(this.props.currentDate+this.props.currentLiveEvent.event+this.props.currentLiveEvent.organization)){
+    if(!isLiveEvent(this.props.currentDate+this.props.currentLiveEvent.event+this.props.currentLiveEvent.organization, this.props.currentLiveEvent.attPath)){
       return this.loginFailure(2);
     }
     addAtt(this.props.currentDate, this.props.currentLiveEvent.event, this.state.user.displayName.toUpperCase(), timestamp, 

@@ -14,7 +14,8 @@ export const ActionTypes = {
     SET_EVENT_DATE: "SET_EVENT_DATE",
     FETCH_LIVE_EVENTS: "FETCH_LIVE_EVENTS",
     SET_LIVE_EVENT: "SET_LIVE_EVENT",
-    SET_IS_EVENT_LIVE: "SET_IS_EVENT_LIVE"
+    SET_IS_EVENT_LIVE: "SET_IS_EVENT_LIVE",
+    SET_ATT_PATH: "SET_ATT_PATH"
 }
 
 /*ACTION CREATORS*/
@@ -29,6 +30,7 @@ export const setOrg = (newOrg) => ({type:ActionTypes.SET_ORG, newOrg})
 export const fetchLiveEvents = (liveEvents) => ({type:ActionTypes.FETCH_LIVE_EVENTS, liveEvents})
 export const setLiveEvent = (newLiveEvent) => ({type:ActionTypes.SET_LIVE_EVENT, newLiveEvent})
 export const setIsEventLive = (isEventLive) => ({type:ActionTypes.SET_IS_EVENT_LIVE, isEventLive})
+export const setAttPath = (newAttPath) => ({type:ActionTypes.SET_ATT_PATH, newAttPath})
 
 /*THUNKS*/
 export function fetchDateThunk () {
@@ -39,15 +41,15 @@ export function fetchDateThunk () {
     }
 }
 
-export function checkEventLive (attPath="opening") {
+export function checkEventLive () {
     return (dispatch, getState) => {
         let state = getState();
-        let isEventLive = isLiveEvent(state.currentDate+state.currentEvent+state.currentOrg, attPath);
+        let isEventLive = isLiveEvent(state.currentDate+state.currentEvent+state.currentOrg, state.attPath);
         dispatch(setIsEventLive(isEventLive));
     }
 }
 
-export function fetchEventDatesThunk (attPath="opening") {
+export function fetchEventDatesThunk () {
     return (dispatch, getState) => {
         var state = getState();
         const eventDates = [];
@@ -62,8 +64,7 @@ export function fetchEventDatesThunk (attPath="opening") {
            })
         .then(() => dispatch(fetchEventDates(eventDates)))
         .then(() => dispatch(setEventDate(eventDates[eventDates.length-1])))
-        .then(() => dispatch(fetchAttendanceThunk(attPath)))
-        .then(() => dispatch(setIsEventLive(isLiveEvent(state.currentDate+state.currentEvent+state.currentOrg))))
+        .then(() => dispatch(fetchAttendanceThunk()))
     }
 }
 
@@ -78,7 +79,7 @@ export function fetchEventsThunk () {
      })
     })
     .then(() => dispatch(fetchEvents(events)))
-    .then(events[0] ? () => dispatch(setEvent(events[0])) : null)
+    .then(() => events[0] ? dispatch(setEvent(events[0])) : null)
     .then(() => dispatch(fetchEventDatesThunk()))
     }
 }
@@ -97,11 +98,11 @@ export function fetchOrgsThunk () {
     }
 }
 
-export function fetchAttendanceThunk (attPath="opening") {
+export function fetchAttendanceThunk () {
     return (dispatch,getState) => {
         var state = getState();
         const attendance = [];
-        database.ref(`/Engineering Governing Council/2018/events/${state.currentEvent}/${state.eventDate.key}/attendance/${attPath}/people`).once('value', snap => {
+        database.ref(`/Engineering Governing Council/2018/events/${state.currentEvent}/${state.eventDate.key}/attendance/${state.attPath}/people`).once('value', snap => {
         snap.forEach(data => {
             const attObj = {
                 name: data.key.toUpperCase(),
@@ -112,7 +113,7 @@ export function fetchAttendanceThunk (attPath="opening") {
         })
         })
         .then(() => dispatch(fetchAtt(attendance)))
-        .then(() => dispatch(setIsEventLive(isLiveEvent(state.currentDate+state.currentEvent+state.currentOrg, attPath))))
+        .then(() => dispatch(setIsEventLive(isLiveEvent(state.currentDate+state.currentEvent+state.currentOrg, state.attPath))))
     }
 }
 

@@ -18,6 +18,11 @@ const isEventLive = (state = false, action) => {
     return (action.type === ActionTypes.SET_IS_EVENT_LIVE) ? action.isEventLive : state
 }
 
+const attPath = (state = "opening", action) => {
+    return (action.type === ActionTypes.SET_ATT_PATH && action.newAttPath) ? action.newAttPath : state
+}
+
+
 const organizations = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_ORGS && action.organizations) ? action.organizations : state
 }
@@ -48,5 +53,5 @@ const currentOrg = (state = 'Engineering Governing Council', action) => {
 
 export default combineReducers ({
     events, organizations, attendance, currentDate, currentEvent, 
-    currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive
+    currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath
 })
