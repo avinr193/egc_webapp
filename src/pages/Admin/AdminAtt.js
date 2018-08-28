@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import firebase from '../../firebase'
-import { addLiveEvent, removeLiveEvent }  from '../../firebase'
+import { addLiveEvent, removeLiveEvent, signIn }  from '../../firebase'
 
 import {List, ListItem} from 'material-ui/List';
 import DropDownMenu from 'material-ui/DropDownMenu';
@@ -10,7 +10,7 @@ import FlatButton from 'material-ui/FlatButton';
 import Toggle from 'material-ui/Toggle';
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 
-import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventsThunk, fetchEventDatesThunk, checkEventLive, setAttPath } from '../../store/actions'
+import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, setAttPath } from '../../store/actions'
 
 const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
                  currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath }) => (
@@ -138,8 +138,9 @@ download(filename, text) {
     return (
       (!this.state.enabled ?
         <div>
-         	<p>Please sign-in with an admin-enabled account!</p>
-          	<p style = {{color:"#DAA520"}}>If sign-in button doesn't work, make sure pop-ups are enabled and try again</p>
+         	 <FlatButton onClick={() => signIn()} labelStyle={{color:"#FFFFFF"}} label={"SIGN-IN"} 
+          backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"/>
+          	<p style = {{color:"#DAA520", "marginTop":"10px"}}>If sign-in button doesn't work, make sure pop-ups are enabled and try again</p>
           	<p style = {{color:"#DAA520"}}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
         </div> 
         : 
@@ -181,7 +182,7 @@ download(filename, text) {
                   style={{"marginBottom":"16px"}}
                 />
              </RadioButtonGroup>
-          </div> : null : <div>error checking if closing attendance.</div>
+          </div> : null : this.props.onSetAttPath("opening")
           }
           <p></p>
           <FlatButton onClick={() => this.downloadReport()} labelStyle={{color:"#FFFFFF"}} label="Download Report" 
@@ -207,8 +208,7 @@ const mapState = (state) => ({
     attPath: state.attPath
 })
  const mapDispatch = (dispatch) => {
-  dispatch(setAttPath("opening"));
-  dispatch(fetchEventsThunk());
+   dispatch(checkEventLive());
    return {
     onChangeEvent(newEvent){
       dispatch(setEvent(newEvent));

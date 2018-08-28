@@ -1,10 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import firebase from '../firebase'
+import firebase, {signOut} from '../firebase'
 
 import { NavLink, Link } from 'react-router-dom';
 
-import FlatButton from 'material-ui/FlatButton';
 import IconMenu from 'material-ui/IconMenu'
 import IconButton from 'material-ui/IconButton'
 import MenuItem from 'material-ui/MenuItem'
@@ -50,33 +49,10 @@ class SignInButton extends React.Component {
     });
   }
 
-  signIn() {
-    if(this.state.enabled){
-      var provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({
-        'hd': 'scarletmail.rutgers.edu'
-      });
-      firebase.auth().signInWithRedirect(provider);
-    }
-  }
-
-  signOut() {
-    firebase.auth().signOut()
-    .then(() => {
-      this.setState({
-        enabled: true,
-        label: "SIGN-IN"
-      });
-    });
-  }
-
   render() {
     return (
       (this.state.enabled ? 
-        <div>
-          <FlatButton onClick={() => this.signIn()} labelStyle={{color:"#FFFFFF"}} label={this.state.label} 
-          backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"/>
-        </div> 
+        null
         :
         <div>
           <IconMenu 
@@ -85,7 +61,7 @@ class SignInButton extends React.Component {
           targetOrigin={{horizontal: 'right', vertical: 'top'}}
           iconStyle={{color: "#FFFFFF"}}
           >
-          <MenuItem onClick={() => this.signOut()} primaryText="Sign out" />
+          <MenuItem onClick={() => signOut()} primaryText="Sign out" />
           <MenuItem primaryText="Close"/>
           </IconMenu>
         </div>)

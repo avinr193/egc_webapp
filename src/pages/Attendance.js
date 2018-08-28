@@ -6,7 +6,7 @@ import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 
 import firebase from '../firebase'
-import { addAtt, isLiveEvent }  from '../firebase'
+import { addAtt, isLiveEvent, signIn }  from '../firebase'
 
 import { setLiveEvent, fetchAttendanceThunk, fetchLiveEventsThunk } from '../store/actions'
 
@@ -137,8 +137,9 @@ class AttendanceWindow extends React.Component {
     return (
       (!this.state.enabled ?
         <div>
-          <p>Please sign-in to mark your attendance!</p>
-          <p style = {{color:"#DAA520"}}>If sign-in button doesn't work, make sure pop-ups are enabled and try again</p>
+          <FlatButton onClick={() => signIn()} labelStyle={{color:"#FFFFFF"}} label={"SIGN-IN"} 
+          backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"/>
+          <p style = {{color:"#DAA520", "marginTop":"10px"}}>If sign-in button doesn't work, make sure pop-ups are enabled and try again</p>
           <p style = {{color:"#DAA520"}}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
         </div> 
         : 

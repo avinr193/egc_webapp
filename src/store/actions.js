@@ -162,11 +162,9 @@ export function watchLiveEvents () {
     return dispatch => {
     database.ref(`/liveEvents/`).on('child_added', () => {    
         dispatch(fetchLiveEventsThunk());
-        dispatch(fetchEventsThunk());
     });
     database.ref(`/liveEvents/`).on('child_removed', () => {    
         dispatch(fetchLiveEventsThunk());
-        dispatch(fetchEventsThunk());
     });
     }
 }
