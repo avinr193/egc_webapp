@@ -10,6 +10,14 @@ const liveEvents = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_LIVE_EVENTS && action.liveEvents) ? action.liveEvents : state
 }
 
+const currentLiveEvent = (state = {}, action) => {
+    return (action.type === ActionTypes.SET_LIVE_EVENT && action.newLiveEvent) ? action.newLiveEvent : state
+}
+
+const isEventLive = (state = false, action) => {
+    return (action.type === ActionTypes.SET_IS_EVENT_LIVE) ? action.isEventLive : state
+}
+
 const organizations = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_ORGS && action.organizations) ? action.organizations : state
 }
@@ -40,5 +48,5 @@ const currentOrg = (state = 'Engineering Governing Council', action) => {
 
 export default combineReducers ({
     events, organizations, attendance, currentDate, currentEvent, 
-    currentOrg, eventDates, eventDate, liveEvents
+    currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive
 })

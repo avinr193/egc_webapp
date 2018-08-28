@@ -6,14 +6,14 @@ import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 
 import firebase from '../firebase'
-import { addAtt }  from '../firebase'
+import { addAtt, isLiveEvent }  from '../firebase'
 
-import { setEvent, fetchAttendanceThunk } from '../store/actions'
+import { setLiveEvent, fetchAttendanceThunk, fetchLiveEventsThunk } from '../store/actions'
 
-const Attendance = ({liveEvents, currentDate, currentEvent, onChangeEvent}) => (
+const Attendance = ({liveEvents, currentDate, onChangeEvent, currentLiveEvent}) => (
   <div className='attendance'>
   <AttendanceWindow liveEvents={liveEvents} currentDate={currentDate} 
-  currentEvent={currentEvent} onChangeEvent={onChangeEvent}/>
+  currentLiveEvent={currentLiveEvent} onChangeEvent={onChangeEvent}/>
   </div>
 );
 
@@ -49,7 +49,9 @@ class AttendanceWindow extends React.Component {
   }
 
   changeEvent(event, index, value){
-    if(value){this.props.onChangeEvent(value);}
+    if(value){
+      let newVal = JSON.parse(value);
+      this.props.onChangeEvent(newVal);}
     this.setState({
       logged: false
     })
@@ -86,8 +88,11 @@ class AttendanceWindow extends React.Component {
   loginSuccess(userLat, userLong){
     var today = new Date(); 
     var timestamp = today.getHours().toString() + ":" +  today.getMinutes().toString();
-    addAtt(this.props.currentDate, this.props.currentEvent, this.state.user.displayName.toUpperCase(), timestamp, 
-    this.state.user.email, userLat, userLong);
+    if(!isLiveEvent(this.props.currentDate+this.props.currentLiveEvent.event+this.props.currentLiveEvent.organization)){
+      return this.loginFailure(2);
+    }
+    addAtt(this.props.currentDate, this.props.currentLiveEvent.event, this.state.user.displayName.toUpperCase(), timestamp, 
+    this.state.user.email, userLat, userLong, this.props.currentLiveEvent.attPath);
     this.setState({
       logged: true,
       lat:userLat,
@@ -108,6 +113,10 @@ class AttendanceWindow extends React.Component {
       error = "FAIL: Please allow location for this page in your browser and try again"
       break;
         
+      case 2:
+      error = "FAIL: Event no longer live."
+      break;
+
       default:
       error = "FAIL: Unknown Error, please refresh and try again"
       break;
@@ -122,7 +131,7 @@ class AttendanceWindow extends React.Component {
     var eventsList = [];
     for(var j = 0; j < this.props.liveEvents.length; j++){
         eventsList.push(<MenuItem key={j} 
-        value={this.props.liveEvents[j].event} primaryText={this.props.liveEvents[j].event 
+        value={JSON.stringify(this.props.liveEvents[j])} primaryText={this.props.liveEvents[j].event 
           + " - " + this.props.liveEvents[j].organization.match(/[A-Z]/g).join('')}></MenuItem>);
     }
     return (
@@ -133,8 +142,9 @@ class AttendanceWindow extends React.Component {
           <p style = {{color:"#DAA520"}}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
         </div> 
         : 
+        (this.props.liveEvents[0] ? 
         <div>
-        <DropDownMenu maxHeight={300} value={this.props.currentEvent} onChange={this.changeEvent.bind(this)}>
+        <DropDownMenu maxHeight={300} value={JSON.stringify(this.props.currentLiveEvent)} onChange={this.changeEvent.bind(this)}>
             {eventsList}
           </DropDownMenu>
           <p></p>
@@ -151,6 +161,7 @@ class AttendanceWindow extends React.Component {
           <p></p>
           <p style={{color:'red'}}> {this.state.err} </p>
         </div>
+       : <div>No live events at this time.</div>)
       )
     )
   }
@@ -159,10 +170,12 @@ class AttendanceWindow extends React.Component {
 const mapState = (state) => ({
     liveEvents: state.liveEvents,
     currentDate: state.currentDate,
-    currentEvent: state.currentEvent
+    currentLiveEvent: state.currentLiveEvent
 })
 
-const mapDispatch = (dispatch) => ({
-  onChangeEvent(newEvent){ dispatch(setEvent(newEvent)); dispatch(fetchAttendanceThunk()) }
-})
- export default connect(mapState, mapDispatch)(Attendance);
+const mapDispatch = (dispatch) => {
+  dispatch(fetchLiveEventsThunk());
+return {
+  onChangeEvent(newLiveEvent){ dispatch(setLiveEvent(newLiveEvent)); dispatch(fetchAttendanceThunk()) }
+}}
+export default connect(mapState, mapDispatch)(Attendance);

@@ -1,9 +1,10 @@
 import React from 'react'
 import moment from 'moment'
 import { connect } from 'react-redux'
-import firebase from '../../firebase'
-import { addEvent } from '../../firebase'
+import firebase, { addEvent } from '../../firebase'
 
+
+import LocationPickerExample from './Map'
 import FlatButton from 'material-ui/FlatButton';
 import {List, ListItem} from 'material-ui/List';
 import DatePicker from 'material-ui/DatePicker';
@@ -11,6 +12,7 @@ import TimePicker from 'material-ui/TimePicker';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
+import Checkbox from 'material-ui/Checkbox'
 
 import { setOrg, fetchEventsThunk } from '../../store/actions'
 
@@ -19,6 +21,14 @@ const Admin = ({ events, orgs, currentOrg, onChangeOrg }) => (
 		<AdminEvntWindow events={events} orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}/>
     </div>
 );
+
+function loadJS(src) {
+	var ref = window.document.getElementsByTagName("script")[0];
+	var script = window.document.createElement("script");
+	script.src = src;
+	script.async = true;
+	ref.parentNode.insertBefore(script, ref);
+}
 
 class AdminEvntWindow extends React.Component {
 	constructor(props){
@@ -29,7 +39,8 @@ class AdminEvntWindow extends React.Component {
 			event_name: '',
 			event_date: {},
 			event_time_start: {},
-			event_time_end: {}
+			event_time_end: {},
+			closingAtt: false
 		}
 		
 		this.handleEvent = this.handleEvent.bind(this);
@@ -37,12 +48,17 @@ class AdminEvntWindow extends React.Component {
   }
 
   componentDidMount() {
+		 // Connect the initMap() function within this class to the global window context,
+        // so Google Maps can invoke it
+        //window.initMap = this.initMap;
+        // Asynchronously load the Google Maps script, passing in the callback reference
+				//loadJS('https://maps.googleapis.com/maps/api/js?key=AIzaSyD_Brakef26k_3vGI9T5I8d--giSRrJ86c&callback=initMap')
+				
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.setState({
           enabled: true,
-					user: user,
-					current_org: this.props.orgs[0]
+					user: user
         })
       }
       else {
@@ -54,6 +70,10 @@ class AdminEvntWindow extends React.Component {
 		 });
 	}
 
+	initMap () {
+	//	map = new google.maps.Map(this.refs.map.getDOMNode(), { ... });
+ }
+
 	handleEvent (e) {
     this.setState({ [e.target.name]: e.target.value });
 	}
@@ -64,6 +84,7 @@ class AdminEvntWindow extends React.Component {
 	setTimeStart = (e, time_start) => {this.setState({'event_time_start':time_start})}
 	setTimeEnd = (e, time_end) => {this.setState({'event_time_end':time_end})}
 	setDate = (e, date) => {this.setState({'event_date':date})}
+	updateCheck = () => {this.setState({'closingAtt':!this.state.closingAtt})}
 
 	trySubmit (e) {
 		e.preventDefault();
@@ -76,7 +97,7 @@ class AdminEvntWindow extends React.Component {
 			this.setState({'error':true,'submitted':false});
 			return false;
 		}
-		addEvent(this.props.currentOrg, year, date, time_start, time_end, name);
+		addEvent(this.props.currentOrg, year, date, time_start, time_end, name, 1,1, this.state.closingAtt);
 		this.setState({'submitted':true,'error':false});
 		return true;
 	}
@@ -107,17 +128,20 @@ class AdminEvntWindow extends React.Component {
 				<div style={{"padding":"10px"}}></div>
         <div style={{"display":"flex"}}>
 					  <div style={{"flex":"1"}}> 
-						<div style = {{"font-weight": "bold"}}>Add Event</div>
+						<div style = {{"fontWeight": "bold"}}>Add Event</div>
 						<form onSubmit={this.trySubmit}>
 							<div></div>
-							<label>
-								<TextField name="event_name" value={this.state.event_name} onChange={this.handleEvent}
-								hintText="e.g. General Council" floatingLabelText="Event Name" style={{"margin-top":"0px"}}/>
-  						</label>
+							<TextField name="event_name" value={this.state.event_name} onChange={this.handleEvent}
+							hintText="e.g. General Council" floatingLabelText="Event Name" style={{"marginTop":"0px"}}/>
 							<TimePicker value={this.state.event_time_start} hintText="Choose Start Time (default: now)" onChange={this.setTimeStart}/>
 							<TimePicker value={this.state.event_time_end} hintText="Choose End Time (default: now)" onChange={this.setTimeEnd}/>
 							<DatePicker value={this.state.event_date} firstDayOfWeek={0} hintText="Choose Date (default: today)" onChange={this.setDate}/>
-  						<div style={{"padding":"10px"}}></div>
+							<div style={{"maxWidth":"200px","marginLeft":"20%"}}>
+							<Checkbox label="Closing Attendance" checked={this.state.closingAtt}
+												onCheck={this.updateCheck}/></div>
+							<div style={{"padding":"10px"}}></div>
+							<div>Map here</div>
+							<div style={{"padding":"10px"}}></div>
 							<FlatButton labelStyle={{color:"#FFFFFF"}} label="Add Event" 
 							backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" 
 							type="submit" />
@@ -126,7 +150,7 @@ class AdminEvntWindow extends React.Component {
 						{this.state.submitted ? <div style={{"color":"green","padding":"10px"}}>Event added successfully!</div> : null}
 						</div>
 						<div style={{"flex":"1"}}> 
-						<div style = {{"font-weight": "bold"}}>View Events</div>
+						<div style = {{"fontWeight": "bold"}}>View Events</div>
 						<List>
           	{eventsList}
          	 	</List>
@@ -144,10 +168,12 @@ const mapState = (state) => ({
 	orgs: state.organizations,
 	currentOrg: state.currentOrg
 })
-const mapDispatch = (dispatch) => ({
+const mapDispatch = (dispatch) => {
+	return {
 	onChangeOrg(newOrg){ 
 		dispatch(setOrg(newOrg)); 
 		dispatch(fetchEventsThunk())}
-})
+}}
 
 export default connect(mapState, mapDispatch)(Admin);
+

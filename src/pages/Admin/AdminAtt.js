@@ -7,16 +7,18 @@ import {List, ListItem} from 'material-ui/List';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import FlatButton from 'material-ui/FlatButton';
-import Toggle from 'material-ui/Toggle'
+import Toggle from 'material-ui/Toggle';
+import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 
-import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk } from '../../store/actions'
+import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventsThunk, fetchEventDatesThunk, checkEventLive } from '../../store/actions'
 
 const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
-                 currentDate, currentOrg }) => (
+                 currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive }) => (
 	<div className = "admin">
 		<AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
     currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
-    onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg}/>
+    onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg}
+    onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}/>
   </div>
 );
 
@@ -25,7 +27,8 @@ class AdminWindow extends React.Component {
     super(props);
     this.state = {
       enabled: false,
-      user: null
+      user: null,
+      attSwitchVal: "opening"
     }
   }
 
@@ -43,15 +46,35 @@ class AdminWindow extends React.Component {
           user: null
         })
       }
-   	});
+     });
   }
 
 changeEvent(event, index, value){
-  if(value){this.props.onChangeEvent(value);}
+  if(value){
+    this.props.onChangeEvent(value, this.state.attSwitchVal);
+  }
+  this.setState({
+    attSwitchVal: "opening"
+  })
 }
 
 changeDate(event, index, value){
-  if(value){this.props.onChangeDate(value);}
+  if(value){
+    let newVal = this.props.eventDates[value];
+    this.setState({
+      attSwitchVal: "opening"
+    })
+    this.props.onChangeDate(newVal, this.state.attSwitchVal);
+  }
+}
+
+changeAttType(event, value){
+  if(value){
+    this.setState({
+      attSwitchVal: value
+    })
+    this.props.onChangeAtt(value, this.state.attSwitchVal)
+  }
 }
 
 download(filename, text) {
@@ -90,7 +113,8 @@ download(filename, text) {
     var liveEvent = {
       'event':this.props.currentEvent,
       'organization':this.props.currentOrg,
-      'date':this.props.currentDate
+      'date':this.props.currentDate,
+      'attPath':this.state.attSwitchVal
     }
     if(isInputChecked){
       addLiveEvent(liveEvent)
@@ -98,6 +122,7 @@ download(filename, text) {
     else{
       removeLiveEvent(liveEvent)
     }
+    this.props.onSetEventLive(this.state.attSwitchVal);
   }
 
   render() {
@@ -113,7 +138,7 @@ download(filename, text) {
 
     var datesList = [];
     for(var k = 0; k < this.props.eventDates.length; k++){
-        datesList.push(<MenuItem key={k} value={this.props.eventDates[k]} primaryText={this.props.eventDates[k]}></MenuItem>);
+        datesList.push(<MenuItem key={k} value={this.props.eventDates[k].key} primaryText={this.props.eventDates[k].key}></MenuItem>);
     }
 
     return (
@@ -128,23 +153,41 @@ download(filename, text) {
           <div>Attendance:</div>
           <p></p>
           <div>Choose event & date below:</div>
-          <div style={{"display":"flex","justify-content":"center"}}>
+          <div style={{"display":"flex","justifyContent":"center"}}>
             <div>
             <DropDownMenu maxHeight={300} value={this.props.currentEvent} onChange={this.changeEvent.bind(this)}>
         		  {eventsList}
       		  </DropDownMenu>
             </div>
             <div>
-            <DropDownMenu maxHeight={300} value={this.props.eventDate} onChange={this.changeDate.bind(this)}>
+            <DropDownMenu maxHeight={300} value={this.props.eventDate.key} onChange={this.changeDate.bind(this)}>
         		  {datesList}
       		  </DropDownMenu>
             </div>
-            {(this.props.eventDate === this.props.currentDate) ? 
+            {(this.props.eventDate.key === this.props.currentDate) ? 
             <div style={{"display":"flex"}}>
-            <div style={{"margin-top":"19px"}}>Live:</div>
-            <div style={{"margin-top":"17px"}}><Toggle onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle></div>
+            <div style={{"marginTop":"19px"}}>Live:</div>
+            <div style={{"marginTop":"17px"}}><Toggle toggled={this.props.isEventLive === true ? this.props.isEventLive : false} onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle></div>
             </div> : null}
           </div>
+          { (this.props.eventDate.props) ? 
+          (this.props.eventDate.props.closingAtt) ? 
+          <div>
+             <RadioButtonGroup name="whichAtt" defaultSelected="opening" onChange={this.changeAttType.bind(this)}
+             style={{"maxWidth":"125px","marginLeft":"42%"}}>
+                <RadioButton
+                  value="opening"
+                  label="opening"
+                  style={{"marginBottom":"16px"}}
+                />
+                <RadioButton
+                  value="closing"
+                  label="closing"
+                  style={{"marginBottom":"16px"}}
+                />
+             </RadioButtonGroup>
+          </div> : null : <div>error checking if closing attendance.</div>
+          }
           <p></p>
           <FlatButton onClick={() => this.downloadReport()} labelStyle={{color:"#FFFFFF"}} label="Download Report" 
           backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"/>
@@ -164,16 +207,26 @@ const mapState = (state) => ({
     currentDate: state.currentDate,
     eventDate: state.eventDate,
     eventDates: state.eventDates,
-    currentOrg: state.currentOrg
+    currentOrg: state.currentOrg,
+    isEventLive: state.isEventLive
 })
  const mapDispatch = (dispatch) => {
+  dispatch(fetchEventsThunk());
    return {
-    onChangeEvent(newEvent){
-      dispatch(setEvent(newEvent)); 
-      dispatch(fetchEventDatesThunk());}, 
-    onChangeDate(newEventDate){
-      dispatch(setEventDate(newEventDate)); 
-      dispatch(fetchAttendanceThunk());}
+    onChangeEvent(newEvent,attPath){
+      dispatch(setEvent(newEvent));
+      dispatch(fetchEventDatesThunk(attPath));
+    }, 
+    onChangeDate(newEventDate, attPath){
+      dispatch(setEventDate(newEventDate));
+      dispatch(fetchAttendanceThunk(attPath));
+    },
+    onChangeAtt(newAttPath){
+      dispatch(fetchAttendanceThunk(newAttPath));
+    },
+    onSetEventLive(attPath){
+      dispatch(checkEventLive(attPath))
     }
   }
+ }
  export default connect(mapState, mapDispatch)(Admin);

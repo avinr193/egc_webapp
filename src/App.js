@@ -9,7 +9,6 @@ import Navigation from './components/Navigation'
 
 import { watchEventAdded, watchAttendanceAdded, fetchDateThunk, fetchOrgsThunk, 
   watchEventDateAdded, 
-  fetchLiveEventsThunk,
   watchLiveEvents} from './store/actions'
 
 import './styles/App.css';
@@ -40,7 +39,6 @@ const mapState = () => {
 }
  const mapDispatch = dispatch => {
   dispatch(fetchOrgsThunk())
-  dispatch(fetchLiveEventsThunk())
   dispatch(fetchDateThunk())
   dispatch(watchEventAdded())
   dispatch(watchEventDateAdded())
