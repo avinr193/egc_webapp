@@ -105,7 +105,7 @@ export function fetchAttendanceThunk () {
         database.ref(`/Organizations/Engineering Governing Council/2018/events/${state.currentEvent}/${state.eventDate.key}/attendance/${state.attPath}/people`).once('value', snap => {
         snap.forEach(data => {
             const attObj = {
-                name: data.key.toUpperCase(),
+                name: data.val().name.toUpperCase(),
                 email: data.val().email,
                 time: data.val().time_logged.toString()
             }

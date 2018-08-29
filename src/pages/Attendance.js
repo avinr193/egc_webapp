@@ -92,7 +92,7 @@ class AttendanceWindow extends React.Component {
       return this.loginFailure(2);
     }
     addAtt(this.props.currentDate, this.props.currentLiveEvent.event, this.state.user.displayName.toUpperCase(), timestamp, 
-    this.state.user.email, userLat, userLong, this.props.currentLiveEvent.attPath);
+    this.state.user.email, userLat, userLong, this.props.currentLiveEvent.attPath, this.state.user.uid);
     this.setState({
       logged: true,
       lat:userLat,
