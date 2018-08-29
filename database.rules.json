@@ -1,6 +1,30 @@
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null"
+    ".read": "auth !== null && auth.provider === 'google' 
+    && root.child('Admins').child('general').hasChild(auth.token.name)",
+    ".write": "auth !== null && auth.provider === 'google' 
+    && root.child('Admins').child('general').hasChild(auth.token.name)",
+    "Organizations":{
+      "$org":{
+        "events":{
+          "$event":{
+            "$date":{
+              "attendance":{
+                "$attType":{
+                  "people":{
+                    "$uid":{
+                      ".write":"auth.uid === $uid"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "liveEvents":{
+      ".read":"auth !== null && auth.provider === 'google'"
+    }
   }
 }
