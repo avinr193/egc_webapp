@@ -1,7 +1,7 @@
 import React from 'react'
 import moment from 'moment'
 import { connect } from 'react-redux'
-import firebase, { addEvent, signIn } from '../../firebase'
+import firebase, { addEvent, signIn, isGeneralAdmin } from '../../firebase'
 
 
 import LocationPickerExample from './Map'
@@ -40,7 +40,8 @@ class AdminEvntWindow extends React.Component {
 			event_date: {},
 			event_time_start: {},
 			event_time_end: {},
-			closingAtt: false
+			closingAtt: false,
+			admin: false
 		}
 		
 		this.handleEvent = this.handleEvent.bind(this);
@@ -54,21 +55,25 @@ class AdminEvntWindow extends React.Component {
         // Asynchronously load the Google Maps script, passing in the callback reference
 				//loadJS('https://maps.googleapis.com/maps/api/js?key=AIzaSyD_Brakef26k_3vGI9T5I8d--giSRrJ86c&callback=initMap')
 				
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        this.setState({
-          enabled: true,
-					user: user
-        })
-      }
-      else {
-      	this.setState({
-          enabled: false,
-          user: null
-        })
-      }
-		 });
-	}
+				firebase.auth().onAuthStateChanged((user) => {
+					if (user) {
+					 isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
+						this.setState({
+							enabled: true,
+							user: user,
+							admin: isGenAdmin
+						})
+					 })
+					}
+					else {
+						this.setState({
+							enabled: false,
+							user: null,
+							admin: false
+						})
+					}
+				 });
+			}
 
 	initMap () {
 	//	map = new google.maps.Map(this.refs.map.getDOMNode(), { ... });
@@ -122,6 +127,7 @@ class AdminEvntWindow extends React.Component {
           	<p style = {{color:"#DAA520"}}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
         </div> 
 				: 
+				(this.state.admin ? 
 				<div>
 				<DropDownMenu maxHeight={300} value={this.props.currentOrg} onChange={this.changeOrg}>
         	{orgsList}
@@ -158,7 +164,7 @@ class AdminEvntWindow extends React.Component {
 							<div></div>
 							</div>
         </div>
-				</div>
+				</div> : <div>You are not an admin.</div>)
       )
     )
   }

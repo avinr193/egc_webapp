@@ -53,7 +53,7 @@ export function fetchEventDatesThunk () {
     return (dispatch, getState) => {
         var state = getState();
         const eventDates = [];
-        database.ref(`/Engineering Governing Council/2018/events/${state.currentEvent}/`).once('value', snap => {
+        database.ref(`/Organizations/Engineering Governing Council/2018/events/${state.currentEvent}/`).once('value', snap => {
             snap.forEach(data => {
                 var eventDate = {
                     key: data.key,
@@ -71,7 +71,7 @@ export function fetchEventDatesThunk () {
 export function fetchEventsThunk () {
     return dispatch => {
     const events = [];
-    database.ref(`/Engineering Governing Council/2018/`).once('value', snap => {
+    database.ref(`/Organizations/Engineering Governing Council/2018/`).once('value', snap => {
      snap.forEach(data => {
      for (var event in data.val()){
         events.push(event)
@@ -87,7 +87,7 @@ export function fetchEventsThunk () {
 export function fetchOrgsThunk () {
     return dispatch => {
     const organizations = [];
-    database.ref(`/`).once('value', snap => {
+    database.ref(`/Organizations/`).once('value', snap => {
      snap.forEach(data => {
         organizations.push(data.key)
      })
@@ -102,7 +102,7 @@ export function fetchAttendanceThunk () {
     return (dispatch,getState) => {
         var state = getState();
         const attendance = [];
-        database.ref(`/Engineering Governing Council/2018/events/${state.currentEvent}/${state.eventDate.key}/attendance/${state.attPath}/people`).once('value', snap => {
+        database.ref(`/Organizations/Engineering Governing Council/2018/events/${state.currentEvent}/${state.eventDate.key}/attendance/${state.attPath}/people`).once('value', snap => {
         snap.forEach(data => {
             const attObj = {
                 name: data.key.toUpperCase(),
@@ -133,7 +133,7 @@ export function fetchLiveEventsThunk () {
 /*LISTENERS*/
 export function watchEventAdded () {
     return dispatch => {
-    database.ref(`/Engineering Governing Council/2018/events/`).on('child_added', () => {    
+    database.ref(`/Organizations/Engineering Governing Council/2018/events/`).on('child_added', () => {    
         dispatch(fetchEventsThunk());
     });
     }
@@ -141,10 +141,10 @@ export function watchEventAdded () {
 
 export function watchAttendanceAdded () {
     return dispatch => {
-    database.ref(`/Engineering Governing Council/2018/events/`).on('child_added', () => {    
+    database.ref(`/Organizations/Engineering Governing Council/2018/events/`).on('child_added', () => {    
         dispatch(fetchAttendanceThunk());
     });
-    database.ref(`/Engineering Governing Council/2018/events/`).on('child_changed', () => {    
+    database.ref(`/Organizations/Engineering Governing Council/2018/events/`).on('child_changed', () => {    
         dispatch(fetchAttendanceThunk());
     });
     }
@@ -152,7 +152,7 @@ export function watchAttendanceAdded () {
 
 export function watchEventDateAdded () {
     return dispatch => {
-    database.ref(`/Engineering Governing Council/2018/events/GENERAL COUNCIL/`).on('child_added', () => {    
+    database.ref(`/Organizations/Engineering Governing Council/2018/events/GENERAL COUNCIL/`).on('child_added', () => {    
         dispatch(fetchEventDatesThunk());
     });
     }

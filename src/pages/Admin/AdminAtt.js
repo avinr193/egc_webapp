@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import firebase from '../../firebase'
-import { addLiveEvent, removeLiveEvent, signIn }  from '../../firebase'
+import { addLiveEvent, removeLiveEvent, signIn, isGeneralAdmin }  from '../../firebase'
 
 import {List, ListItem} from 'material-ui/List';
 import DropDownMenu from 'material-ui/DropDownMenu';
@@ -32,22 +32,26 @@ class AdminWindow extends React.Component {
     }
   }
 
-  componentDidMount() {
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        this.setState({
-          enabled: true,
-          user: user
-        })
-      }
-      else {
-      	this.setState({
-          enabled: false,
-          user: null
-        })
-      }
-     });
-  }
+  componentDidMount() { 
+   firebase.auth().onAuthStateChanged((user) => {
+     if (user) {
+      isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
+       this.setState({
+         enabled: true,
+         user: user,
+         admin: isGenAdmin
+       })
+      })
+     }
+     else {
+       this.setState({
+         enabled: false,
+         user: null,
+         admin: false
+       })
+     }
+    });
+ }
 
 changeEvent(event, index, value){
   if(value){
@@ -144,6 +148,7 @@ download(filename, text) {
           	<p style = {{color:"#DAA520"}}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
         </div> 
         : 
+        (this.state.admin ?
         <div>
           <div>Attendance:</div>
           <p></p>
@@ -190,7 +195,7 @@ download(filename, text) {
           <List>
           	{namesList}
           </List>
-        </div>
+        </div> : <div>You are not an admin.</div>)
       )
     )
   }
