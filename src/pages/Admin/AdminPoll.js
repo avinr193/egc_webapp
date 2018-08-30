@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import firebase, { addPoll, signIn, isGeneralAdmin } from '../../firebase'
+import firebase, { addPoll, signIn, isGeneralAdmin, addLivePoll, removeLivePoll } from '../../firebase'
 
 
 import LocationPickerExample from './Map'
@@ -12,13 +12,16 @@ import {List, ListItem} from 'material-ui/List';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
+import Toggle from 'material-ui/Toggle'
 
-import { setOrg } from '../../store/actions'
+import { setOrg, setPoll, fetchPollsThunk,checkPollLive } from '../../store/actions'
 
-const Admin = ({ orgs, currentOrg, onChangeOrg }) => (
+const Admin = ({ orgs, currentOrg, onChangeOrg, polls, currentPoll, onChangePoll, isPollLive, onSetPollLive }) => (
 	<div className = "admin">
-		<AdminPollWindow orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}/>
-    </div>
+		<AdminPollWindow orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
+		polls={polls} currentPoll={currentPoll} onChangePoll={onChangePoll} isPollLive={isPollLive}
+		onSetPollLive={onSetPollLive}/>
+  </div>
 );
 
 function loadJS(src) {
@@ -36,7 +39,16 @@ class AdminPollWindow extends React.Component {
       enabled: false,
 			user: null,
 			poll_question: '',
-			poll_options: ['','','','','','','','','',''],
+			poll_options: [{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0}],
 			number_poll_options: 2,
 			admin: false
 		}
@@ -78,13 +90,23 @@ class AdminPollWindow extends React.Component {
 	//	map = new google.maps.Map(this.refs.map.getDOMNode(), { ... });
  }
 
+ addRemoveLive(e, isInputChecked){
+	if(isInputChecked){
+		addLivePoll(this.props.currentPoll)
+	}
+	else{
+		removeLivePoll(this.props.currentPoll)
+	}
+	this.props.onSetPollLive();
+}
+
 	handleEvent (e) {
     this.setState({ [e.target.name]: e.target.value });
 	}
 
 	setPollOption = (e, key) => {
 		let newPollOptions = this.state.poll_options;
-		newPollOptions[key] = e.target.value;
+		newPollOptions[key].text = e.target.value;
 		this.setState({'poll_options':newPollOptions})
 	}
 
@@ -94,6 +116,16 @@ class AdminPollWindow extends React.Component {
 	changeOrg = (event, index, value) => {
 		if(value){this.props.onChangeOrg(value);}
 	}	
+
+	changePoll = (event, index, value) => {
+		let newPoll = this.props.polls[index];
+		if(this.props.polls[index].question === value){
+			this.props.onChangePoll(newPoll);
+		}
+		else{
+			console.error("Poll mismatch.")
+		}
+	}
 
 	trySubmit (e) {
 		e.preventDefault();
@@ -115,38 +147,45 @@ class AdminPollWindow extends React.Component {
 		this.setState({'submitted':true,
 									 'error':false,
 									 poll_question: '',
-									 poll_options: ['','','','','','','','','',''],
+									 poll_options: [{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0},
+											{text: '', count: 0}],
 									 number_poll_options: 2
 									});
 		return true;
 	}
 
   render() {
-		/*
-		var eventsList = [];
-    for(var j = 0; j < this.props.events.length; j++){
-        eventsList.push(<ListItem key={j} value={this.props.events[j]} primaryText={this.props.events[j]}></ListItem>);
+		let pollsList = [];
+    for(let i = 0; i < this.props.polls.length; i++){
+        pollsList.push(<MenuItem key={i} value={this.props.polls[i].question} primaryText={this.props.polls[i].question}></MenuItem>);
 		}
-		*/
 
 		let optionsList = [];
 		for(let k = 0; k < this.state.number_poll_options-1; k++){
 			const id = k;
-			optionsList.push(<div key={k}><TextField name="poll_question" value={this.state.poll_options[k]} onChange={(e) => this.setPollOption(e,id)}
+			optionsList.push(<div key={k}><TextField name="poll_question" value={this.state.poll_options[k].text} onChange={(e) => this.setPollOption(e,id)}
 			hintText="e.g. Rutgers Red" floatingLabelText={"Poll Option " + (k+1).toString()} key={k} style={{"marginTop":"0px"}}/>
 			<Close color="#FFFFFF"/>
 			</div>);
 		}
 
 		if(this.state.number_poll_options === 2){
-			optionsList.push(<div key={1}><TextField name="poll_question" value={this.state.poll_options[1]} onChange={(e) => this.setPollOption(e,1)}
+			optionsList.push(<div key={1}><TextField name="poll_question" value={this.state.poll_options[1].text} onChange={(e) => this.setPollOption(e,1)}
 			hintText="e.g. Rutgers Red" floatingLabelText={"Poll Option 2"} key={1} style={{"marginTop":"0px"}}/>
 			<Close color="#FFFFFF"/>
 			</div>);
 		}
 		else{
 			let k = this.state.number_poll_options - 1;
-			optionsList.push(<div key={k}><TextField name="poll_question" value={this.state.poll_options[k]} 
+			optionsList.push(<div key={k}><TextField name="poll_question" value={this.state.poll_options[k].text} 
 			onChange={(e) => this.setPollOption(e,k)} hintText="e.g. Rutgers Red" 
 			floatingLabelText={"Poll Option " + (k+1).toString()} key={k} style={{"marginTop":"0px"}}/>
 			<Close onClick={this.decrementOptions}/>
@@ -156,6 +195,16 @@ class AdminPollWindow extends React.Component {
 		let orgsList = [];
     for(let i = 0; i < this.props.orgs.length; i++){
         orgsList.push(<MenuItem key={i} value={this.props.orgs[i]} primaryText={this.props.orgs[i]}></MenuItem>);
+		}
+
+		let currentPollOptions = [];
+		for(let y = 0; y < this.props.currentPoll.options.length; y++){
+			currentPollOptions.push(
+			<div key={y}>
+			<ListItem value={this.props.currentPoll.options[y].text} primaryText={this.props.currentPoll.options[y].text}
+			secondaryText={this.props.currentPoll.options[y].count.toString()}></ListItem>
+			</div>
+			)
 		}
 		
     return (
@@ -203,9 +252,17 @@ class AdminPollWindow extends React.Component {
 						</div>
 						<div style={{"flex":"1"}}> 
 						<div style = {{"fontWeight": "bold"}}>View Polls</div>
-						<DropDownMenu maxHeight={300} value={this.props.currentOrg} onChange={this.changeOrg}>
-      			</DropDownMenu>
+						<DropDownMenu maxHeight={300} value={this.props.currentPoll.question} onChange={this.changePoll}>
+								{pollsList}
+						</DropDownMenu>
+						<div style={{"display":"flex", "marginLeft":"43%"}}>
+            <div style={{"marginTop":"19px"}}>Live:</div>
+            <div style={{"marginTop":"17px"}}><Toggle toggled={this.props.isPollLive === true ? this.props.isPollLive : false} onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle></div>
+            </div>
 							<div></div>
+							<List>
+          	{currentPollOptions}
+         	 	</List>
 							</div>
         </div>
 				</div> : <div>You are not an admin.</div>)
@@ -216,13 +273,22 @@ class AdminPollWindow extends React.Component {
 
 const mapState = (state) => ({
 	orgs: state.organizations,
-	currentOrg: state.currentOrg
+	currentOrg: state.currentOrg,
+	polls: state.polls,
+	currentPoll: state.currentPoll,
+	isPollLive: state.isPollLive
 })
 const mapDispatch = (dispatch) => {
 	return {
 	onChangeOrg(newOrg){ 
 		dispatch(setOrg(newOrg)); 
-		//dispatch(fetchPollsThunk())
+		dispatch(fetchPollsThunk());
+	},
+	onChangePoll(newPoll){
+		dispatch(setPoll(newPoll));
+	},
+	onSetPollLive(){
+		dispatch(checkPollLive());
 	}
 }}
 

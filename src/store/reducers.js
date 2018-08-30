@@ -18,10 +18,13 @@ const isEventLive = (state = false, action) => {
     return (action.type === ActionTypes.SET_IS_EVENT_LIVE) ? action.isEventLive : state
 }
 
+const isPollLive = (state = false, action) => {
+    return (action.type === ActionTypes.SET_IS_POLL_LIVE) ? action.isPollLive : state
+}
+
 const attPath = (state = "opening", action) => {
     return (action.type === ActionTypes.SET_ATT_PATH && action.newAttPath) ? action.newAttPath : state
 }
-
 
 const organizations = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_ORGS && action.organizations) ? action.organizations : state
@@ -51,7 +54,16 @@ const currentOrg = (state = 'Engineering Governing Council', action) => {
     return (action.type === ActionTypes.SET_ORG && action.newOrg) ? action.newOrg : state
 }
 
+const polls = (state = [], action) => {
+    return (action.type === ActionTypes.FETCH_POLLS && action.polls) ? action.polls : state
+}
+
+const currentPoll = (state = {question: '', options: []}, action) => {
+    return (action.type === ActionTypes.SET_POLL && action.poll) ? action.poll : state 
+}
+
 export default combineReducers ({
     events, organizations, attendance, currentDate, currentEvent, 
-    currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath
+    currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath,
+    polls, currentPoll, isPollLive
 })

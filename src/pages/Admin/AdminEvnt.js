@@ -95,12 +95,14 @@ class AdminEvntWindow extends React.Component {
 
 	trySubmit (e) {
 		e.preventDefault();
+		let isNameClean = true;
 		let name = this.state.event_name.toUpperCase();
+		if(/[.[\]$#]/.test(name)){isNameClean=false;}
 		let date = moment(this.state.event_date).format('M-D');
 		let year = moment(this.state.event_date).format('YYYY');
 		let time_start = moment(this.state.event_time_start).format('hh:mm A');
 		let time_end = moment(this.state.event_time_end).format('hh:mm A');
-		if(!(date && year && time_start && time_end && name)){
+		if(!(date && year && time_start && time_end && name && isNameClean)){
 			this.setState({'error':true,'submitted':false});
 			return false;
 		}
@@ -162,7 +164,7 @@ class AdminEvntWindow extends React.Component {
 							backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" 
 							type="submit" />
 						</form>
-						{this.state.error ? <div style={{"color":"red","padding":"10px"}}>Please fill in all fields.</div> : null}
+						{this.state.error ? <div style={{"color":"red","padding":"10px"}}>Please fill in all fields, and do not use the following characters for event name: . $ # [ ]</div> : null}
 						{this.state.submitted ? <div style={{"color":"green","padding":"10px"}}>Event added successfully!</div> : null}
 						</div>
 						<div style={{"flex":"1"}}> 
