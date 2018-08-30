@@ -35,12 +35,14 @@ class AdminWindow extends React.Component {
   componentDidMount() { 
    firebase.auth().onAuthStateChanged((user) => {
      if (user) {
-      isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
        this.setState({
          enabled: true,
-         user: user,
-         admin: isGenAdmin
+         user: user
        })
+      isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
+        this.setState({
+          admin: isGenAdmin
+        })
       })
      }
      else {

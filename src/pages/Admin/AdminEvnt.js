@@ -57,12 +57,14 @@ class AdminEvntWindow extends React.Component {
 				
 				firebase.auth().onAuthStateChanged((user) => {
 					if (user) {
-					 isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
 						this.setState({
 							enabled: true,
-							user: user,
-							admin: isGenAdmin
+							user: user
 						})
+					 isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
+						 this.setState({
+							 admin: isGenAdmin
+						 })
 					 })
 					}
 					else {
@@ -103,7 +105,14 @@ class AdminEvntWindow extends React.Component {
 			return false;
 		}
 		addEvent(this.props.currentOrg, year, date, time_start, time_end, name, 1,1, this.state.closingAtt);
-		this.setState({'submitted':true,'error':false});
+		this.setState({'submitted':true,
+					   'error':false,
+					   event_name: '',
+					   event_date: {},
+					   event_time_start: {},
+					   event_time_end: {},
+					   closingAtt: false
+					  });
 		return true;
 	}
 
