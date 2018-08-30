@@ -73,7 +73,7 @@ changeDate(event, index, value){
 changeAttType(event, value){
   if(value){
     this.props.onSetAttPath(value);
-    this.props.onChangeAtt(value)
+    this.props.onChangeAtt(value);
   }
 }
 
@@ -177,7 +177,7 @@ download(filename, text) {
           <div>
              <RadioButtonGroup name="whichAtt" defaultSelected="opening" valueSelected={this.props.attPath}
               onChange={this.changeAttType.bind(this)}
-             style={{"maxWidth":"125px","marginLeft":"45%"}}>
+             style={{"maxWidth":"115px","marginLeft":"45%"}}>
                 <RadioButton
                   value="opening"
                   label="opening"

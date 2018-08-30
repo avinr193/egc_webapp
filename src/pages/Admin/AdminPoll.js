@@ -286,6 +286,7 @@ const mapDispatch = (dispatch) => {
 	},
 	onChangePoll(newPoll){
 		dispatch(setPoll(newPoll));
+		dispatch(checkPollLive());
 	},
 	onSetPollLive(){
 		dispatch(checkPollLive());

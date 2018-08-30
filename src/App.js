@@ -10,7 +10,8 @@ import Navigation from './components/Navigation'
 import { watchEventAdded, watchAttendanceAdded, fetchDateThunk, fetchOrgsThunk, 
   watchEventDateAdded, 
   watchLiveEvents,
-  watchPollAdded} from './store/actions'
+  watchPollAdded,
+  watchLivePolls} from './store/actions'
 
 import './styles/App.css';
 
@@ -46,6 +47,7 @@ const mapState = () => {
   dispatch(watchAttendanceAdded())
   dispatch(watchLiveEvents())
   dispatch(watchPollAdded())
+  dispatch(watchLivePolls())
   return {
   }
 }

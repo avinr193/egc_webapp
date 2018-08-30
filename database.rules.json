@@ -13,10 +13,25 @@
                 "$attType":{
                   "people":{
                     "$uid":{
-                      ".write":"auth.uid === $uid"
+                      ".write":"auth.uid === $uid",
+                      ".read":"auth.uid === $uid"
                     }
                   }
                 }
+              }
+            }
+          }
+        },
+        "polls":{
+          "$pollID":{
+            "options":{
+              ".write":"auth !== null && auth.provider === 'google'",
+              ".red":"auth !== null && auth.provider === 'google'"
+            },
+            "people":{
+              "$uid":{
+                ".write":"auth.uid === $uid",
+                ".read":"auth.uid === $uid"
               }
             }
           }
@@ -24,6 +39,9 @@
       }
     },
     "liveEvents":{
+      ".read":"auth !== null && auth.provider === 'google'"
+    },
+    "livePolls":{
       ".read":"auth !== null && auth.provider === 'google'"
     }
   }

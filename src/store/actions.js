@@ -18,7 +18,9 @@ export const ActionTypes = {
     SET_ATT_PATH: "SET_ATT_PATH",
     FETCH_POLLS: "FETCH_POLLS",
     SET_POLL: "SET_POLL",
-    SET_IS_POLL_LIVE: "SET_IS_POLL_LIVE"
+    SET_IS_POLL_LIVE: "SET_IS_POLL_LIVE",
+    FETCH_LIVE_POLLS: "FETCH_LIVE_POLLS",
+    SET_LIVE_POLL: "SET_LIVE_POLL"
 }
 
 /*ACTION CREATORS*/
@@ -32,6 +34,8 @@ export const setEvent = (newEvent) => ({type:ActionTypes.SET_EVENT, newEvent})
 export const setOrg = (newOrg) => ({type:ActionTypes.SET_ORG, newOrg})
 export const fetchLiveEvents = (liveEvents) => ({type:ActionTypes.FETCH_LIVE_EVENTS, liveEvents})
 export const setLiveEvent = (newLiveEvent) => ({type:ActionTypes.SET_LIVE_EVENT, newLiveEvent})
+export const fetchLivePolls= (livePolls) => ({type:ActionTypes.FETCH_LIVE_POLLS, livePolls})
+export const setLivePoll = (newLivePoll) => ({type:ActionTypes.SET_LIVE_POLL, newLivePoll})
 export const setIsEventLive = (isEventLive) => ({type:ActionTypes.SET_IS_EVENT_LIVE, isEventLive})
 export const setIsPollLive = (isPollLive) => ({type:ActionTypes.SET_IS_POLL_LIVE, isPollLive})
 export const setAttPath = (newAttPath) => ({type:ActionTypes.SET_ATT_PATH, newAttPath})
@@ -50,6 +54,7 @@ export function fetchDateThunk () {
 export function checkEventLive () {
     return (dispatch, getState) => {
         let state = getState();
+        if(!state.currentEvent){return;};
         isLiveEvent(state.currentDate+state.currentEvent+state.currentOrg, state.attPath)
         .then((isEventLive) => dispatch(setIsEventLive(isEventLive)));
     }
@@ -58,6 +63,7 @@ export function checkEventLive () {
 export function checkPollLive () {
     return (dispatch, getState) => {
         let state = getState();
+        if(!state.currentPoll){return;};
         isLivePoll(state.currentPoll.uuid).then((isPollLive)=>dispatch(setIsPollLive(isPollLive)));
     }
 }
@@ -161,6 +167,21 @@ export function fetchLiveEventsThunk () {
         })
         .then(() => dispatch(fetchLiveEvents(liveEvents)))
         .then(() => liveEvents[0] ? dispatch(setLiveEvent(liveEvents[0])) : null)
+        .then(() => liveEvents[0] ? dispatch(checkEventLive()) : null)
+    }
+}
+
+export function fetchLivePollsThunk () {
+    return (dispatch) => {
+        let livePolls = [];
+        database.ref(`/livePolls/`).once('value', snap => {
+            snap.forEach(data => {
+               livePolls.push(data.val())
+            })
+        })
+        .then(() => dispatch(fetchLivePolls(livePolls)))
+        .then(() => livePolls[0] ? dispatch(setLivePoll(livePolls[0])) : null)
+        .then(() => livePolls[0] ? dispatch(checkPollLive()) : null)
     }
 }
 
@@ -208,6 +229,19 @@ export function watchPollAdded () {
         database.ref(`/Organizations/Engineering Governing Council/2018/polls/`).on('child_added', () => {    
             dispatch(fetchPollsThunk());
         });
+        database.ref(`/Organizations/Engineering Governing Council/2018/polls/`).on('child_changed', () => {    
+            dispatch(fetchPollsThunk());
+        });
     }
 }
 
+export function watchLivePolls () {
+    return dispatch => {
+    database.ref(`/livePolls/`).on('child_added', () => {    
+       dispatch(fetchLivePollsThunk());
+    });
+    database.ref(`/livePolls/`).on('child_removed', () => {    
+       dispatch(fetchLivePollsThunk());
+    });
+    }
+}
