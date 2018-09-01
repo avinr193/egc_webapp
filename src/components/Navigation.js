@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import firebase, {signOut} from '../firebase'
+import firebase, { signOut } from '../firebase'
 
 import { NavLink, Link } from 'react-router-dom';
 
@@ -13,23 +13,23 @@ import Menu from 'material-ui/Menu';
 
 const Navigation = () => (
   <nav>
-  <ul id="paginate">
-    <li style={{padding:5}}><NavLink exact to='/home'><img style={{height:"90%", width:"100%"}} src={require('../egc.png')} alt="egc logo"/></NavLink></li>
-    <li><NavLink exact activeClassName="current" to='/attendance'>Attendance</NavLink></li>
-    <li><NavLink exact activeClassName="current" to='/voting'>Voting</NavLink></li>
-    <li>
-        <AdminPopover/>      
-    </li>
-    <li><NavLink exact activeClassName="current" to='/about'>About</NavLink></li>
-    <li><SignInButton /></li>
-  </ul>
+    <ul id="paginate">
+      <li style={{ padding: 5 }}><NavLink exact to='/home'><img style={{ height: "90%", width: "100%" }} src={require('../egc.png')} alt="egc logo" /></NavLink></li>
+      <li><NavLink exact activeClassName="current" to='/attendance'>Attendance</NavLink></li>
+      <li><NavLink exact activeClassName="current" to='/voting'>Voting</NavLink></li>
+      <li>
+        <AdminPopover />
+      </li>
+      <li><NavLink exact activeClassName="current" to='/about'>About</NavLink></li>
+      <li><SignInButton /></li>
+    </ul>
   </nav>
 );
 
 export default Navigation;
 
 class SignInButton extends React.Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       label: "SIGN-IN",
@@ -45,27 +45,27 @@ class SignInButton extends React.Component {
           enabled: false,
           label: user.displayName // update it here
         })
-      } 
+      }
     });
   }
 
   render() {
     return (
-      (this.state.enabled ? 
+      (this.state.enabled ?
         null
         :
         <div>
-          <IconMenu 
-          iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-          anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-          targetOrigin={{horizontal: 'right', vertical: 'top'}}
-          iconStyle={{color: "#FFFFFF"}}
+          <IconMenu
+            iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
+            anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+            targetOrigin={{ horizontal: 'right', vertical: 'top' }}
+            iconStyle={{ color: "#FFFFFF" }}
           >
-          <MenuItem onClick={() => signOut()} primaryText="Sign out" />
-          <MenuItem primaryText="Close"/>
+            <MenuItem onClick={() => signOut()} primaryText="Sign out" />
+            <MenuItem primaryText="Close" />
           </IconMenu>
         </div>)
-      )
+    )
   }
 }
 
@@ -85,7 +85,7 @@ class AdminPopover extends React.Component {
 
     this.setState({
       open: true,
-      anchorEl: event.currentTarget,
+      anchorEl: event.currentTarget
     });
   };
 
@@ -102,8 +102,8 @@ class AdminPopover extends React.Component {
         <Popover
           open={this.state.open}
           anchorEl={this.state.anchorEl}
-          anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-          targetOrigin={{horizontal: 'left', vertical: 'top'}}
+          anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+          targetOrigin={{ horizontal: 'left', vertical: 'top' }}
           onRequestClose={this.handleRequestClose}
         >
           <Menu>
@@ -122,7 +122,7 @@ class AdminPopover extends React.Component {
             <Link exact="true" to='/admin/reports' style={{ textDecoration: 'none' }}>
               <MenuItem primaryText="Reports"></MenuItem>
             </Link>
-            <MenuItem primaryText="Close" onClick={this.handleRequestClose}/>
+            <MenuItem primaryText="Close" onClick={this.handleRequestClose} />
           </Menu>
         </Popover>
       </div>

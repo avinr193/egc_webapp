@@ -66,12 +66,12 @@ const polls = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_POLLS && action.polls) ? action.polls : state
 }
 
-const currentPoll = (state = {question: '', options: []}, action) => {
-    return (action.type === ActionTypes.SET_POLL && action.poll) ? action.poll : state 
+const currentPoll = (state = { question: '', options: [] }, action) => {
+    return (action.type === ActionTypes.SET_POLL && action.poll) ? action.poll : state
 }
 
-export default combineReducers ({
-    events, organizations, attendance, currentDate, currentEvent, 
+export default combineReducers({
+    events, organizations, attendance, currentDate, currentEvent,
     currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath,
     polls, currentPoll, isPollLive, livePolls, currentLivePoll
 })

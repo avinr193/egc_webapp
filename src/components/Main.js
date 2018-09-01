@@ -12,21 +12,21 @@ import AdminEvnt from '../pages/Admin/AdminEvnt'
 import AdminCnst from '../pages/Admin/AdminCnst'
 import AdminRprt from '../pages/Admin/AdminRprt'
 
- const Main = () => (
-    <Switch>
-      <Route exact path='/home' component={Home}></Route>
-      <Route exact path='/about' component={About}></Route>
-      <Route exact path='/attendance' component={Attendance}></Route>
-      <Route exact path='/voting' component={Voting}></Route>
-      <Route exact path='/admin/attendance' component={AdminAtt}></Route>
-      <Route exact path='/admin/polling' component={AdminPoll}></Route>
-      <Route exact path='/admin/events' component={AdminEvnt}></Route>
-      <Route exact path='/admin/constituencies' component={AdminCnst}></Route>
-      <Route exact path='/admin/reports' component={AdminRprt}></Route>
-  
-      <Redirect exact from="/admin*" to="/admin/attendance"/>
-      <Redirect exact from="*" to="/attendance"/>
-    </Switch>
+const Main = () => (
+  <Switch>
+    <Route exact path='/home' component={Home}></Route>
+    <Route exact path='/about' component={About}></Route>
+    <Route exact path='/attendance' component={Attendance}></Route>
+    <Route exact path='/voting' component={Voting}></Route>
+    <Route exact path='/admin/attendance' component={AdminAtt}></Route>
+    <Route exact path='/admin/polling' component={AdminPoll}></Route>
+    <Route exact path='/admin/events' component={AdminEvnt}></Route>
+    <Route exact path='/admin/constituencies' component={AdminCnst}></Route>
+    <Route exact path='/admin/reports' component={AdminRprt}></Route>
+
+    <Redirect exact from="/admin*" to="/admin/attendance" />
+    <Redirect exact from="*" to="/attendance" />
+  </Switch>
 );
 
 export default Main;
