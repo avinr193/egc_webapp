@@ -1,5 +1,6 @@
 import React from 'react'
 
+import 'firebase/auth'
 import firebase from '../../firebase'
 
 const Admin = () => (
@@ -15,10 +16,7 @@ class AdminCnstWindow extends React.Component {
     super(props);
     this.state = {
       enabled: false,
-      currentEvent: "sample_EGC_Meeting",
-      user: null,
-      event_list: [],
-      att_list: []
+      user: null
     }
   }
 
@@ -37,67 +35,7 @@ class AdminCnstWindow extends React.Component {
         })
       }
    	});
-
-    var master = this;
-
-
-    var database = firebase.database().ref();
-    database.on('value', function(datasnapshot) {
-    	var events = [];
-    	for (var key in datasnapshot.toJSON()){
-    		const eventObj = {
-    			event: key
-    		}
-    		events.push(eventObj);
-    	}
-    	master.setState({
-  			event_list: events
-  		})
-    });
-
-  	var event = firebase.database().ref().child(this.state.currentEvent).child("attendance");
-  	event.on('value', function(datasnapshot) {
-  		var names = [];
-  		var dataArr = datasnapshot.toJSON();
-  		for (var key in dataArr){
-  			const attObj = {
-  				name: key.toUpperCase(),
-  				email: (dataArr[key]).EMAIL,
-  				time: (dataArr[key]).TIME_SUCCESS.toString()
-  			}
-    		names.push(attObj);
-  		}
-  		master.setState({
-  			att_list: names
-  		})
-  	});
-  }
-
-changeEvent(event, index, value){
-	firebase.database().ref().child(this.state.currentEvent).child("attendance").off('value');
-  	this.setState({
-  		currentEvent: value,
-  		att_list: []
-  	}, function () {
-  		var master = this;
-  		var event = firebase.database().ref().child(this.state.currentEvent).child("attendance");
-  		event.off();
-  	event.on('value', function(datasnapshot) {
-  		var names = [];
-  		var dataArr = datasnapshot.toJSON();
-  		for (var key in dataArr){
-  			const attObj = {
-  				name: key.toUpperCase(),
-  				email: (dataArr[key]).EMAIL,
-  				time: (dataArr[key]).TIME_SUCCESS.toString()
-  			}
-    		names.push(attObj);
-  		}
-  		master.setState({
-  			att_list: names
-  		})});
-  	})
-  }
+	}
 
   render() {
 

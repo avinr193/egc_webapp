@@ -5,8 +5,8 @@ import FlatButton from 'material-ui/FlatButton';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 
-import firebase from '../firebase'
-import { addAtt, isLiveEvent, signIn } from '../firebase'
+import firebase, { addAtt, isLiveEvent, signIn } from '../firebase'
+import 'firebase/auth'
 
 import { setLiveEvent, fetchAttendanceThunk, fetchLiveEventsThunk } from '../store/actions'
 
@@ -87,8 +87,9 @@ class AttendanceWindow extends React.Component {
         if (position.coords) {
           userLat = position.coords.latitude;
           userLong = position.coords.longitude;
-          if (master.measure(meetingLat, meetingLong, userLat, userLong) <= radius) {
-            master.loginSuccess(userLat, userLong);
+          let distToEvent = master.measure(meetingLat, meetingLong, userLat, userLong);
+          if (distToEvent <= radius) {
+            master.loginSuccess(userLat, userLong,distToEvent);
           }
           else {
             master.loginFailure(0);
@@ -100,14 +101,14 @@ class AttendanceWindow extends React.Component {
     }
   }
 
-  loginSuccess(userLat, userLong) {
+  loginSuccess(userLat, userLong, distToEvent) {
     var today = new Date();
     var timestamp = today.getHours().toString() + ":" + today.getMinutes().toString();
     if (!isLiveEvent(this.props.currentDate + this.props.currentLiveEvent.event + this.props.currentLiveEvent.organization, this.props.currentLiveEvent.attPath)) {
       return this.loginFailure(2);
     }
     addAtt(this.props.currentDate, this.props.currentLiveEvent.event, this.state.user.displayName.toUpperCase(), timestamp,
-      this.state.user.email, userLat, userLong, this.props.currentLiveEvent.attPath, this.state.user.uid);
+      this.state.user.email, userLat, userLong, distToEvent, this.props.currentLiveEvent.attPath, this.state.user.uid);
     this.setState({
       logged: true,
       lat: userLat,

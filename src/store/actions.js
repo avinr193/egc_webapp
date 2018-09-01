@@ -1,6 +1,4 @@
-import firebase, { isLiveEvent, isLivePoll } from '../firebase'
-
-const database = firebase.database();
+import { database, isLiveEvent, isLivePoll } from '../firebase'
 
 export const ActionTypes = {
     FETCH_ORGS: "FETCH_ORGS",

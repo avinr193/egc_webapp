@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import firebase, { addPoll, signIn, isGeneralAdmin, addLivePoll, removeLivePoll } from '../../firebase'
-
+import 'firebase/auth'
 
 import {LocationPickerExample} from './Map'
 import FlatButton from 'material-ui/FlatButton';

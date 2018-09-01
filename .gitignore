@@ -21,3 +21,6 @@ yarn-debug.log*
 yarn-error.log*
 
 help.md
+
+#config
+config.js

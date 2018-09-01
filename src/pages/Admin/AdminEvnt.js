@@ -2,6 +2,7 @@ import React from 'react'
 import moment from 'moment'
 import { connect } from 'react-redux'
 import firebase, { addEvent, signIn, isGeneralAdmin } from '../../firebase'
+import 'firebase/auth'
 
 import {LocationPickerExample} from './Map'
 import FlatButton from 'material-ui/FlatButton';

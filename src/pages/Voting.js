@@ -7,8 +7,8 @@ import MenuItem from 'material-ui/MenuItem';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 import styled from 'styled-components';
 
-import firebase from '../firebase'
-import { logOption, isLivePoll, signIn } from '../firebase'
+import 'firebase/auth'
+import firebase, { logOption, isLivePoll, signIn } from '../firebase'
 
 import { setLivePoll, fetchLivePollsThunk } from '../store/actions'
 
@@ -91,13 +91,14 @@ class VotingWindow extends React.Component {
     let radius = this.props.currentLivePoll.location.radius;
     var userLat;
     var userLong;
+    let distToEvent = master.measure(meetingLat, meetingLong, userLat, userLong);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function (position) {
         if (position.coords) {
           userLat = position.coords.latitude;
           userLong = position.coords.longitude;
-          if (master.measure(meetingLat, meetingLong, userLat, userLong) <= radius) {
-            master.loginSuccess(userLat, userLong);
+          if (distToEvent <= radius) {
+            master.loginSuccess(userLat, userLong, distToEvent);
           }
           else {
             master.loginFailure(0);
@@ -109,13 +110,13 @@ class VotingWindow extends React.Component {
     }
   }
 
-  loginSuccess(userLat, userLong) {
+  loginSuccess(userLat, userLong, distToEvent) {
     var today = new Date();
     var timestamp = today.getHours().toString() + ":" + today.getMinutes().toString();
     if (!isLivePoll(this.props.currentLivePoll.uuid)) {
       return this.loginFailure(2);
     }
-    logOption(this.props.currentLivePoll, this.state.currentOption, this.state.user, timestamp, userLat, userLong);
+    logOption(this.props.currentLivePoll, this.state.currentOption, this.state.user, timestamp, userLat, userLong, distToEvent);
     this.setState({
       logged: true,
       lat: userLat,

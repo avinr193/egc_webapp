@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import firebase from '../../firebase'
-import { addLiveEvent, removeLiveEvent, signIn, isGeneralAdmin } from '../../firebase'
+import 'firebase/auth'
+import firebase, { addLiveEvent, removeLiveEvent, signIn, isGeneralAdmin } from '../../firebase'
 
 import { List, ListItem } from 'material-ui/List';
 import DropDownMenu from 'material-ui/DropDownMenu';
