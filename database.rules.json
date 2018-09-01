@@ -24,10 +24,6 @@
         },
         "polls":{
           "$pollID":{
-            "options":{
-              ".write":"auth !== null && auth.provider === 'google'",
-              ".red":"auth !== null && auth.provider === 'google'"
-            },
             "people":{
               "$uid":{
                 ".write":"auth.uid === $uid",

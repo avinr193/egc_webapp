@@ -88,7 +88,7 @@ export function fetchEventDatesThunk () {
 }
 
 export function fetchEventsThunk () {
-    return dispatch => {
+    return (dispatch) => {
     let events = [];
     database.ref(`/Organizations/Engineering Governing Council/2018/events/`).once('value', snap => {
      snap.forEach(data => {
@@ -119,8 +119,40 @@ export function fetchPollsThunk () {
             })
         })
         .then(() => dispatch(fetchPolls(polls)))
-        .then(() => polls[0] ? dispatch(setPoll(polls[0])) : null)
+        .then(() => {
+            if(state.currentPoll.question !== ''){
+                return polls.filter(obj => {
+                    return obj.question === state.currentPoll.question;
+                  })[0]
+            }
+            else{
+                return null;
+            }})
+        .then((newPoll) => (polls[0]) ? (newPoll ? dispatch(setPoll(newPoll)) : dispatch(setPoll(polls[0]))) : null)
         .then(() => polls[0] ? dispatch(checkPollLive()) : null)
+    }
+}
+
+export function updatePollCounts () {
+    return (dispatch, getState) => {
+        let state = getState();
+        database.ref('/livePolls/').once('value', snap => {
+            snap.forEach(data => {
+                database.ref(`/Organizations/${state.currentOrg}/2018/polls/${data.key}/options/`).once('value', snap => {
+                    let options = snap.val();
+                    for (let key in options){
+                        options[key].count = 0;
+                    }
+                    database.ref(`/Organizations/${state.currentOrg}/2018/polls/${data.key}/people/`).once('value', snap => {
+                        snap.forEach(data => {
+                            options.filter(obj => {return obj.text === data.val().option})[0].count += 1;
+                        })
+                    })
+                database.ref(`/Organizations/${state.currentOrg}/2018/polls/${data.key}/options/`).set(options);
+                })
+            })
+        })
+        .then((() => dispatch(fetchPollsThunk())));
     }
 }
 
@@ -227,10 +259,10 @@ export function watchLiveEvents () {
 export function watchPollAdded () {
     return dispatch => {
         database.ref(`/Organizations/Engineering Governing Council/2018/polls/`).on('child_added', () => {    
-            dispatch(fetchPollsThunk());
+            dispatch(updatePollCounts());
         });
         database.ref(`/Organizations/Engineering Governing Council/2018/polls/`).on('child_changed', () => {    
-            dispatch(fetchPollsThunk());
+            dispatch(updatePollCounts());
         });
     }
 }
