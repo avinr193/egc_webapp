@@ -51,6 +51,14 @@ export function fetchDateThunk() {
     }
 }
 
+export function fetchAndSetPoll(id, org) {
+    return dispatch => {
+        database.ref(`/Organizations/${org}/2018/polls/`).child(id).once('value', snap => {
+            dispatch(setPoll(snap.val()));
+        })
+    }
+}
+
 export function checkEventLive() {
     return (dispatch, getState) => {
         let state = getState();

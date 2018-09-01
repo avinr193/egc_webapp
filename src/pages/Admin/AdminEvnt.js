@@ -3,8 +3,7 @@ import moment from 'moment'
 import { connect } from 'react-redux'
 import firebase, { addEvent, signIn, isGeneralAdmin } from '../../firebase'
 
-
-import LocationPickerExample from './Map'
+import {LocationPickerExample} from './Map'
 import FlatButton from 'material-ui/FlatButton';
 import { List, ListItem } from 'material-ui/List';
 import DatePicker from 'material-ui/DatePicker';
@@ -28,14 +27,6 @@ const Admin = ({ events, orgs, currentOrg, onChangeOrg }) => (
 	</div>
 );
 
-function loadJS(src) {
-	var ref = window.document.getElementsByTagName("script")[0];
-	var script = window.document.createElement("script");
-	script.src = src;
-	script.async = true;
-	ref.parentNode.insertBefore(script, ref);
-}
-
 class AdminEvntWindow extends React.Component {
 	constructor(props) {
 		super(props);
@@ -47,7 +38,10 @@ class AdminEvntWindow extends React.Component {
 			event_time_start: {},
 			event_time_end: {},
 			closingAtt: false,
-			admin: false
+			admin: false,
+			lat:1,
+			long:1,
+			radius:50
 		}
 
 		this.handleEvent = this.handleEvent.bind(this);
@@ -55,12 +49,6 @@ class AdminEvntWindow extends React.Component {
 	}
 
 	componentDidMount() {
-		// Connect the initMap() function within this class to the global window context,
-		// so Google Maps can invoke it
-		//window.initMap = this.initMap;
-		// Asynchronously load the Google Maps script, passing in the callback reference
-		//loadJS('https://maps.googleapis.com/maps/api/js?key=AIzaSyD_Brakef26k_3vGI9T5I8d--giSRrJ86c&callback=initMap')
-
 		firebase.auth().onAuthStateChanged((user) => {
 			if (user) {
 				this.setState({
@@ -81,10 +69,6 @@ class AdminEvntWindow extends React.Component {
 				})
 			}
 		});
-	}
-
-	initMap() {
-		//	map = new google.maps.Map(this.refs.map.getDOMNode(), { ... });
 	}
 
 	handleEvent(e) {
@@ -112,7 +96,8 @@ class AdminEvntWindow extends React.Component {
 			this.setState({ 'error': true, 'submitted': false });
 			return false;
 		}
-		addEvent(this.props.currentOrg, year, date, time_start, time_end, name, 1, 1, this.state.closingAtt);
+		addEvent(this.props.currentOrg, year, date, time_start, time_end, name, this.state.lat,
+			this.state.long, this.state.radius, this.state.closingAtt);
 		this.setState({
 			'submitted': true,
 			'error': false,
@@ -123,6 +108,14 @@ class AdminEvntWindow extends React.Component {
 			closingAtt: false
 		});
 		return true;
+	}
+
+	updateLocation = (e, position, radius) => {
+		this.setState({
+			lat: position.lat,
+			long: position.lng,
+			radius: radius
+		})
 	}
 
 	render() {
@@ -167,14 +160,14 @@ class AdminEvntWindow extends React.Component {
 												onCheck={this.updateCheck} /></div>
 									</Container>
 									<div style={{ "padding": "10px" }}></div>
-									<div>Map here</div>
+									<div><LocationPickerExample onChange={this.updateLocation}/></div>
 									<div style={{ "padding": "10px" }}></div>
+									{this.state.error ? <div style={{ "color": "red", "padding": "10px" }}>Please fill in all fields, and do not use the following characters for event name: . $ # [ ]</div> : null}
+									{this.state.submitted ? <div style={{ "color": "green", "padding": "10px" }}>Event added successfully!</div> : null}
 									<FlatButton labelStyle={{ color: "#FFFFFF" }} label="Add Event"
 										backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"
 										type="submit" />
 								</form>
-								{this.state.error ? <div style={{ "color": "red", "padding": "10px" }}>Please fill in all fields, and do not use the following characters for event name: . $ # [ ]</div> : null}
-								{this.state.submitted ? <div style={{ "color": "green", "padding": "10px" }}>Event added successfully!</div> : null}
 							</div>
 							<div style={{ "flex": "1" }}>
 								<div style={{ "fontWeight": "bold" }}>View Events</div>

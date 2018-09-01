@@ -122,7 +122,12 @@ class AdminWindow extends React.Component {
       'event': this.props.currentEvent,
       'organization': this.props.currentOrg,
       'date': this.props.currentDate,
-      'attPath': this.props.attPath
+      'attPath': this.props.attPath,
+      'location': {
+        lat: this.props.eventDate.props.location.latitude,
+        long: this.props.eventDate.props.location.longitude,
+        radius: this.props.eventDate.props.location.radius,
+      }
     }
     if (isInputChecked) {
       addLiveEvent(liveEvent)

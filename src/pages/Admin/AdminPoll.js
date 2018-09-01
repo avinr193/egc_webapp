@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import firebase, { addPoll, signIn, isGeneralAdmin, addLivePoll, removeLivePoll } from '../../firebase'
 
 
-import LocationPickerExample from './Map'
+import {LocationPickerExample} from './Map'
 import FlatButton from 'material-ui/FlatButton';
 import FloatingActionButton from 'material-ui/FloatingActionButton'
 import ContentAdd from 'material-ui/svg-icons/content/add';
@@ -15,28 +15,21 @@ import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
 import styled from 'styled-components';
 
-import { setOrg, setPoll, fetchPollsThunk, checkPollLive } from '../../store/actions'
+import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
  display: flex;
 `;
 
-const Admin = ({ orgs, currentOrg, onChangeOrg, polls, currentPoll, onChangePoll, isPollLive, onSetPollLive }) => (
+const Admin = ({ orgs, currentOrg, onChangeOrg, polls, currentPoll, onChangePoll, 
+	isPollLive, onSetPollLive, fetchAndSetPoll }) => (
 	<div className="admin">
 		<AdminPollWindow orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
 			polls={polls} currentPoll={currentPoll} onChangePoll={onChangePoll} isPollLive={isPollLive}
-			onSetPollLive={onSetPollLive} />
+			onSetPollLive={onSetPollLive} fetchAndSetPoll={fetchAndSetPoll}/>
 	</div>
 );
-
-function loadJS(src) {
-	var ref = window.document.getElementsByTagName("script")[0];
-	var script = window.document.createElement("script");
-	script.src = src;
-	script.async = true;
-	ref.parentNode.insertBefore(script, ref);
-}
 
 class AdminPollWindow extends React.Component {
 	constructor(props) {
@@ -56,7 +49,10 @@ class AdminPollWindow extends React.Component {
 			{ text: '', count: 0 },
 			{ text: '', count: 0 }],
 			number_poll_options: 2,
-			admin: false
+			admin: false,
+			lat:1,
+			long:1,
+			radius:50
 		}
 
 		this.handleEvent = this.handleEvent.bind(this);
@@ -64,12 +60,6 @@ class AdminPollWindow extends React.Component {
 	}
 
 	componentDidMount() {
-		// Connect the initMap() function within this class to the global window context,
-		// so Google Maps can invoke it
-		//window.initMap = this.initMap;
-		// Asynchronously load the Google Maps script, passing in the callback reference
-		//loadJS('https://maps.googleapis.com/maps/api/js?key=AIzaSyD_Brakef26k_3vGI9T5I8d--giSRrJ86c&callback=initMap')
-
 		firebase.auth().onAuthStateChanged((user) => {
 			if (user) {
 				this.setState({
@@ -90,10 +80,6 @@ class AdminPollWindow extends React.Component {
 				})
 			}
 		});
-	}
-
-	initMap() {
-		//	map = new google.maps.Map(this.refs.map.getDOMNode(), { ... });
 	}
 
 	addRemoveLive(e, isInputChecked) {
@@ -149,7 +135,8 @@ class AdminPollWindow extends React.Component {
 			this.setState({ 'error': true, 'submitted': false });
 			return false;
 		}
-		addPoll(this.props.currentOrg, "2018", question, optionsArr, 1, 1);
+		let id = addPoll(this.props.currentOrg, "2018", question, optionsArr, this.state.lat, this.state.long, this.state.radius);
+		this.props.fetchAndSetPoll(id, this.props.currentOrg);
 		this.setState({
 			'submitted': true,
 			'error': false,
@@ -167,6 +154,14 @@ class AdminPollWindow extends React.Component {
 			number_poll_options: 2
 		});
 		return true;
+	}
+
+	updateLocation = (e, position, radius) => {
+		this.setState({
+			lat: position.lat,
+			long: position.lng,
+			radius: radius
+		})
 	}
 
 	render() {
@@ -248,14 +243,14 @@ class AdminPollWindow extends React.Component {
 										</FloatingActionButton>
 										: null}
 									<p></p>
-									<div>Map here</div>
+									<div><LocationPickerExample onChange={this.updateLocation}/></div>
 									<div style={{ "padding": "10px" }}></div>
+									{this.state.error ? <div style={{ "color": "red", "padding": "10px" }}>Please fill in all fields.</div> : null}
+									{this.state.submitted ? <div style={{ "color": "green", "padding": "10px" }}>Poll added successfully!</div> : null}
 									<FlatButton labelStyle={{ color: "#FFFFFF" }} label="Add Poll"
 										backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"
 										type="submit" />
 								</form>
-								{this.state.error ? <div style={{ "color": "red", "padding": "10px" }}>Please fill in all fields.</div> : null}
-								{this.state.submitted ? <div style={{ "color": "green", "padding": "10px" }}>Poll added successfully!</div> : null}
 							</div>
 							<div style={{ "flex": "1" }}>
 								<div style={{ "fontWeight": "bold" }}>View Polls</div>
@@ -299,6 +294,9 @@ const mapDispatch = (dispatch) => {
 		},
 		onSetPollLive() {
 			dispatch(checkPollLive());
+		},
+		fetchAndSetPoll(id, org) {
+			dispatch(fetchAndSetPoll(id, org))
 		}
 	}
 }

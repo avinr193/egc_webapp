@@ -66,6 +66,19 @@ class VotingWindow extends React.Component {
     })
   }
 
+  //from: https://stackoverflow.com/questions/639695/how-to-convert-latitude-or-longitude-to-meters
+  measure(lat1, lon1, lat2, lon2){  // generally used geo measurement function
+    var R = 6378.137; // Radius of earth in KM
+    var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+    var dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = R * c;
+    return d * 1000; // meters
+  }
+
   logAtt() {
     var master = this;
     this.setState({
@@ -73,8 +86,9 @@ class VotingWindow extends React.Component {
       err: "WARNING: If longer than 10 seconds, please make sure location is allowed and try again",
       logged: false
     })
-    var egc_meeting_lat = 40.522529
-    var egc_meeting_long = -74.457966
+    let meetingLat = this.props.currentLivePoll.location.latitude;
+    let meetingLong = this.props.currentLivePoll.location.longitude;
+    let radius = this.props.currentLivePoll.location.radius;
     var userLat;
     var userLong;
     if (navigator.geolocation) {
@@ -82,7 +96,7 @@ class VotingWindow extends React.Component {
         if (position.coords) {
           userLat = position.coords.latitude;
           userLong = position.coords.longitude;
-          if (!Math.abs(egc_meeting_lat - userLat) < .0009 && !Math.abs(egc_meeting_long - userLong) < .0009) {
+          if (master.measure(meetingLat, meetingLong, userLat, userLong) <= radius) {
             master.loginSuccess(userLat, userLong);
           }
           else {
@@ -183,7 +197,7 @@ class VotingWindow extends React.Component {
                 <div>
                   <RadioButtonGroup name="whichOpt" defaultSelected={this.props.currentLivePoll.options[0].text} valueSelected={this.state.currentOption}
                     onChange={this.changeOption.bind(this)}
-                    style={{ "maxWidth": "115px" }}>
+                    style={{ "maxWidth": "115px", "marginRight": "10px" }}>
                     {this.props.currentLivePoll.options.map((option, index) => {
                       return (<RadioButton key={index}
                         value={option.text}
