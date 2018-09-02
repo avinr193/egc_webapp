@@ -60,7 +60,7 @@ export function fetchAndSetPoll(id, org) {
 export function checkEventLive() {
     return (dispatch, getState) => {
         let state = getState();
-        if (!state.currentEvent) { return; };
+        if (!state.currentEvent) { dispatch(setIsEventLive(false)); };
         isLiveEvent(state.currentDate + state.currentEvent + state.currentOrg, state.attPath)
             .then((isEventLive) => dispatch(setIsEventLive(isEventLive)));
     }
@@ -69,7 +69,7 @@ export function checkEventLive() {
 export function checkPollLive() {
     return (dispatch, getState) => {
         let state = getState();
-        if (!state.currentPoll) { return; };
+        if (!state.currentPoll) { dispatch(setIsPollLive(false)); };
         isLivePoll(state.currentPoll.uuid).then((isPollLive) => dispatch(setIsPollLive(isPollLive)));
     }
 }
@@ -206,7 +206,7 @@ export function fetchLiveEventsThunk() {
         })
             .then(() => dispatch(fetchLiveEvents(liveEvents)))
             .then(() => liveEvents[0] ? dispatch(setLiveEvent(liveEvents[0])) : null)
-            .then(() => liveEvents[0] ? dispatch(checkEventLive()) : null)
+            .then(() => dispatch(checkEventLive()))
     }
 }
 
@@ -220,7 +220,7 @@ export function fetchLivePollsThunk() {
         })
             .then(() => dispatch(fetchLivePolls(livePolls)))
             .then(() => livePolls[0] ? dispatch(setLivePoll(livePolls[0])) : null)
-            .then(() => livePolls[0] ? dispatch(checkPollLive()) : null)
+            .then(() => dispatch(checkPollLive()))
     }
 }
 
