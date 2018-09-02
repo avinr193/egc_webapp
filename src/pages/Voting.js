@@ -91,12 +91,12 @@ class VotingWindow extends React.Component {
     let radius = this.props.currentLivePoll.location.radius;
     var userLat;
     var userLong;
-    let distToEvent = master.measure(meetingLat, meetingLong, userLat, userLong);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function (position) {
         if (position.coords) {
           userLat = position.coords.latitude;
           userLong = position.coords.longitude;
+          let distToEvent = master.measure(meetingLat, meetingLong, userLat, userLong);
           if (distToEvent <= radius) {
             master.loginSuccess(userLat, userLong, distToEvent);
           }
