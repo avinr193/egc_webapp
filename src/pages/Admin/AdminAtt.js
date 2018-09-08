@@ -48,12 +48,16 @@ class AdminWindow extends React.Component {
           enabled: true,
           user: user
         })
-        isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
-          this.props.onIsAdmin(isGenAdmin);
-        })
+        if(!this.props.isAdmin){
+          isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
+            this.props.onIsAdmin(isGenAdmin);
+          })
+        }
       }
       else {
-        this.props.onIsAdmin(false);
+        if(this.props.isAdmin){
+          this.props.onIsAdmin(false);
+        }
         this.setState({
           enabled: false,
           user: null

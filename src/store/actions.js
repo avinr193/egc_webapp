@@ -44,9 +44,12 @@ export const setAdmin = (isAdmin) => ({ type: ActionTypes.SET_IS_ADMIN, isAdmin 
 
 /*THUNKS*/
 export function setIsAdmin(isAdmin){
-    return dispatch => {
-        dispatch(setAdmin(true))
-        dispatch(fetchOrgsThunk());
+    return (dispatch, getState) => {
+        let state = getState();
+        dispatch(setAdmin(isAdmin));
+        if(isAdmin && state.organizations.length === 0){
+            dispatch(fetchOrgsThunk());
+        }
     }
 }
 
@@ -173,9 +176,7 @@ export function updatePollCounts() {
 }
 
 export function fetchOrgsThunk() {
-    return (dispatch, getState) => {
-        let state = getState();
-        if(state.isAdmin && state.organizations.length === 0){
+    return (dispatch) => {
         let organizations = [];
         database.ref(`/Organizations/`).once('value', snap => {
             snap.forEach(data => {
@@ -186,7 +187,6 @@ export function fetchOrgsThunk() {
             .then(() => organizations[0] ? dispatch(setOrg(organizations[0])) : null)
             .then(() => dispatch(fetchEventsThunk()))
     }
-}
 }
 
 export function fetchAttendanceThunk() {

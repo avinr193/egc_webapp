@@ -51,24 +51,29 @@ class AdminEvntWindow extends React.Component {
 
 	componentDidMount() {
 		firebase.auth().onAuthStateChanged((user) => {
-			if (user) {
-				this.setState({
-					enabled: true,
-					user: user
-				})
+		  if (user) {
+			this.setState({
+			  enabled: true,
+			  user: user
+			})
+			if(!this.props.isAdmin){
 				isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
-					this.props.onIsAdmin(isGenAdmin);
+			 		this.props.onIsAdmin(isGenAdmin);
 				})
+		  	}
+		  }
+		  else {
+			if(this.props.isAdmin){
+			  this.props.onIsAdmin(false);
 			}
-			else {
-				this.props.onIsAdmin(false);
-				this.setState({
-					enabled: false,
-					user: null
-				})
-			}
+			this.setState({
+			  enabled: false,
+			  user: null
+			})
+		  }
 		});
-	}
+	  }
+	
 
 	handleEvent(e) {
 		this.setState({ [e.target.name]: e.target.value });
