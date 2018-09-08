@@ -4,41 +4,43 @@
     && root.child('Admins').child('general').hasChild(auth.token.name)",
     ".write": "auth !== null && auth.provider === 'google' 
     && root.child('Admins').child('general').hasChild(auth.token.name)",
-    "Organizations":{
-      "$org":{
-        "events":{
-          "$event":{
-            "$date":{
-              "attendance":{
-                "$attType":{
-                  "people":{
-                    "$uid":{
-                      ".write":"auth.uid === $uid",
-                      ".read":"auth.uid === $uid"
+    "Organizations": {
+      "$org": {
+        "$year": {
+          "events": {
+            "$event": {
+              "$date": {
+                "attendance": {
+                  "$attType": {
+                    "people": {
+                      "$uid": {
+                        ".write": "auth.uid === $uid",
+                        ".read": "auth.uid === $uid"
+                      }
                     }
                   }
                 }
               }
             }
-          }
-        },
-        "polls":{
-          "$pollID":{
-            "people":{
-              "$uid":{
-                ".write":"auth.uid === $uid",
-                ".read":"auth.uid === $uid"
+          },
+          "polls": {
+            "$pollID": {
+              "people": {
+                "$uid": {
+                  ".write": "auth.uid === $uid",
+                  ".read": "auth.uid === $uid"
+                }
               }
             }
           }
         }
       }
     },
-    "liveEvents":{
-      ".read":"auth !== null && auth.provider === 'google'"
+    "liveEvents": {
+      ".read": "auth !== null"
     },
-    "livePolls":{
-      ".read":"auth !== null && auth.provider === 'google'"
+    "livePolls": {
+      ".read": "auth !== null"
     }
   }
 }

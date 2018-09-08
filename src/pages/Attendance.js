@@ -166,7 +166,6 @@ class AttendanceWindow extends React.Component {
             </DropDownMenu>
             <p></p>
             <p> Signed-In: {this.state.user.displayName} </p>
-            <p> Email: {this.state.user.email} </p>
             <p> Attendance Logged: {this.state.att} </p>
             <p> Longitude: {!this.state.logged ? "Pending" : this.state.long} </p>
             <p> Latitude: {!this.state.logged ? "Pending" : this.state.lat} </p>

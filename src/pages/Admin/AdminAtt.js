@@ -11,7 +11,8 @@ import Toggle from 'material-ui/Toggle';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 import styled from 'styled-components';
 
-import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, setAttPath } from '../../store/actions'
+import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, 
+  setAttPath, setIsAdmin } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -21,13 +22,13 @@ const Container = styled.div`
 `;
 
 const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
-  currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath }) => (
+  currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin, isAdmin }) => (
     <div className="admin">
       <AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
         currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
         onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg}
         onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}
-        onSetAttPath={onSetAttPath} attPath={attPath} />
+        onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin}/>
     </div>
   );
 
@@ -48,16 +49,14 @@ class AdminWindow extends React.Component {
           user: user
         })
         isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
-          this.setState({
-            admin: isGenAdmin
-          })
+          this.props.onIsAdmin(isGenAdmin);
         })
       }
       else {
+        this.props.onIsAdmin(false);
         this.setState({
           enabled: false,
-          user: null,
-          admin: false
+          user: null
         })
       }
     });
@@ -163,7 +162,7 @@ class AdminWindow extends React.Component {
           <p style={{ color: "#DAA520" }}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
         </div>
         :
-        (this.state.admin ?
+        (this.props.isAdmin ?
           <div>
             <div>Attendance:</div>
             <p></p>
@@ -227,7 +226,8 @@ const mapState = (state) => ({
   eventDates: state.eventDates,
   currentOrg: state.currentOrg,
   isEventLive: state.isEventLive,
-  attPath: state.attPath
+  attPath: state.attPath,
+  isAdmin: state.isAdmin
 })
 const mapDispatch = (dispatch) => {
   dispatch(checkEventLive());
@@ -248,6 +248,9 @@ const mapDispatch = (dispatch) => {
     },
     onSetAttPath(attPath) {
       dispatch(setAttPath(attPath));
+    },
+    onIsAdmin(isGenAdmin){
+      dispatch(setIsAdmin(isGenAdmin));
     }
   }
 }

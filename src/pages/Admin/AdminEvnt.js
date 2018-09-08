@@ -15,16 +15,17 @@ import TextField from 'material-ui/TextField';
 import Checkbox from 'material-ui/Checkbox';
 import styled from 'styled-components';
 
-import { setOrg, fetchEventsThunk } from '../../store/actions'
+import { setOrg, fetchEventsThunk, setIsAdmin } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
  display: flex;
 `;
 
-const Admin = ({ events, orgs, currentOrg, onChangeOrg }) => (
+const Admin = ({ events, orgs, currentOrg, onChangeOrg, onIsAdmin, isAdmin }) => (
 	<div className="admin">
-		<AdminEvntWindow events={events} orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg} />
+		<AdminEvntWindow events={events} orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
+		onIsAdmin={onIsAdmin} isAdmin={isAdmin}/>
 	</div>
 );
 
@@ -39,7 +40,6 @@ class AdminEvntWindow extends React.Component {
 			event_time_start: {},
 			event_time_end: {},
 			closingAtt: false,
-			admin: false,
 			lat:1,
 			long:1,
 			radius:50
@@ -57,16 +57,14 @@ class AdminEvntWindow extends React.Component {
 					user: user
 				})
 				isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
-					this.setState({
-						admin: isGenAdmin
-					})
+					this.props.onIsAdmin(isGenAdmin);
 				})
 			}
 			else {
+				this.props.onIsAdmin(false);
 				this.setState({
 					enabled: false,
-					user: null,
-					admin: false
+					user: null
 				})
 			}
 		});
@@ -139,7 +137,7 @@ class AdminEvntWindow extends React.Component {
 					<p style={{ color: "#DAA520" }}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
 				</div>
 				:
-				(this.state.admin ?
+				(this.props.isAdmin ?
 					<div>
 						<DropDownMenu maxHeight={300} value={this.props.currentOrg} onChange={this.changeOrg}>
 							{orgsList}
@@ -187,13 +185,17 @@ class AdminEvntWindow extends React.Component {
 const mapState = (state) => ({
 	events: state.events,
 	orgs: state.organizations,
-	currentOrg: state.currentOrg
+	currentOrg: state.currentOrg,
+	isAdmin: state.isAdmin
 })
 const mapDispatch = (dispatch) => {
 	return {
 		onChangeOrg(newOrg) {
 			dispatch(setOrg(newOrg));
 			dispatch(fetchEventsThunk())
+		},
+		onIsAdmin(isGenAdmin){
+		  dispatch(setIsAdmin(isGenAdmin));
 		}
 	}
 }

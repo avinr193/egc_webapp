@@ -6,6 +6,10 @@ const events = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_EVENTS) ? action.events : state
 }
 
+const isAdmin = (state = false, action) => {
+    return (action.type === ActionTypes.SET_IS_ADMIN) ? action.isAdmin : state
+}
+
 const liveEvents = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_LIVE_EVENTS && action.liveEvents) ? action.liveEvents : state
 }
@@ -73,5 +77,5 @@ const currentPoll = (state = { question: '', options: [] }, action) => {
 export default combineReducers({
     events, organizations, attendance, currentDate, currentEvent,
     currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath,
-    polls, currentPoll, isPollLive, livePolls, currentLivePoll
+    polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin
 })

@@ -86,6 +86,10 @@ export const addPoll = (currentOrganization, year, question, options, pollLat, p
 }
 
 export function isLiveEvent(liveEventString, attPath) {
+    if(!(liveEventString && attPath)){
+        liveEventString = 'null';
+        attPath = 'null';
+    }
     let isLive = false;
     return database.ref('/liveEvents/').once('value', snap => {
         isLive = snap.hasChild(liveEventString);
@@ -94,6 +98,9 @@ export function isLiveEvent(liveEventString, attPath) {
 }
 
 export function isLivePoll(livePollID) {
+    if(!livePollID){
+        livePollID = 'null';
+    }
     let isLive = false;
     return database.ref('/livePolls/').once('value', snap => {
         isLive = snap.hasChild(livePollID);

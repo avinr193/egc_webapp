@@ -15,7 +15,7 @@ import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
 import styled from 'styled-components';
 
-import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll } from '../../store/actions'
+import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll, setIsAdmin } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -23,11 +23,11 @@ const Container = styled.div`
 `;
 
 const Admin = ({ orgs, currentOrg, onChangeOrg, polls, currentPoll, onChangePoll, 
-	isPollLive, onSetPollLive, fetchAndSetPoll }) => (
+	isPollLive, onSetPollLive, fetchAndSetPoll, onIsAdmin, isAdmin }) => (
 	<div className="admin">
 		<AdminPollWindow orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
 			polls={polls} currentPoll={currentPoll} onChangePoll={onChangePoll} isPollLive={isPollLive}
-			onSetPollLive={onSetPollLive} fetchAndSetPoll={fetchAndSetPoll}/>
+			onSetPollLive={onSetPollLive} fetchAndSetPoll={fetchAndSetPoll} onIsAdmin={onIsAdmin} isAdmin={isAdmin}/>
 	</div>
 );
 
@@ -49,7 +49,6 @@ class AdminPollWindow extends React.Component {
 			{ text: '', count: 0 },
 			{ text: '', count: 0 }],
 			number_poll_options: 2,
-			admin: false,
 			lat:1,
 			long:1,
 			radius:50
@@ -67,16 +66,14 @@ class AdminPollWindow extends React.Component {
 					user: user
 				})
 				isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
-					this.setState({
-						admin: isGenAdmin
-					})
+					this.props.onIsAdmin(isGenAdmin);
 				})
 			}
 			else {
+				this.props.onIsAdmin(false);
 				this.setState({
 					enabled: false,
-					user: null,
-					admin: false
+					user: null
 				})
 			}
 		});
@@ -218,7 +215,7 @@ class AdminPollWindow extends React.Component {
 					<p style={{ color: "#DAA520" }}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
 				</div>
 				:
-				(this.state.admin ?
+				(this.props.isAdmin ?
 					<div>
 						<DropDownMenu maxHeight={300} value={this.props.currentOrg} onChange={this.changeOrg}>
 							{orgsList}
@@ -280,7 +277,8 @@ const mapState = (state) => ({
 	currentOrg: state.currentOrg,
 	polls: state.polls,
 	currentPoll: state.currentPoll,
-	isPollLive: state.isPollLive
+	isPollLive: state.isPollLive,
+	isAdmin: state.isAdmin
 })
 const mapDispatch = (dispatch) => {
 	return {
@@ -297,6 +295,9 @@ const mapDispatch = (dispatch) => {
 		},
 		fetchAndSetPoll(id, org) {
 			dispatch(fetchAndSetPoll(id, org))
+		},
+		onIsAdmin(isGenAdmin){
+		  dispatch(setIsAdmin(isGenAdmin));
 		}
 	}
 }
