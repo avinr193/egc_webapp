@@ -9,10 +9,11 @@ import MenuItem from 'material-ui/MenuItem';
 import FlatButton from 'material-ui/FlatButton';
 import Toggle from 'material-ui/Toggle';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
+import Slider from 'material-ui/Slider'
 import styled from 'styled-components';
 
 import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, 
-  setAttPath, setIsAdmin } from '../../store/actions'
+  setAttPath, setIsAdmin, fetchLiveEventsThunk } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -22,13 +23,15 @@ const Container = styled.div`
 `;
 
 const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
-  currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin, isAdmin }) => (
+  currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin, 
+  isAdmin, currentLiveEvent, onLiveEventUpdate }) => (
     <div className="admin">
       <AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
         currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
         onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg}
         onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}
-        onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin}/>
+        onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin} 
+        currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate}/>
     </div>
   );
 
@@ -75,9 +78,16 @@ class AdminWindow extends React.Component {
 
   changeDate(event, index, value) {
     if (value) {
-      let newVal = this.props.eventDates[value];
-      this.props.onSetAttPath("opening");
-      this.props.onChangeDate(newVal);
+      let newVal = null;
+      for(let i = 0; i < this.props.eventDates.length; i++){
+        if(this.props.eventDates[i].key === value){
+          newVal = this.props.eventDates[i];
+        }
+      }
+      if(newVal){
+        this.props.onSetAttPath("opening");
+        this.props.onChangeDate(newVal);
+      }
     }
   }
 
@@ -138,7 +148,14 @@ class AdminWindow extends React.Component {
     else {
       removeLiveEvent(liveEvent)
     }
-    this.props.onSetEventLive();
+    this.props.onSetEventLive(this.props.attPath);
+  }
+
+  updateLocation(e, val){
+    let newLiveEvent = this.props.currentLiveEvent;
+    newLiveEvent.location.radius = val;
+    addLiveEvent(newLiveEvent);
+    this.props.onLiveEventUpdate();
   }
 
   render() {
@@ -209,6 +226,16 @@ class AdminWindow extends React.Component {
                   </Container>
                 </div> : null : this.props.onSetAttPath("opening")
             }
+            {(this.props.isEventLive && this.props.currentLiveEvent) ? 
+            <div>
+            <div style={{"marginTop":"10px"}}>Live Event Radius: {this.props.currentLiveEvent.location.radius}m</div>
+            <Container>
+            <Slider defaultValue={this.props.currentLiveEvent.location.radius} max={250} min={10} style={{"width":"100%","maxWidth":"250px"}}
+            sliderStyle={{"marginBottom": "9px", "marginTop":"9px"}} onChange={ (e, val) => this.val = val }  
+            onDragStop={ (e) => this.updateLocation(e, this.val) }></Slider>
+            </Container>
+            </div>
+            : null}
             <p></p>
             <FlatButton onClick={() => this.downloadReport()} labelStyle={{ color: "#FFFFFF" }} label="Download Report"
               backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
@@ -231,7 +258,8 @@ const mapState = (state) => ({
   currentOrg: state.currentOrg,
   isEventLive: state.isEventLive,
   attPath: state.attPath,
-  isAdmin: state.isAdmin
+  isAdmin: state.isAdmin,
+  currentLiveEvent: state.currentLiveEvent
 })
 const mapDispatch = (dispatch) => {
   dispatch(checkEventLive());
@@ -255,6 +283,9 @@ const mapDispatch = (dispatch) => {
     },
     onIsAdmin(isGenAdmin){
       dispatch(setIsAdmin(isGenAdmin));
+    },
+    onLiveEventUpdate(){
+      dispatch(fetchLiveEventsThunk());
     }
   }
 }

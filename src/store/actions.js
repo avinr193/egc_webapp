@@ -74,7 +74,8 @@ export function checkEventLive() {
         let state = getState();
         if (!state.currentEvent) { dispatch(setIsEventLive(false)); };
         isLiveEvent(state.currentDate + state.currentEvent + state.currentOrg, state.attPath)
-            .then((isEventLive) => dispatch(setIsEventLive(isEventLive)));
+            .then((isEventLive) => dispatch(setIsEventLive(isEventLive)))
+            .then(() => dispatch(setLiveEventByString()))
     }
 }
 
@@ -205,6 +206,25 @@ export function fetchAttendanceThunk() {
         })
             .then(() => dispatch(fetchAtt(attendance)))
             .then(() => dispatch(checkEventLive()))
+    }
+}
+
+export function setLiveEventByString() {
+    return (dispatch, getState) => {
+        if(!window.location.pathname.startsWith("/admin/")){
+            return false;
+        };
+        let state = getState();
+        for(let i = 0; i < state.liveEvents.length; i++){
+            if(state.liveEvents[i].date === state.currentDate
+            && state.liveEvents[i].event === state.currentEvent
+            && state.liveEvents[i].organization === state.currentOrg
+            && state.liveEvents[i].attPath === state.attPath){
+                dispatch(setLiveEvent(state.liveEvents[i]));
+                i = state.liveEvents.length;
+                break;
+            }
+        }
     }
 }
 
