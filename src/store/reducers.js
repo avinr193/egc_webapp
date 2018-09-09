@@ -26,6 +26,10 @@ const currentLivePoll = (state = {}, action) => {
     return (action.type === ActionTypes.SET_LIVE_POLL && action.newLivePoll) ? action.newLivePoll : state
 }
 
+const currentOption = (state = '', action) => {
+    return (action.type === ActionTypes.SET_CURRENT_OPTION && action.newOption) ? action.newOption : state
+}
+
 const isEventLive = (state = false, action) => {
     return (action.type === ActionTypes.SET_IS_EVENT_LIVE) ? action.isEventLive : state
 }
@@ -77,5 +81,5 @@ const currentPoll = (state = { question: '', options: [] }, action) => {
 export default combineReducers({
     events, organizations, attendance, currentDate, currentEvent,
     currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath,
-    polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin
+    polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin, currentOption
 })

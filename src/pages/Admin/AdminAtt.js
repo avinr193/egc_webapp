@@ -230,7 +230,8 @@ class AdminWindow extends React.Component {
             <div>
             <div style={{"marginTop":"10px"}}>Live Event Radius: {this.props.currentLiveEvent.location.radius}m</div>
             <Container>
-            <Slider defaultValue={this.props.currentLiveEvent.location.radius} max={250} min={10} style={{"width":"100%","maxWidth":"250px"}}
+            <Slider defaultValue={this.props.currentLiveEvent.location.radius} value={this.props.currentLiveEvent.location.radius} 
+            max={1000} min={10} style={{"width":"100%","maxWidth":"250px"}}
             sliderStyle={{"marginBottom": "9px", "marginTop":"9px"}} onChange={ (e, val) => this.val = val }  
             onDragStop={ (e) => this.updateLocation(e, this.val) }></Slider>
             </Container>

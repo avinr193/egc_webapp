@@ -10,17 +10,18 @@ import styled from 'styled-components';
 import 'firebase/auth'
 import firebase, { logOption, isLivePoll, signIn } from '../firebase'
 
-import { setLivePoll, fetchLivePollsThunk } from '../store/actions'
+import { setLivePoll, fetchLivePollsThunk, setCurrentOption } from '../store/actions'
 
 const Container = styled.div`
  justify-content: center;
  display: flex;
 `;
 
-const Voting = ({ livePolls, onChangePoll, currentLivePoll }) => (
+const Voting = ({ livePolls, onChangePoll, currentLivePoll, currentOption, onChangeOption }) => (
   <div className='attendance'>
     <VotingWindow livePolls={livePolls}
-      currentLivePoll={currentLivePoll} onChangePoll={onChangePoll} />
+      currentLivePoll={currentLivePoll} onChangePoll={onChangePoll} 
+      currentOption={currentOption} onChangeOption={onChangeOption}/>
   </div>
 );
 
@@ -153,16 +154,9 @@ class VotingWindow extends React.Component {
 
   changeOption(event, value) {
     if (value) {
+      this.props.onChangeOption(value);
       this.setState({
         currentOption: value
-      })
-    }
-  }
-
-  componentDidUpdate() {
-    if (this.props.currentLivePoll.options && !this.state.currentOption) {
-      this.setState({
-        currentOption: this.props.currentLivePoll.options[0].text
       })
     }
   }
@@ -196,7 +190,8 @@ class VotingWindow extends React.Component {
             {this.props.currentLivePoll.options ?
               <Container>
                 <div>
-                  <RadioButtonGroup name="whichOpt" defaultSelected={this.props.currentLivePoll.options[0].text} valueSelected={this.state.currentOption}
+                  <RadioButtonGroup name="whichOpt" defaultSelected={this.props.currentOption} 
+                  valueSelected={this.props.currentOption}
                     onChange={this.changeOption.bind(this)}
                     style={{ "maxWidth": "115px", "marginRight": "10px" }}>
                     {this.props.currentLivePoll.options.map((option, index) => {
@@ -226,13 +221,17 @@ class VotingWindow extends React.Component {
 
 const mapState = (state) => ({
   livePolls: state.livePolls,
-  currentLivePoll: state.currentLivePoll
+  currentLivePoll: state.currentLivePoll,
+  currentOption: state.currentOption
 })
 
 const mapDispatch = (dispatch) => {
   dispatch(fetchLivePollsThunk());
   return {
-    onChangePoll(newLivePoll) { dispatch(setLivePoll(newLivePoll)); }
+    onChangePoll(newLivePoll) { 
+      dispatch(setLivePoll(newLivePoll)); 
+      dispatch(setCurrentOption(newLivePoll.options[0].text)) },
+    onChangeOption(newOption) { dispatch(setCurrentOption(newOption)); }
   }
 }
 export default connect(mapState, mapDispatch)(Voting);

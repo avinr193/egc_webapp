@@ -19,7 +19,8 @@ export const ActionTypes = {
     SET_IS_POLL_LIVE: "SET_IS_POLL_LIVE",
     FETCH_LIVE_POLLS: "FETCH_LIVE_POLLS",
     SET_LIVE_POLL: "SET_LIVE_POLL",
-    SET_IS_ADMIN: "SET_IS_ADMIN"
+    SET_IS_ADMIN: "SET_IS_ADMIN",
+    SET_CURRENT_OPTION: "SET_CURRENT_OPTION"
 }
 
 /*ACTION CREATORS*/
@@ -41,6 +42,7 @@ export const setAttPath = (newAttPath) => ({ type: ActionTypes.SET_ATT_PATH, new
 export const fetchPolls = (polls) => ({ type: ActionTypes.FETCH_POLLS, polls })
 export const setPoll = (poll) => ({ type: ActionTypes.SET_POLL, poll })
 export const setAdmin = (isAdmin) => ({ type: ActionTypes.SET_IS_ADMIN, isAdmin })
+export const setCurrentOption = (newOption) => ({ type: ActionTypes.SET_CURRENT_OPTION, newOption})
 
 /*THUNKS*/
 export function setIsAdmin(isAdmin){
@@ -83,7 +85,9 @@ export function checkPollLive() {
     return (dispatch, getState) => {
         let state = getState();
         if (!state.currentPoll) { dispatch(setIsPollLive(false)); };
-        isLivePoll(state.currentPoll.uuid).then((isPollLive) => dispatch(setIsPollLive(isPollLive)));
+        isLivePoll(state.currentPoll.uuid)
+        .then((isPollLive) => dispatch(setIsPollLive(isPollLive)))
+        .then(() => dispatch(setLivePollByID()));
     }
 }
 
@@ -228,6 +232,22 @@ export function setLiveEventByString() {
     }
 }
 
+export function setLivePollByID() {
+    return (dispatch, getState) => {
+        if(!window.location.pathname.startsWith("/admin/")){
+            return false;
+        };
+        let state = getState();
+        for(let i = 0; i < state.livePolls.length; i++){
+            if(state.livePolls[i].uuid === state.currentPoll.uuid){
+                dispatch(setLivePoll(state.livePolls[i]));
+                i = state.livePolls.length;
+                break;
+            }
+        }
+    }
+}
+
 export function fetchLiveEventsThunk() {
     return (dispatch) => {
         let liveEvents = [];
@@ -252,6 +272,7 @@ export function fetchLivePollsThunk() {
         })
             .then(() => dispatch(fetchLivePolls(livePolls)))
             .then(() => livePolls[0] ? dispatch(setLivePoll(livePolls[0])) : null)
+            .then(() => livePolls[0] ? dispatch(setCurrentOption(livePolls[0].options[0].text)): null)
             .then(() => dispatch(checkPollLive()))
     }
 }
@@ -292,6 +313,9 @@ export function watchLiveEvents() {
         database.ref(`/liveEvents/`).on('child_removed', () => {
             dispatch(fetchLiveEventsThunk());
         });
+        database.ref(`/liveEvents/`).on('child_changed', () => {
+            dispatch(fetchLiveEventsThunk());
+        });
     }
 }
 
@@ -312,6 +336,9 @@ export function watchLivePolls() {
             dispatch(fetchLivePollsThunk());
         });
         database.ref(`/livePolls/`).on('child_removed', () => {
+            dispatch(fetchLivePollsThunk());
+        });
+        database.ref(`/livePolls/`).on('child_changed', () => {
             dispatch(fetchLivePollsThunk());
         });
     }

@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import firebase, { addPoll, signIn, isGeneralAdmin, addLivePoll, removeLivePoll } from '../../firebase'
 import 'firebase/auth'
 
-import {LocationPickerExample} from './Map'
+import { LocationPickerExample } from './Map'
 import FlatButton from 'material-ui/FlatButton';
 import FloatingActionButton from 'material-ui/FloatingActionButton'
 import ContentAdd from 'material-ui/svg-icons/content/add';
@@ -13,23 +13,25 @@ import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
+import Slider from 'material-ui/Slider';
 import styled from 'styled-components';
 
-import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll, setIsAdmin } from '../../store/actions'
+import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll, setIsAdmin, fetchLivePollsThunk } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
  display: flex;
 `;
 
-const Admin = ({ orgs, currentOrg, onChangeOrg, polls, currentPoll, onChangePoll, 
-	isPollLive, onSetPollLive, fetchAndSetPoll, onIsAdmin, isAdmin }) => (
-	<div className="admin">
-		<AdminPollWindow orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
-			polls={polls} currentPoll={currentPoll} onChangePoll={onChangePoll} isPollLive={isPollLive}
-			onSetPollLive={onSetPollLive} fetchAndSetPoll={fetchAndSetPoll} onIsAdmin={onIsAdmin} isAdmin={isAdmin}/>
-	</div>
-);
+const Admin = ({ orgs, currentOrg, onChangeOrg, polls, currentPoll, onChangePoll,
+	isPollLive, onSetPollLive, fetchAndSetPoll, onIsAdmin, isAdmin, currentLivePoll, onLivePollUpdate }) => (
+		<div className="admin">
+			<AdminPollWindow orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
+				polls={polls} currentPoll={currentPoll} onChangePoll={onChangePoll} isPollLive={isPollLive}
+				onSetPollLive={onSetPollLive} fetchAndSetPoll={fetchAndSetPoll} onIsAdmin={onIsAdmin}
+				isAdmin={isAdmin} currentLivePoll={currentLivePoll} onLivePollUpdate={onLivePollUpdate} />
+		</div>
+	);
 
 class AdminPollWindow extends React.Component {
 	constructor(props) {
@@ -49,9 +51,9 @@ class AdminPollWindow extends React.Component {
 			{ text: '', count: 0 },
 			{ text: '', count: 0 }],
 			number_poll_options: 2,
-			lat:1,
-			long:1,
-			radius:50
+			lat: 1,
+			long: 1,
+			radius: 50
 		}
 
 		this.handleEvent = this.handleEvent.bind(this);
@@ -60,29 +62,29 @@ class AdminPollWindow extends React.Component {
 
 	componentDidMount() {
 		firebase.auth().onAuthStateChanged((user) => {
-		  if (user) {
-			this.setState({
-			  enabled: true,
-			  user: user
-			})
-			if(!this.props.isAdmin){
-				isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
-			  		this.props.onIsAdmin(isGenAdmin);
+			if (user) {
+				this.setState({
+					enabled: true,
+					user: user
 				})
-		  	}
-		  }
-		  else {
-			if(this.props.isAdmin){
-			  this.props.onIsAdmin(false);
+				if (!this.props.isAdmin) {
+					isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
+						this.props.onIsAdmin(isGenAdmin);
+					})
+				}
 			}
-			this.setState({
-			  enabled: false,
-			  user: null
-			})
-		  }
+			else {
+				if (this.props.isAdmin) {
+					this.props.onIsAdmin(false);
+				}
+				this.setState({
+					enabled: false,
+					user: null
+				})
+			}
 		});
-	  }
-	
+	}
+
 
 	addRemoveLive(e, isInputChecked) {
 		if (isInputChecked) {
@@ -166,6 +168,13 @@ class AdminPollWindow extends React.Component {
 		})
 	}
 
+	updateLivePollLocation(e, val) {
+		let newLivePoll = this.props.currentLivePoll;
+		newLivePoll.location.radius = val;
+		addLivePoll(newLivePoll);
+		this.props.onLivePollUpdate();
+	}
+
 	render() {
 		let pollsList = [];
 		for (let i = 0; i < this.props.polls.length; i++) {
@@ -245,7 +254,7 @@ class AdminPollWindow extends React.Component {
 										</FloatingActionButton>
 										: null}
 									<p></p>
-									<div><LocationPickerExample onChange={this.updateLocation}/></div>
+									<div><LocationPickerExample onChange={this.updateLocation} /></div>
 									<div style={{ "padding": "10px" }}></div>
 									{this.state.error ? <div style={{ "color": "red", "padding": "10px" }}>Please fill in all fields.</div> : null}
 									{this.state.submitted ? <div style={{ "color": "green", "padding": "10px" }}>Poll added successfully!</div> : null}
@@ -265,6 +274,17 @@ class AdminPollWindow extends React.Component {
 											<Toggle label="Live:" toggled={this.props.isPollLive === true ? this.props.isPollLive : false} onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle></div>
 									</div>
 								</Container>
+								{(this.props.isPollLive && this.props.currentLivePoll) ?
+									<div>
+										<div style={{ "marginTop": "10px" }}>Live Poll Radius: {this.props.currentLivePoll.location.radius}m</div>
+										<Container>
+											<Slider defaultValue={this.props.currentLivePoll.location.radius} value={this.props.currentLivePoll.location.radius}
+												max={1000} min={10} style={{ "width": "100%", "maxWidth": "250px" }}
+												sliderStyle={{ "marginBottom": "9px", "marginTop": "9px" }} onChange={(e, val) => this.val = val}
+												onDragStop={(e) => this.updateLivePollLocation(e, this.val)}></Slider>
+										</Container>
+									</div>
+									: null}
 								<div></div>
 								<List>
 									{currentPollOptions}
@@ -283,7 +303,8 @@ const mapState = (state) => ({
 	polls: state.polls,
 	currentPoll: state.currentPoll,
 	isPollLive: state.isPollLive,
-	isAdmin: state.isAdmin
+	isAdmin: state.isAdmin,
+	currentLivePoll: state.currentLivePoll
 })
 const mapDispatch = (dispatch) => {
 	return {
@@ -301,8 +322,11 @@ const mapDispatch = (dispatch) => {
 		fetchAndSetPoll(id, org) {
 			dispatch(fetchAndSetPoll(id, org))
 		},
-		onIsAdmin(isGenAdmin){
-		  dispatch(setIsAdmin(isGenAdmin));
+		onIsAdmin(isGenAdmin) {
+			dispatch(setIsAdmin(isGenAdmin));
+		},
+		onLivePollUpdate() {
+			dispatch(fetchLivePollsThunk());
 		}
 	}
 }
