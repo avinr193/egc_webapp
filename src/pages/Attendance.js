@@ -89,7 +89,7 @@ class AttendanceWindow extends React.Component {
           userLong = position.coords.longitude;
           let distToEvent = master.measure(meetingLat, meetingLong, userLat, userLong);
           if (distToEvent <= radius) {
-            master.loginSuccess(userLat, userLong,distToEvent);
+            master.loginSuccess(userLat, userLong, distToEvent);
           }
           else {
             master.loginFailure(0);

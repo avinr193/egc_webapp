@@ -313,9 +313,6 @@ export function watchLiveEvents() {
         database.ref(`/liveEvents/`).on('child_removed', () => {
             dispatch(fetchLiveEventsThunk());
         });
-        database.ref(`/liveEvents/`).on('child_changed', () => {
-            dispatch(fetchLiveEventsThunk());
-        });
     }
 }
 
@@ -336,9 +333,6 @@ export function watchLivePolls() {
             dispatch(fetchLivePollsThunk());
         });
         database.ref(`/livePolls/`).on('child_removed', () => {
-            dispatch(fetchLivePollsThunk());
-        });
-        database.ref(`/livePolls/`).on('child_changed', () => {
             dispatch(fetchLivePollsThunk());
         });
     }

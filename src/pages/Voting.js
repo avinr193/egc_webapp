@@ -35,8 +35,7 @@ class VotingWindow extends React.Component {
       att: "Pending",
       lat: null,
       long: null,
-      err: "",
-      currentOption: null
+      err: ""
     }
   }
 
@@ -117,7 +116,7 @@ class VotingWindow extends React.Component {
     if (!isLivePoll(this.props.currentLivePoll.uuid)) {
       return this.loginFailure(2);
     }
-    logOption(this.props.currentLivePoll, this.state.currentOption, this.state.user, timestamp, userLat, userLong, distToEvent);
+    logOption(this.props.currentLivePoll, this.props.currentOption, this.state.user, timestamp, userLat, userLong, distToEvent);
     this.setState({
       logged: true,
       lat: userLat,
@@ -155,9 +154,6 @@ class VotingWindow extends React.Component {
   changeOption(event, value) {
     if (value) {
       this.props.onChangeOption(value);
-      this.setState({
-        currentOption: value
-      })
     }
   }
 
