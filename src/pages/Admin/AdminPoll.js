@@ -68,7 +68,7 @@ class AdminPollWindow extends React.Component {
 					user: user
 				})
 				if (!this.props.isAdmin) {
-					isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
+					isGeneralAdmin(user.uid, user.email).then(isGenAdmin => {
 						this.props.onIsAdmin(isGenAdmin);
 					})
 				}
@@ -220,6 +220,18 @@ class AdminPollWindow extends React.Component {
 			)
 		}
 
+		let currentPollPeople = [];
+		if(this.props.currentPoll.people){
+		Object.keys(this.props.currentPoll.people).forEach(key => {
+			currentPollPeople.push(
+				<div key={key}>
+					<ListItem value={this.props.currentPoll.people[key].name} primaryText={this.props.currentPoll.people[key].name}
+						secondaryText={this.props.currentPoll.people[key].time_logged}></ListItem>
+				</div>
+			)
+		});
+	}
+
 		return (
 			(!this.state.enabled ?
 				<div>
@@ -279,15 +291,20 @@ class AdminPollWindow extends React.Component {
 										<div style={{ "marginTop": "10px" }}>Live Poll Radius: {this.props.currentLivePoll.location.radius}m</div>
 										<Container>
 											<Slider defaultValue={this.props.currentLivePoll.location.radius} value={this.props.currentLivePoll.location.radius}
-												max={1000} min={10} style={{ "width": "100%", "maxWidth": "250px" }}
+												max={2500} min={10} style={{ "width": "100%", "maxWidth": "250px" }}
 												sliderStyle={{ "marginBottom": "9px", "marginTop": "9px" }} onChange={(e, val) => this.val = val}
 												onDragStop={(e) => this.updateLivePollLocation(e, this.val)}></Slider>
 										</Container>
 									</div>
 									: null}
-								<div></div>
+								<p></p>
+								<div style={{"fontWeight":"bold"}}>Vote Count:</div>
 								<List>
 									{currentPollOptions}
+								</List>
+								<div style={{"fontWeight":"bold"}}>People:</div>
+								<List style={{"maxHeight":"400px", "overflow":"scroll"}}>
+									{currentPollPeople}
 								</List>
 							</div>
 						</div>

@@ -9,11 +9,11 @@ export default firebase;
 
 export const database = firebase.database();
 
-export function isGeneralAdmin(name, email) {
+export function isGeneralAdmin(uuid, email) {
     let isGeneralAdmin = false;
     return database.ref('/Admins/general/').once('value', snap => {
-        isGeneralAdmin = snap.hasChild(name);
-        if (isGeneralAdmin) { isGeneralAdmin = (snap.child(name).val() === email) };
+        isGeneralAdmin = snap.hasChild(uuid);
+        if (isGeneralAdmin) { isGeneralAdmin = (snap.child(uuid).val() === email) };
     }).then(() => { return isGeneralAdmin; })
 }
 
@@ -53,7 +53,7 @@ export const logOption = (livePoll, option, user, timestamp, userLat, userLong, 
             time_logged: timestamp,
             email: user.email,
             location: { latitude: userLat, longitude: userLong, distance: distToEvent },
-            name: user.displayName,
+            name: user.displayName.toUpperCase(),
             option: option
         })
 }

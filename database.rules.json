@@ -1,9 +1,9 @@
 {
   "rules": {
     ".read": "auth !== null && auth.provider === 'google' 
-    && root.child('Admins').child('general').hasChild(auth.token.name)",
+    && root.child('Admins').child('general').hasChild(auth.uid)",
     ".write": "auth !== null && auth.provider === 'google' 
-    && root.child('Admins').child('general').hasChild(auth.token.name)",
+    && root.child('Admins').child('general').hasChild(auth.uid)",
     "Organizations": {
       "$org": {
         "$year": {

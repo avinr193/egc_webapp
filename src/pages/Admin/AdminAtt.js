@@ -52,7 +52,7 @@ class AdminWindow extends React.Component {
           user: user
         })
         if(!this.props.isAdmin){
-          isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
+          isGeneralAdmin(user.uid, user.email).then(isGenAdmin => {
             this.props.onIsAdmin(isGenAdmin);
           })
         }
@@ -114,7 +114,6 @@ class AdminWindow extends React.Component {
   downloadReport() {
     var jsonArr = [];
     var dataArr = this.props.attendance;
-    console.log(dataArr)
     for (var key in dataArr) {
       const attObj = {
         NAME: (dataArr[key]).name.toUpperCase(),
@@ -149,6 +148,7 @@ class AdminWindow extends React.Component {
       removeLiveEvent(liveEvent)
     }
     this.props.onSetEventLive(this.props.attPath);
+    this.props.onLiveEventUpdate();
   }
 
   updateLocation(e, val){
@@ -231,7 +231,7 @@ class AdminWindow extends React.Component {
             <div style={{"marginTop":"10px"}}>Live Event Radius: {this.props.currentLiveEvent.location.radius}m</div>
             <Container>
             <Slider defaultValue={this.props.currentLiveEvent.location.radius} value={this.props.currentLiveEvent.location.radius} 
-            max={1000} min={10} style={{"width":"100%","maxWidth":"250px"}}
+            max={2500} min={10} style={{"width":"100%","maxWidth":"250px"}}
             sliderStyle={{"marginBottom": "9px", "marginTop":"9px"}} onChange={ (e, val) => this.val = val }  
             onDragStop={ (e) => this.updateLocation(e, this.val) }></Slider>
             </Container>
@@ -240,7 +240,7 @@ class AdminWindow extends React.Component {
             <p></p>
             <FlatButton onClick={() => this.downloadReport()} labelStyle={{ color: "#FFFFFF" }} label="Download Report"
               backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
-            <List>
+            <List style={{"maxHeight":"400px", "overflow":"scroll"}}>
               {namesList}
             </List>
           </div> : <div>You are not an admin.</div>)

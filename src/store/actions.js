@@ -97,9 +97,10 @@ export function fetchEventDatesThunk() {
         const eventDates = [];
         database.ref(`/Organizations/Engineering Governing Council/2018/events/${state.currentEvent}/`).once('value', snap => {
             snap.forEach(data => {
+                let dataVal = data.val();
                 const eventDate = {
                     key: data.key,
-                    props: data.val().properties ? data.val().properties : null
+                    props: dataVal.properties ? dataVal.properties : null
                 }
                 eventDates.push(eventDate)
             })
@@ -131,11 +132,13 @@ export function fetchPollsThunk() {
         let polls = [];
         database.ref(`/Organizations/${state.currentOrg}/2018/polls/`).once('value', snap => {
             snap.forEach(data => {
+                let dataVal = data.val();
                 const pollObj = {
-                    question: data.val().question,
-                    options: data.val().options,
-                    organization: data.val().properties.organization,
-                    location: data.val().properties.location,
+                    question: dataVal.question,
+                    options: dataVal.options,
+                    organization: dataVal.properties.organization,
+                    location: dataVal.properties.location,
+                    people: dataVal.people ? dataVal.people : {none:"null"},
                     uuid: data.key
                 }
                 polls.push(pollObj);
@@ -200,10 +203,11 @@ export function fetchAttendanceThunk() {
         let attendance = [];
         database.ref(`/Organizations/Engineering Governing Council/2018/events/${state.currentEvent}/${state.eventDate.key}/attendance/${state.attPath}/people`).once('value', snap => {
             snap.forEach(data => {
+                let dataVal = data.val();
                 const attObj = {
-                    name: data.val().name.toUpperCase(),
-                    email: data.val().email,
-                    time: data.val().time_logged.toString()
+                    name: dataVal.name.toUpperCase(),
+                    email: dataVal.email,
+                    time: dataVal.time_logged.toString()
                 }
                 attendance.push(attObj);
             })

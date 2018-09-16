@@ -57,7 +57,7 @@ class AdminEvntWindow extends React.Component {
 			  user: user
 			})
 			if(!this.props.isAdmin){
-				isGeneralAdmin(user.displayName, user.email).then(isGenAdmin => {
+				isGeneralAdmin(user.uid, user.email).then(isGenAdmin => {
 			 		this.props.onIsAdmin(isGenAdmin);
 				})
 		  	}
