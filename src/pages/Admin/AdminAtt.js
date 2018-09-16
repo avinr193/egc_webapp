@@ -161,7 +161,9 @@ class AdminWindow extends React.Component {
   render() {
     var namesList = [];
     for (var i = 0; i < this.props.attendance.length; i++) {
-      namesList.push(<ListItem key={i} primaryText={(this.props.attendance[i]).name} secondaryText={"Time Logged: " + (this.props.attendance[i]).time}></ListItem>);
+      namesList.push(<ListItem key={i} primaryText={(this.props.attendance[i]).name} 
+      secondaryText={"Time Logged: " + (this.props.attendance[i]).time + ", Distance: " + 
+      (this.props.attendance[i]).location.distance.toFixed(3)}></ListItem>);
     }
 
     var eventsList = [];

@@ -221,16 +221,19 @@ class AdminPollWindow extends React.Component {
 		}
 
 		let currentPollPeople = [];
-		if(this.props.currentPoll.people){
-		Object.keys(this.props.currentPoll.people).forEach(key => {
-			currentPollPeople.push(
-				<div key={key}>
-					<ListItem value={this.props.currentPoll.people[key].name} primaryText={this.props.currentPoll.people[key].name}
-						secondaryText={this.props.currentPoll.people[key].time_logged}></ListItem>
-				</div>
-			)
-		});
-	}
+		if (this.props.currentPoll.people) {
+			if (this.props.currentPoll.people[0]) {
+				Object.keys(this.props.currentPoll.people).forEach(key => {
+					currentPollPeople.push(
+						<div key={key}>
+							<ListItem value={this.props.currentPoll.people[key].name} primaryText={this.props.currentPoll.people[key].name}
+								secondaryText={"Time Logged: " + this.props.currentPoll.people[key].time_logged + ", Distance: "
+									+ this.props.currentPoll.people[key].location.distance.toFixed(3)}></ListItem>
+						</div>
+					)
+				});
+			}
+		}
 
 		return (
 			(!this.state.enabled ?
@@ -298,12 +301,12 @@ class AdminPollWindow extends React.Component {
 									</div>
 									: null}
 								<p></p>
-								<div style={{"fontWeight":"bold"}}>Vote Count:</div>
+								<div style={{ "fontWeight": "bold" }}>Vote Count:</div>
 								<List>
 									{currentPollOptions}
 								</List>
-								<div style={{"fontWeight":"bold"}}>People:</div>
-								<List style={{"maxHeight":"400px", "overflow":"scroll"}}>
+								<div style={{ "fontWeight": "bold" }}>People:</div>
+								<List style={{ "maxHeight": "400px", "overflow": "scroll" }}>
 									{currentPollPeople}
 								</List>
 							</div>

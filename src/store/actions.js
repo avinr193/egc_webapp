@@ -1,5 +1,7 @@
 import { database, isLiveEvent, isLivePoll } from '../firebase'
 
+var sortBy = require('lodash/sortBy');
+
 export const ActionTypes = {
     FETCH_ORGS: "FETCH_ORGS",
     FETCH_EVENTS: "FETCH_EVENTS",
@@ -138,7 +140,7 @@ export function fetchPollsThunk() {
                     options: dataVal.options,
                     organization: dataVal.properties.organization,
                     location: dataVal.properties.location,
-                    people: dataVal.people ? dataVal.people : {none:"null"},
+                    people: dataVal.people ? sortBy(dataVal.people,"name") : {none:"null"},
                     uuid: data.key
                 }
                 polls.push(pollObj);
@@ -207,10 +209,12 @@ export function fetchAttendanceThunk() {
                 const attObj = {
                     name: dataVal.name.toUpperCase(),
                     email: dataVal.email,
-                    time: dataVal.time_logged.toString()
+                    time: dataVal.time_logged.toString(),
+                    location: dataVal.location
                 }
                 attendance.push(attObj);
             })
+            attendance = sortBy(attendance, "name")
         })
             .then(() => dispatch(fetchAtt(attendance)))
             .then(() => dispatch(checkEventLive()))
