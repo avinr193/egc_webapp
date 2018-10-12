@@ -228,12 +228,19 @@ class AdminWindow extends React.Component {
                   </Container>
                 </div> : null : this.props.onSetAttPath("opening")
             }
-            {(this.props.isEventLive && this.props.currentLiveEvent) ? 
+            {(this.props.isEventLive && this.props.currentLiveEvent && (this.props.eventDate.key === this.props.currentDate)) ? 
             <div>
             <div style={{"marginTop":"10px"}}>Live Event Radius: {this.props.currentLiveEvent.location.radius}m</div>
             <Container>
             <Slider defaultValue={this.props.currentLiveEvent.location.radius} value={this.props.currentLiveEvent.location.radius} 
-            max={2500} min={10} style={{"width":"100%","maxWidth":"250px"}}
+            max={500} min={10} style={{"width":"100%","maxWidth":"250px"}}
+            sliderStyle={{"marginBottom": "9px", "marginTop":"9px"}} onChange={ (e, val) => this.val = val }  
+            onDragStop={ (e) => this.updateLocation(e, this.val) }></Slider>
+            </Container>
+            <div>Emergency Huge Range: </div>
+            <Container>
+            <Slider defaultValue={this.props.currentLiveEvent.location.radius} value={this.props.currentLiveEvent.location.radius} 
+            max={500000000000000} min={10} style={{"width":"100%","maxWidth":"250px"}}
             sliderStyle={{"marginBottom": "9px", "marginTop":"9px"}} onChange={ (e, val) => this.val = val }  
             onDragStop={ (e) => this.updateLocation(e, this.val) }></Slider>
             </Container>

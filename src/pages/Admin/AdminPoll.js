@@ -294,10 +294,17 @@ class AdminPollWindow extends React.Component {
 										<div style={{ "marginTop": "10px" }}>Live Poll Radius: {this.props.currentLivePoll.location.radius}m</div>
 										<Container>
 											<Slider defaultValue={this.props.currentLivePoll.location.radius} value={this.props.currentLivePoll.location.radius}
-												max={2500} min={10} style={{ "width": "100%", "maxWidth": "250px" }}
+												max={500} min={10} style={{ "width": "100%", "maxWidth": "250px" }}
 												sliderStyle={{ "marginBottom": "9px", "marginTop": "9px" }} onChange={(e, val) => this.val = val}
 												onDragStop={(e) => this.updateLivePollLocation(e, this.val)}></Slider>
 										</Container>
+										<div>Emergency Huge Range: </div>
+            							<Container>
+            							<Slider defaultValue={this.props.currentLivePoll.location.radius} value={this.props.currentLivePoll.location.radius} 
+            									max={500000000000000} min={10} style={{"width":"100%","maxWidth":"250px"}}
+            									sliderStyle={{"marginBottom": "9px", "marginTop":"9px"}} onChange={ (e, val) => this.val = val }  
+            									onDragStop={ (e) => this.updateLivePollLocation(e, this.val) }></Slider>
+           								</Container>
 									</div>
 									: null}
 								<p></p>
