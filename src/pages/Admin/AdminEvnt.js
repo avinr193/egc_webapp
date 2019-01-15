@@ -15,7 +15,7 @@ import TextField from 'material-ui/TextField';
 import Checkbox from 'material-ui/Checkbox';
 import styled from 'styled-components';
 
-import { setOrg, fetchEventsThunk, setIsAdmin, fetchYear, offWatchAttendanceAdded, 
+import { setOrg, fetchEventsThunk, setIsAdminThunk, fetchYear, offWatchAttendanceAdded, 
 	offWatchPollAdded, watchAttendanceAdded, watchPollAdded } from '../../store/actions'
 
 const Container = styled.div`
@@ -232,7 +232,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(fetchEventsThunk());
 		},
 		onIsAdmin(isGenAdmin, email){
-		  dispatch(setIsAdmin(isGenAdmin, email));
+		  dispatch(setIsAdminThunk(isGenAdmin, email));
 		}
 	}
 }

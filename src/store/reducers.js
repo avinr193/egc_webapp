@@ -46,6 +46,10 @@ const organizations = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_ORGS && action.organizations) ? action.organizations : state
 }
 
+const allOrganizations = (state = [], action) => {
+    return (action.type === ActionTypes.FETCH_ALL_ORGS && action.allOrganizations) ? action.allOrganizations : state
+}
+
 const years = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_YEARS && action.years) ? action.years : state
 }
@@ -86,8 +90,17 @@ const currentPoll = (state = { question: '', options: [] }, action) => {
     return (action.type === ActionTypes.SET_POLL && action.poll) ? action.poll : state
 }
 
+const admins = (state = [], action) => {
+    return (action.type === ActionTypes.FETCH_ADMINS && action.admins) ? action.admins : state
+}
+
+const currentAdmin = (state = '', action) => {
+    return (action.type === ActionTypes.SET_ADMIN && action.newAdmin) ? action.newAdmin : state
+}
+
 export default combineReducers({
     events, organizations, attendance, currentDate, currentEvent,
     currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath,
-    polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin, currentOption, currentYear, years
+    polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin, currentOption, currentYear, 
+    years, admins, currentAdmin, allOrganizations
 })

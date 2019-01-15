@@ -117,8 +117,8 @@ class AdminPopover extends React.Component {
             <Link exact="true" to='/admin/events' style={{ textDecoration: 'none' }}>
               <MenuItem primaryText="Events"></MenuItem>
             </Link>
-            <Link exact="true" to='/admin/constituencies' style={{ textDecoration: 'none' }}>
-              <MenuItem primaryText="Constituencies"></MenuItem>
+            <Link exact="true" to='/admin/adorgs' style={{ textDecoration: 'none' }}>
+              <MenuItem primaryText="Admins/Orgs"></MenuItem>
             </Link>
             <Link exact="true" to='/admin/reports' style={{ textDecoration: 'none' }}>
               <MenuItem primaryText="Reports"></MenuItem>

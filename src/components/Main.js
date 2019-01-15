@@ -9,7 +9,7 @@ import Voting from '../pages/Voting'
 import AdminAtt from '../pages/Admin/AdminAtt'
 import AdminPoll from '../pages/Admin/AdminPoll'
 import AdminEvnt from '../pages/Admin/AdminEvnt'
-import AdminCnst from '../pages/Admin/AdminCnst'
+import AdminAdOrgs from '../pages/Admin/AdminAdOrgs'
 import AdminRprt from '../pages/Admin/AdminRprt'
 
 const Main = () => (
@@ -21,7 +21,7 @@ const Main = () => (
     <Route exact path='/admin/attendance' component={AdminAtt}></Route>
     <Route exact path='/admin/polling' component={AdminPoll}></Route>
     <Route exact path='/admin/events' component={AdminEvnt}></Route>
-    <Route exact path='/admin/constituencies' component={AdminCnst}></Route>
+    <Route exact path='/admin/adorgs' component={AdminAdOrgs}></Route>
     <Route exact path='/admin/reports' component={AdminRprt}></Route>
 
     <Redirect exact from="/admin*" to="/admin/attendance" />

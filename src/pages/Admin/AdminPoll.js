@@ -18,7 +18,7 @@ import Slider from 'material-ui/Slider';
 import AllInclusive from 'material-ui/svg-icons/places/all-inclusive';
 import styled from 'styled-components';
 
-import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll, setIsAdmin, 
+import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll, setIsAdminThunk, 
 	fetchLivePollsThunk, fetchYear, watchAttendanceAdded, watchPollAdded, offWatchAttendanceAdded,
 	offWatchPollAdded } from '../../store/actions'
 
@@ -383,7 +383,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(fetchAndSetPoll(id, org))
 		},
 		onIsAdmin(isGenAdmin, email) {
-			dispatch(setIsAdmin(isGenAdmin, email));
+			dispatch(setIsAdminThunk(isGenAdmin, email));
 		},
 		onLivePollUpdate() {
 			dispatch(fetchLivePollsThunk());

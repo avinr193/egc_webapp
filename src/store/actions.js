@@ -24,12 +24,16 @@ export const ActionTypes = {
     FETCH_LIVE_POLLS: "FETCH_LIVE_POLLS",
     SET_LIVE_POLL: "SET_LIVE_POLL",
     SET_IS_ADMIN: "SET_IS_ADMIN",
-    SET_CURRENT_OPTION: "SET_CURRENT_OPTION"
+    SET_CURRENT_OPTION: "SET_CURRENT_OPTION",
+    FETCH_ADMINS: "FETCH_ADMINS",
+    SET_ADMIN: "SET_ADMIN",
+    FETCH_ALL_ORGS: "FETCH_ALL_ORGS"
 }
 
 /*ACTION CREATORS*/
 export const fetchEvents = (events) => ({ type: ActionTypes.FETCH_EVENTS, events })
 export const fetchOrgs = (organizations) => ({ type: ActionTypes.FETCH_ORGS, organizations })
+export const fetchAllOrgs = (allOrganizations) => ({ type: ActionTypes.FETCH_ALL_ORGS, allOrganizations })
 export const fetchAtt = (attendance) => ({ type: ActionTypes.FETCH_ATT, attendance })
 export const fetchEventDates = (eventDates) => ({ type: ActionTypes.FETCH_EVENT_DATES, eventDates })
 export const setEventDate = (eventDate) => ({ type: ActionTypes.SET_EVENT_DATE, eventDate })
@@ -47,15 +51,17 @@ export const setIsPollLive = (isPollLive) => ({ type: ActionTypes.SET_IS_POLL_LI
 export const setAttPath = (newAttPath) => ({ type: ActionTypes.SET_ATT_PATH, newAttPath })
 export const fetchPolls = (polls) => ({ type: ActionTypes.FETCH_POLLS, polls })
 export const setPoll = (poll) => ({ type: ActionTypes.SET_POLL, poll })
-export const setAdmin = (isAdmin) => ({ type: ActionTypes.SET_IS_ADMIN, isAdmin })
+export const setIsAdmin = (isAdmin) => ({ type: ActionTypes.SET_IS_ADMIN, isAdmin })
 export const setCurrentOption = (newOption) => ({ type: ActionTypes.SET_CURRENT_OPTION, newOption })
+export const fetchAdmins = (admins) => ({ type: ActionTypes.FETCH_ADMINS, admins })
+export const setAdmin = (newAdmin) => ({ type: ActionTypes.SET_ADMIN, newAdmin })
 
 /*THUNKS*/
-export function setIsAdmin(isAdmin, email = null) {
+export function setIsAdminThunk(isAdmin, email = null) {
     let netID = email.split('@')[0];
     return (dispatch, getState) => {
         let state = getState();
-        dispatch(setAdmin(isAdmin));
+        dispatch(setIsAdmin(isAdmin));
         if (isAdmin && state.organizations.length === 0) {
             dispatch(fetchOrgsThunk(netID));
         }
@@ -216,6 +222,34 @@ export function fetchOrgsThunk(netID) {
             .then(() => dispatch(fetchEventsThunk()))
             .then(() => dispatch(watchPollAdded()))
             .then(() => dispatch(watchAttendanceAdded()))
+    }
+}
+
+export function fetchAllOrgsThunk() {
+    return (dispatch) => {        
+        let allOrganizations = [];
+        database.ref(`/Organizations/`).once('value', snap => {
+            snap.forEach(data => {
+                allOrganizations.push(data.key)
+            })
+        })
+            .then(() => dispatch(fetchAllOrgs(allOrganizations)))
+    }
+}
+
+export function fetchAdminsThunk() {
+    return (dispatch) => {        
+        let admins = [];
+        database.ref(`/Admins/`).once('value', snap => {
+            snap.forEach(data => {
+                admins.push(data.key)
+            })
+        })
+            .then(() => {
+                admins.splice( admins.indexOf('dummy'), 1 );
+                dispatch(fetchAdmins(admins))})
+            .then(() => admins[0] ? dispatch(setAdmin(admins[0])) : null)
+            .then(() => dispatch(fetchOrgsThunk(admins[0])))
     }
 }
 
