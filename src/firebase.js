@@ -9,12 +9,22 @@ export default firebase;
 
 export const database = firebase.database();
 
-export function isGeneralAdmin(uuid, email) {
+export function isGeneralAdmin(email) {
+    let netID = email.split('@')[0];
     let isGeneralAdmin = false;
-    return database.ref('/Admins/general/').once('value', snap => {
-        isGeneralAdmin = snap.hasChild(uuid);
-        if (isGeneralAdmin) { isGeneralAdmin = (snap.child(uuid).val() === email) };
+    return database.ref('/Admins/').once('value', snap => {
+        isGeneralAdmin = snap.hasChild(netID);
     }).then(() => { return isGeneralAdmin; })
+}
+
+export const currentUser = () => {
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          return user;
+        } else {
+          return null;
+        }
+      });
 }
 
 export function signIn() {
@@ -37,8 +47,9 @@ export const addTaskToFirebase = (task) => {
     })
 }
 
-export const addAtt = (currentDate, currentEvent, displayName, timestamp, email, userLat, userLong, distToEvent, attPath, uid) => {
-    database.ref(`/Organizations/Engineering Governing Council/2018/events/${currentEvent}/${currentDate}/attendance/${attPath}/people`)
+export const addAtt = (currentOrg, currentDate, currentEvent, displayName, timestamp, email, 
+    userLat, userLong, distToEvent, attPath, uid, currentYear) => {
+    database.ref(`/Organizations/${currentOrg}/${currentYear}/events/${currentEvent}/${currentDate}/attendance/${attPath}/people`)
         .child(uid).set({
             time_logged: timestamp,
             email: email,
@@ -47,8 +58,9 @@ export const addAtt = (currentDate, currentEvent, displayName, timestamp, email,
         })
 }
 
-export const logOption = (livePoll, option, user, timestamp, userLat, userLong, distToEvent) => {
-    database.ref(`/Organizations/${livePoll.organization}/2018/polls/${livePoll.uuid}/people/`)
+export const logOption = (livePoll, option, user, timestamp, userLat, userLong, distToEvent,
+    currentYear) => {
+    database.ref(`/Organizations/${livePoll.organization}/${currentYear}/polls/${livePoll.uuid}/people/`)
         .child(user.uid).set({
             time_logged: timestamp,
             email: user.email,
@@ -72,9 +84,9 @@ export const addEvent = (currentOrganization, year, date, timeStart, timeEnd, na
         })
 }
 
-export const addPoll = (currentOrganization, year, question, options, pollLat, pollLong, radius) => {
+export const addPoll = (currentOrganization, currentYear, question, options, pollLat, pollLong, radius) => {
     const id = uuid();
-    database.ref(`/Organizations/${currentOrganization}/${year}/polls/${id}/`).set({
+    database.ref(`/Organizations/${currentOrganization}/${currentYear}/polls/${id}/`).set({
         question: question,
         options: options,
         properties: {

@@ -10,18 +10,18 @@ import styled from 'styled-components';
 import 'firebase/auth'
 import firebase, { logOption, isLivePoll, signIn } from '../firebase'
 
-import { setLivePoll, fetchLivePollsThunk, setCurrentOption } from '../store/actions'
+import { setLivePoll, fetchLivePollsThunk, setCurrentOption, fetchDateThunk } from '../store/actions'
 
 const Container = styled.div`
  justify-content: center;
  display: flex;
 `;
 
-const Voting = ({ livePolls, onChangePoll, currentLivePoll, currentOption, onChangeOption }) => (
+const Voting = ({ livePolls, onChangePoll, currentLivePoll, currentOption, onChangeOption, currentYear }) => (
   <div className='attendance'>
     <VotingWindow livePolls={livePolls}
       currentLivePoll={currentLivePoll} onChangePoll={onChangePoll} 
-      currentOption={currentOption} onChangeOption={onChangeOption}/>
+      currentOption={currentOption} onChangeOption={onChangeOption} currentYear={currentYear}/>
   </div>
 );
 
@@ -116,7 +116,8 @@ class VotingWindow extends React.Component {
     if (!isLivePoll(this.props.currentLivePoll.uuid)) {
       return this.loginFailure(2);
     }
-    logOption(this.props.currentLivePoll, this.props.currentOption, this.state.user, timestamp, userLat, userLong, distToEvent);
+    logOption(this.props.currentLivePoll, this.props.currentOption, 
+      this.state.user, timestamp, userLat, userLong, distToEvent, this.props.currentYear);
     this.setState({
       logged: true,
       lat: userLat,
@@ -218,11 +219,13 @@ class VotingWindow extends React.Component {
 const mapState = (state) => ({
   livePolls: state.livePolls,
   currentLivePoll: state.currentLivePoll,
-  currentOption: state.currentOption
+  currentOption: state.currentOption,
+  currentYear: state.currentYear
 })
 
 const mapDispatch = (dispatch) => {
   dispatch(fetchLivePollsThunk());
+  dispatch(fetchDateThunk());
   return {
     onChangePoll(newLivePoll) { 
       dispatch(setLivePoll(newLivePoll)); 

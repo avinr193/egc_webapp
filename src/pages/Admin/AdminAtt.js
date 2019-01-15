@@ -7,13 +7,16 @@ import { List, ListItem } from 'material-ui/List';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import FlatButton from 'material-ui/FlatButton';
+import IconButton from 'material-ui/IconButton';
 import Toggle from 'material-ui/Toggle';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
+import AllInclusive from 'material-ui/svg-icons/places/all-inclusive';
 import Slider from 'material-ui/Slider'
 import styled from 'styled-components';
 
 import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, 
-  setAttPath, setIsAdmin, fetchLiveEventsThunk } from '../../store/actions'
+  setAttPath, setIsAdmin, fetchLiveEventsThunk, setOrg, fetchEventsThunk, fetchYear, 
+  offWatchAttendanceAdded, offWatchPollAdded, watchAttendanceAdded, watchPollAdded } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -22,16 +25,17 @@ const Container = styled.div`
  margin-top: 10px;
 `;
 
-const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
+const Admin = ({ events, attendance, currentEvent, onChangeOrg, onChangeEvent, onChangeDate, eventDate, eventDates,
   currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin, 
-  isAdmin, currentLiveEvent, onLiveEventUpdate }) => (
+  isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, onChangeYear, currentYear }) => (
     <div className="admin">
       <AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
         currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
-        onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg}
+        onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
         onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}
         onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin} 
-        currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate}/>
+        currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate} orgs={orgs} 
+        years={years} onChangeYear={onChangeYear} currentYear={currentYear}/>
     </div>
   );
 
@@ -40,7 +44,8 @@ class AdminWindow extends React.Component {
     super(props);
     this.state = {
       enabled: false,
-      user: null
+      user: null,
+      oldRange: 0
     }
   }
 
@@ -52,8 +57,8 @@ class AdminWindow extends React.Component {
           user: user
         })
         if(!this.props.isAdmin){
-          isGeneralAdmin(user.uid, user.email).then(isGenAdmin => {
-            this.props.onIsAdmin(isGenAdmin);
+          isGeneralAdmin(user.email).then(isGenAdmin => {
+            this.props.onIsAdmin(isGenAdmin, user.email);
           })
         }
       }
@@ -74,6 +79,18 @@ class AdminWindow extends React.Component {
       this.props.onChangeEvent(value);
     }
     this.props.onSetAttPath("opening");
+  }
+
+  changeOrg(event, index, value) {
+    if (value) {
+      this.props.onChangeOrg(value);
+    }
+  }
+
+  changeYear(event, index, value) {
+    if (value) {
+      this.props.onChangeYear(value);
+    }
   }
 
   changeDate(event, index, value) {
@@ -133,7 +150,7 @@ class AdminWindow extends React.Component {
     var liveEvent = {
       'event': this.props.currentEvent,
       'organization': this.props.currentOrg,
-      'date': this.props.currentDate,
+      'date': this.props.eventDate.key,
       'attPath': this.props.attPath,
       'location': {
         lat: this.props.eventDate.props.location.latitude,
@@ -152,6 +169,7 @@ class AdminWindow extends React.Component {
   }
 
   updateLocation(e, val){
+    this.setState({oldRange: this.props.currentLiveEvent.location.radius});
     let newLiveEvent = this.props.currentLiveEvent;
     newLiveEvent.location.radius = val;
     addLiveEvent(newLiveEvent);
@@ -159,22 +177,33 @@ class AdminWindow extends React.Component {
   }
 
   render() {
-    var namesList = [];
-    for (var i = 0; i < this.props.attendance.length; i++) {
+    let namesList = [];
+    for (let i = 0; i < this.props.attendance.length; i++) {
       namesList.push(<ListItem key={i} primaryText={(this.props.attendance[i]).name} 
       secondaryText={"Time Logged: " + (this.props.attendance[i]).time + ", Distance: " + 
       (this.props.attendance[i]).location.distance.toFixed(3)}></ListItem>);
     }
 
-    var eventsList = [];
-    for (var j = 0; j < this.props.events.length; j++) {
+    let orgsList = [];
+		for (let i = 0; i < this.props.orgs.length; i++) {
+			orgsList.push(<MenuItem key={i} value={this.props.orgs[i]} primaryText={this.props.orgs[i]}></MenuItem>);
+		}
+
+    let eventsList = [];
+    for (let j = 0; j < this.props.events.length; j++) {
       eventsList.push(<MenuItem key={j} value={this.props.events[j]} primaryText={this.props.events[j]}></MenuItem>);
     }
 
-    var datesList = [];
-    for (var k = 0; k < this.props.eventDates.length; k++) {
+    let datesList = [];
+    for (let k = 0; k < this.props.eventDates.length; k++) {
       datesList.push(<MenuItem key={k} value={this.props.eventDates[k].key} primaryText={this.props.eventDates[k].key}></MenuItem>);
     }
+
+    let yearsList = [];
+    for (let k = 0; k < this.props.years.length; k++) {
+      yearsList.push(<MenuItem key={k} value={this.props.years[k]} primaryText={this.props.years[k]}></MenuItem>);
+    }
+    let today = new Date();
 
     return (
       (!this.state.enabled ?
@@ -187,6 +216,13 @@ class AdminWindow extends React.Component {
         :
         (this.props.isAdmin ?
           <div>
+            <DropDownMenu maxHeight={300} value={this.props.currentOrg} onChange={this.changeOrg.bind(this)}>
+						{orgsList}
+					</DropDownMenu>
+          <DropDownMenu maxHeight={300} value={this.props.currentYear} onChange={this.changeYear.bind(this)}>
+            {yearsList}
+          </DropDownMenu>
+					<div style={{ "padding": "10px" }}></div>
             <div>Attendance:</div>
             <p></p>
             <div>Choose event & date below:</div>
@@ -201,10 +237,11 @@ class AdminWindow extends React.Component {
                   {datesList}
                 </DropDownMenu>
               </div>
-              {(this.props.eventDate.key === this.props.currentDate) ?
+              {((this.props.eventDate.key === this.props.currentDate &&
+              this.props.currentYear === today.getFullYear().toString()) || this.props.isEventLive === true) ?
                 <div style={{ "display": "flex" }}>
                   <div style={{ "marginTop": "19px" }}>Live:</div>
-                  <div style={{ "marginTop": "17px" }}><Toggle toggled={this.props.isEventLive === true ? this.props.isEventLive : false} onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle></div>
+                  <div style={{ "marginTop": "17px" }}><Toggle toggled={this.props.isEventLive} onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle></div>
                 </div> : null}
             </div>
             {(this.props.eventDate.props) ?
@@ -228,7 +265,7 @@ class AdminWindow extends React.Component {
                   </Container>
                 </div> : null : this.props.onSetAttPath("opening")
             }
-            {(this.props.isEventLive && this.props.currentLiveEvent && (this.props.eventDate.key === this.props.currentDate)) ? 
+            {(this.props.isEventLive && this.props.currentLiveEvent) ? 
             <div>
             <div style={{"marginTop":"10px"}}>Live Event Radius: {this.props.currentLiveEvent.location.radius}m</div>
             <Container>
@@ -236,13 +273,9 @@ class AdminWindow extends React.Component {
             max={500} min={10} style={{"width":"100%","maxWidth":"250px"}}
             sliderStyle={{"marginBottom": "9px", "marginTop":"9px"}} onChange={ (e, val) => this.val = val }  
             onDragStop={ (e) => this.updateLocation(e, this.val) }></Slider>
-            </Container>
-            <div>Emergency Huge Range: </div>
-            <Container>
-            <Slider defaultValue={this.props.currentLiveEvent.location.radius} value={this.props.currentLiveEvent.location.radius} 
-            max={500000000000000} min={10} style={{"width":"100%","maxWidth":"250px"}}
-            sliderStyle={{"marginBottom": "9px", "marginTop":"9px"}} onChange={ (e, val) => this.val = val }  
-            onDragStop={ (e) => this.updateLocation(e, this.val) }></Slider>
+            <div style={{"padding":"5px"}}></div>
+            <IconButton style={{"width":"72","height":"72","padding":"0px"}}
+              onClick={(e) => this.updateLocation(e, 5000000000)}><AllInclusive/></IconButton>
             </Container>
             </div>
             : null}
@@ -269,11 +302,26 @@ const mapState = (state) => ({
   isEventLive: state.isEventLive,
   attPath: state.attPath,
   isAdmin: state.isAdmin,
-  currentLiveEvent: state.currentLiveEvent
+  currentLiveEvent: state.currentLiveEvent,
+  orgs: state.organizations,
+  years: state.years,
+  currentYear: state.currentYear
 })
 const mapDispatch = (dispatch) => {
   dispatch(checkEventLive());
   return {
+    onChangeOrg(newOrg) {
+      dispatch(offWatchAttendanceAdded());
+      dispatch(offWatchPollAdded());
+      dispatch(setOrg(newOrg));
+      dispatch(fetchEventsThunk());
+      dispatch(watchAttendanceAdded());
+      dispatch(watchPollAdded());
+    },
+    onChangeYear(newYear) {
+      dispatch(fetchYear(newYear));
+      dispatch(fetchEventsThunk());
+    },
     onChangeEvent(newEvent) {
       dispatch(setEvent(newEvent));
       dispatch(fetchEventDatesThunk());
@@ -291,8 +339,8 @@ const mapDispatch = (dispatch) => {
     onSetAttPath(attPath) {
       dispatch(setAttPath(attPath));
     },
-    onIsAdmin(isGenAdmin){
-      dispatch(setIsAdmin(isGenAdmin));
+    onIsAdmin(isGenAdmin, email){
+      dispatch(setIsAdmin(isGenAdmin, email));
     },
     onLiveEventUpdate(){
       dispatch(fetchLiveEventsThunk());

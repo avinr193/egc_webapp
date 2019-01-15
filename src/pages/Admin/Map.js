@@ -17,7 +17,7 @@ class LocationPickerExtended extends Component {
     super(props);
 
     this.state = {
-      address: "Busch Student Center, Picataway, NJ 08854, USA",
+      address: "Busch Student Center, Piscataway, NJ 08854, USA",
       position: {},
       defaultPosition: defaultPosition,
       radius: 50

@@ -15,17 +15,18 @@ import TextField from 'material-ui/TextField';
 import Checkbox from 'material-ui/Checkbox';
 import styled from 'styled-components';
 
-import { setOrg, fetchEventsThunk, setIsAdmin } from '../../store/actions'
+import { setOrg, fetchEventsThunk, setIsAdmin, fetchYear, offWatchAttendanceAdded, 
+	offWatchPollAdded, watchAttendanceAdded, watchPollAdded } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
  display: flex;
 `;
 
-const Admin = ({ events, orgs, currentOrg, onChangeOrg, onIsAdmin, isAdmin }) => (
+const Admin = ({ events, orgs, currentOrg, onChangeOrg, onIsAdmin, isAdmin, onChangeYear, years, currentYear }) => (
 	<div className="admin">
 		<AdminEvntWindow events={events} orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
-		onIsAdmin={onIsAdmin} isAdmin={isAdmin}/>
+		onIsAdmin={onIsAdmin} isAdmin={isAdmin} onChangeYear={onChangeYear} years={years} currentYear={currentYear}/>
 	</div>
 );
 
@@ -57,8 +58,8 @@ class AdminEvntWindow extends React.Component {
 			  user: user
 			})
 			if(!this.props.isAdmin){
-				isGeneralAdmin(user.uid, user.email).then(isGenAdmin => {
-			 		this.props.onIsAdmin(isGenAdmin);
+				isGeneralAdmin(user.email).then(isGenAdmin => {
+			 		this.props.onIsAdmin(isGenAdmin, user.email);
 				})
 		  	}
 		  }
@@ -79,9 +80,6 @@ class AdminEvntWindow extends React.Component {
 		this.setState({ [e.target.name]: e.target.value });
 	}
 
-	changeOrg = (event, index, value) => {
-		if (value) { this.props.onChangeOrg(value); }
-	}
 	setTimeStart = (e, time_start) => { this.setState({ 'event_time_start': time_start }) }
 	setTimeEnd = (e, time_end) => { this.setState({ 'event_time_end': time_end }) }
 	setDate = (e, date) => { this.setState({ 'event_date': date }) }
@@ -111,8 +109,21 @@ class AdminEvntWindow extends React.Component {
 			event_time_end: {},
 			closingAtt: false
 		});
+		this.props.onChangeOrg(this.props.currentOrg);
 		return true;
 	}
+
+	changeOrg(event, index, value) {
+		if (value) {
+		  this.props.onChangeOrg(value);
+		}
+	  }
+	
+	  changeYear(event, index, value) {
+		if (value) {
+		  this.props.onChangeYear(value);
+		}
+	  }
 
 	updateLocation = (e, position, radius) => {
 		this.setState({
@@ -123,15 +134,21 @@ class AdminEvntWindow extends React.Component {
 	}
 
 	render() {
-		var eventsList = [];
-		for (var j = 0; j < this.props.events.length; j++) {
+		let eventsList = [];
+		for (let j = 0; j < this.props.events.length; j++) {
 			eventsList.push(<ListItem key={j} value={this.props.events[j]} primaryText={this.props.events[j]}></ListItem>);
 		}
 
-		var orgsList = [];
-		for (var i = 0; i < this.props.orgs.length; i++) {
+		let orgsList = [];
+		for (let i = 0; i < this.props.orgs.length; i++) {
 			orgsList.push(<MenuItem key={i} value={this.props.orgs[i]} primaryText={this.props.orgs[i]}></MenuItem>);
 		}
+
+		let yearsList = [];
+    	for (let k = 0; k < this.props.years.length; k++) {
+      		yearsList.push(<MenuItem key={k} value={this.props.years[k]} primaryText={this.props.years[k]}></MenuItem>);
+    	}
+		let today = new Date();
 
 		return (
 			(!this.state.enabled ?
@@ -144,11 +161,15 @@ class AdminEvntWindow extends React.Component {
 				:
 				(this.props.isAdmin ?
 					<div>
-						<DropDownMenu maxHeight={300} value={this.props.currentOrg} onChange={this.changeOrg}>
+						<DropDownMenu maxHeight={300} value={this.props.currentOrg} onChange={this.changeOrg.bind(this)}>
 							{orgsList}
 						</DropDownMenu>
+						<DropDownMenu maxHeight={300} value={this.props.currentYear} onChange={this.changeYear.bind(this)}>
+            				{yearsList}
+          				</DropDownMenu>
 						<div style={{ "padding": "10px" }}></div>
 						<div style={{ "display": "flex" }}>
+							{this.props.currentYear === today.getFullYear().toString() ? 
 							<div style={{ "flex": "1" }}>
 								<div style={{ "fontWeight": "bold" }}>Add Event</div>
 								<form onSubmit={this.trySubmit}>
@@ -173,6 +194,7 @@ class AdminEvntWindow extends React.Component {
 										type="submit" />
 								</form>
 							</div>
+							: <div style={{ "flex": "1" }}>Must be in current year to add events.</div>}
 							<div style={{ "flex": "1" }}>
 								<div style={{ "fontWeight": "bold" }}>View Events</div>
 								<List>
@@ -191,16 +213,26 @@ const mapState = (state) => ({
 	events: state.events,
 	orgs: state.organizations,
 	currentOrg: state.currentOrg,
-	isAdmin: state.isAdmin
+	isAdmin: state.isAdmin,
+	currentYear: state.currentYear,
+	years: state.years
 })
 const mapDispatch = (dispatch) => {
 	return {
 		onChangeOrg(newOrg) {
+			dispatch(offWatchAttendanceAdded());
+			dispatch(offWatchPollAdded());
 			dispatch(setOrg(newOrg));
-			dispatch(fetchEventsThunk())
+			dispatch(fetchEventsThunk());
+			dispatch(watchAttendanceAdded());
+			dispatch(watchPollAdded());
 		},
-		onIsAdmin(isGenAdmin){
-		  dispatch(setIsAdmin(isGenAdmin));
+		onChangeYear(newYear) {
+			dispatch(fetchYear(newYear));
+			dispatch(fetchEventsThunk());
+		},
+		onIsAdmin(isGenAdmin, email){
+		  dispatch(setIsAdmin(isGenAdmin, email));
 		}
 	}
 }

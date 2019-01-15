@@ -6,6 +6,8 @@ export const ActionTypes = {
     FETCH_ORGS: "FETCH_ORGS",
     FETCH_EVENTS: "FETCH_EVENTS",
     FETCH_DATE: "FETCH_DATE",
+    FETCH_YEAR: "FETCH_YEAR",
+    FETCH_YEARS: "FETCH_YEARS",
     FETCH_ATT: "FETCH_ATT",
     FETCH_USER: "FETCH_USER",
     SET_EVENT: "SET_EVENT",
@@ -32,6 +34,8 @@ export const fetchAtt = (attendance) => ({ type: ActionTypes.FETCH_ATT, attendan
 export const fetchEventDates = (eventDates) => ({ type: ActionTypes.FETCH_EVENT_DATES, eventDates })
 export const setEventDate = (eventDate) => ({ type: ActionTypes.SET_EVENT_DATE, eventDate })
 export const fetchDate = (date) => ({ type: ActionTypes.FETCH_DATE, date })
+export const fetchYear = (year) => ({ type: ActionTypes.FETCH_YEAR, year })
+export const fetchYears = (years) => ({ type: ActionTypes.FETCH_YEARS, years })
 export const setEvent = (newEvent) => ({ type: ActionTypes.SET_EVENT, newEvent })
 export const setOrg = (newOrg) => ({ type: ActionTypes.SET_ORG, newOrg })
 export const fetchLiveEvents = (liveEvents) => ({ type: ActionTypes.FETCH_LIVE_EVENTS, liveEvents })
@@ -44,15 +48,16 @@ export const setAttPath = (newAttPath) => ({ type: ActionTypes.SET_ATT_PATH, new
 export const fetchPolls = (polls) => ({ type: ActionTypes.FETCH_POLLS, polls })
 export const setPoll = (poll) => ({ type: ActionTypes.SET_POLL, poll })
 export const setAdmin = (isAdmin) => ({ type: ActionTypes.SET_IS_ADMIN, isAdmin })
-export const setCurrentOption = (newOption) => ({ type: ActionTypes.SET_CURRENT_OPTION, newOption})
+export const setCurrentOption = (newOption) => ({ type: ActionTypes.SET_CURRENT_OPTION, newOption })
 
 /*THUNKS*/
-export function setIsAdmin(isAdmin){
+export function setIsAdmin(isAdmin, email = null) {
+    let netID = email.split('@')[0];
     return (dispatch, getState) => {
         let state = getState();
         dispatch(setAdmin(isAdmin));
-        if(isAdmin && state.organizations.length === 0){
-            dispatch(fetchOrgsThunk());
+        if (isAdmin && state.organizations.length === 0) {
+            dispatch(fetchOrgsThunk(netID));
         }
     }
 }
@@ -61,13 +66,17 @@ export function fetchDateThunk() {
     return dispatch => {
         let today = new Date();
         let currentDate = (today.getMonth() + 1).toString() + "-" + today.getDate().toString();
+        let currentYear = today.getFullYear().toString();
         dispatch(fetchDate(currentDate));
+        dispatch(fetchYear(currentYear));
     }
 }
 
-export function fetchAndSetPoll(id, org) {
-    return dispatch => {
-        database.ref(`/Organizations/${org}/2018/polls/`).child(id).once('value', snap => {
+export function fetchAndSetPoll(id) {
+    return (dispatch, getState) => {
+        let state = getState();
+        dispatch(fetchPollsThunk);
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/`).child(id).once('value', snap => {
             dispatch(setPoll(snap.val()));
         })
     }
@@ -77,7 +86,7 @@ export function checkEventLive() {
     return (dispatch, getState) => {
         let state = getState();
         if (!state.currentEvent) { dispatch(setIsEventLive(false)); };
-        isLiveEvent(state.currentDate + state.currentEvent + state.currentOrg, state.attPath)
+        isLiveEvent(state.eventDate.key + state.currentEvent + state.currentOrg, state.attPath)
             .then((isEventLive) => dispatch(setIsEventLive(isEventLive)))
             .then(() => dispatch(setLiveEventByString()))
     }
@@ -88,8 +97,8 @@ export function checkPollLive() {
         let state = getState();
         if (!state.currentPoll) { dispatch(setIsPollLive(false)); };
         isLivePoll(state.currentPoll.uuid)
-        .then((isPollLive) => dispatch(setIsPollLive(isPollLive)))
-        .then(() => dispatch(setLivePollByID()));
+            .then((isPollLive) => dispatch(setIsPollLive(isPollLive)))
+            .then(() => dispatch(setLivePollByID()));
     }
 }
 
@@ -97,7 +106,7 @@ export function fetchEventDatesThunk() {
     return (dispatch, getState) => {
         let state = getState();
         const eventDates = [];
-        database.ref(`/Organizations/Engineering Governing Council/2018/events/${state.currentEvent}/`).once('value', snap => {
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/${state.currentEvent}/`).once('value', snap => {
             snap.forEach(data => {
                 let dataVal = data.val();
                 const eventDate = {
@@ -107,23 +116,28 @@ export function fetchEventDatesThunk() {
                 eventDates.push(eventDate)
             })
         })
-            .then(() => dispatch(fetchEventDates(eventDates)))
-            .then(() => dispatch(setEventDate(eventDates[eventDates.length - 1])))
+            .then(() => {
+                eventDates.sort(function(a, b) {
+                    return b.key.split('-')[0] - a.key.split('-')[0] || b.key.split('-')[1] - a.key.split('-')[1];
+                });
+                dispatch(fetchEventDates(eventDates))})
+            .then(() => dispatch(setEventDate(eventDates[0])))
             .then(() => dispatch(fetchAttendanceThunk()))
     }
 }
 
 export function fetchEventsThunk() {
-    return (dispatch) => {
+    return (dispatch, getState) => {
+        let state = getState();
         let events = [];
-        database.ref(`/Organizations/Engineering Governing Council/2018/events/`).once('value', snap => {
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/`).once('value', snap => {
             snap.forEach(data => {
                 events.push(data.key)
             })
         })
             .then(() => dispatch(fetchEvents(events)))
             .then(() => events[0] ? dispatch(setEvent(events[0])) : null)
-            .then(() => dispatch(fetchEventDatesThunk()))
+            .then(() => dispatch(fetchEventDatesThunk())) 
             .then(() => dispatch(fetchPollsThunk()))
     }
 }
@@ -132,7 +146,7 @@ export function fetchPollsThunk() {
     return (dispatch, getState) => {
         let state = getState();
         let polls = [];
-        database.ref(`/Organizations/${state.currentOrg}/2018/polls/`).once('value', snap => {
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/`).once('value', snap => {
             snap.forEach(data => {
                 let dataVal = data.val();
                 const pollObj = {
@@ -140,7 +154,7 @@ export function fetchPollsThunk() {
                     options: dataVal.options,
                     organization: dataVal.properties.organization,
                     location: dataVal.properties.location,
-                    people: dataVal.people ? sortBy(dataVal.people,"name") : {none:"null"},
+                    people: dataVal.people ? sortBy(dataVal.people, "name") : { none: "null" },
                     uuid: data.key
                 }
                 polls.push(pollObj);
@@ -167,17 +181,17 @@ export function updatePollCounts() {
         let state = getState();
         database.ref('/livePolls/').once('value', snap => {
             snap.forEach(data => {
-                database.ref(`/Organizations/${state.currentOrg}/2018/polls/${data.key}/options/`).once('value', snap => {
+                database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/${data.key}/options/`).once('value', snap => {
                     let options = snap.val();
                     for (let key in options) {
                         options[key].count = 0;
                     }
-                    database.ref(`/Organizations/${state.currentOrg}/2018/polls/${data.key}/people/`).once('value', snap => {
+                    database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/${data.key}/people/`).once('value', snap => {
                         snap.forEach(data => {
                             options.filter(obj => { return obj.text === data.val().option })[0].count += 1;
                         })
                     })
-                    database.ref(`/Organizations/${state.currentOrg}/2018/polls/${data.key}/options/`).set(options);
+                    database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/${data.key}/options/`).set(options);
                 })
             })
         })
@@ -185,17 +199,46 @@ export function updatePollCounts() {
     }
 }
 
-export function fetchOrgsThunk() {
-    return (dispatch) => {
+export function fetchOrgsThunk(netID) {
+    return (dispatch) => {        
         let organizations = [];
-        database.ref(`/Organizations/`).once('value', snap => {
+        if (!netID) {
+            netID = "dummy";
+        }
+        database.ref(`/Admins/${netID}/`).once('value', snap => {
             snap.forEach(data => {
                 organizations.push(data.key)
             })
         })
             .then(() => dispatch(fetchOrgs(organizations)))
             .then(() => organizations[0] ? dispatch(setOrg(organizations[0])) : null)
+            .then(() => dispatch(fetchYearsThunk()))
             .then(() => dispatch(fetchEventsThunk()))
+            .then(() => dispatch(watchPollAdded()))
+            .then(() => dispatch(watchAttendanceAdded()))
+    }
+}
+
+export function fetchYearsThunk() {
+    let today = new Date();
+    let currentYear = today.getFullYear().toString();
+    return (dispatch, getState) => {
+        let state = getState();
+        let years = [];
+        if(state.currentOrg.length > 0){
+            database.ref(`/Organizations/${state.currentOrg}/`).once('value', snap => {
+                snap.forEach(data => {
+                    years.push(data.key);
+                })
+            })
+                .then(() => {
+                    if (years.filter(function(e) { return e === currentYear; }).length === 0) {
+                        years.push(currentYear);
+                      }
+                    years.sort(function(a, b){return b-a}); 
+                    dispatch(fetchYears(years))})
+                .then(() => years[0] ? dispatch(fetchYear(years[0])) : null)
+        }
     }
 }
 
@@ -203,7 +246,7 @@ export function fetchAttendanceThunk() {
     return (dispatch, getState) => {
         let state = getState();
         let attendance = [];
-        database.ref(`/Organizations/Engineering Governing Council/2018/events/${state.currentEvent}/${state.eventDate.key}/attendance/${state.attPath}/people`).once('value', snap => {
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/${state.currentEvent}/${state.eventDate.key}/attendance/${state.attPath}/people`).once('value', snap => {
             snap.forEach(data => {
                 let dataVal = data.val();
                 const attObj = {
@@ -223,15 +266,14 @@ export function fetchAttendanceThunk() {
 
 export function setLiveEventByString() {
     return (dispatch, getState) => {
-        if(!window.location.pathname.startsWith("/admin/")){
+        if (!window.location.pathname.startsWith("/admin/")) {
             return false;
         };
         let state = getState();
-        for(let i = 0; i < state.liveEvents.length; i++){
-            if(state.liveEvents[i].date === state.currentDate
-            && state.liveEvents[i].event === state.currentEvent
-            && state.liveEvents[i].organization === state.currentOrg
-            && state.liveEvents[i].attPath === state.attPath){
+        for (let i = 0; i < state.liveEvents.length; i++) {
+            if (state.liveEvents[i].event === state.currentEvent
+                && state.liveEvents[i].organization === state.currentOrg
+                && state.liveEvents[i].attPath === state.attPath) {
                 dispatch(setLiveEvent(state.liveEvents[i]));
                 i = state.liveEvents.length;
                 break;
@@ -242,12 +284,12 @@ export function setLiveEventByString() {
 
 export function setLivePollByID() {
     return (dispatch, getState) => {
-        if(!window.location.pathname.startsWith("/admin/")){
+        if (!window.location.pathname.startsWith("/admin/")) {
             return false;
         };
         let state = getState();
-        for(let i = 0; i < state.livePolls.length; i++){
-            if(state.livePolls[i].uuid === state.currentPoll.uuid){
+        for (let i = 0; i < state.livePolls.length; i++) {
+            if (state.livePolls[i].uuid === state.currentPoll.uuid) {
                 dispatch(setLivePoll(state.livePolls[i]));
                 i = state.livePolls.length;
                 break;
@@ -280,36 +322,30 @@ export function fetchLivePollsThunk() {
         })
             .then(() => dispatch(fetchLivePolls(livePolls)))
             .then(() => livePolls[0] ? dispatch(setLivePoll(livePolls[0])) : null)
-            .then(() => livePolls[0] ? dispatch(setCurrentOption(livePolls[0].options[0].text)): null)
+            .then(() => livePolls[0] ? dispatch(setCurrentOption(livePolls[0].options[0].text)) : null)
             .then(() => dispatch(checkPollLive()))
     }
 }
 
 /*LISTENERS*/
-export function watchEventAdded() {
-    return dispatch => {
-        database.ref(`/Organizations/Engineering Governing Council/2018/events/`).on('child_added', () => {
-            dispatch(fetchEventsThunk());
-        });
-    }
-}
 
 export function watchAttendanceAdded() {
-    return dispatch => {
-        database.ref(`/Organizations/Engineering Governing Council/2018/events/`).on('child_added', () => {
+    return (dispatch, getState) => {
+        let state = getState();
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/`).on('child_added', () => {
             dispatch(fetchAttendanceThunk());
         });
-        database.ref(`/Organizations/Engineering Governing Council/2018/events/`).on('child_changed', () => {
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/`).on('child_changed', () => {
             dispatch(fetchAttendanceThunk());
         });
     }
 }
 
-export function watchEventDateAdded() {
-    return dispatch => {
-        database.ref(`/Organizations/Engineering Governing Council/2018/events/GENERAL COUNCIL/`).on('child_added', () => {
-            dispatch(fetchEventDatesThunk());
-        });
+export function offWatchAttendanceAdded() {
+    return (dispatch, getState) => {
+        let state = getState();
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/`).off('child_added');
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/`).off('child_changed');
     }
 }
 
@@ -325,13 +361,22 @@ export function watchLiveEvents() {
 }
 
 export function watchPollAdded() {
-    return dispatch => {
-        database.ref(`/Organizations/Engineering Governing Council/2018/polls/`).on('child_added', () => {
+    return (dispatch, getState) => {
+        let state = getState();
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/`).on('child_added', () => {
             dispatch(updatePollCounts());
         });
-        database.ref(`/Organizations/Engineering Governing Council/2018/polls/`).on('child_changed', () => {
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/`).on('child_changed', () => {
             dispatch(updatePollCounts());
         });
+    }
+}
+
+export function offWatchPollAdded() {
+    return (dispatch, getState) => {
+        let state = getState();
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/`).off('child_added');
+        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/`).off('child_changed');
     }
 }
 

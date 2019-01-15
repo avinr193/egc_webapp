@@ -1,9 +1,7 @@
 {
   "rules": {
-    ".read": "auth !== null && auth.provider === 'google' 
-    && root.child('Admins').child('general').hasChild(auth.uid)",
-    ".write": "auth !== null && auth.provider === 'google' 
-    && root.child('Admins').child('general').hasChild(auth.uid)",
+    ".read": "auth !== null && auth.provider === 'google' && root.child('Admins').hasChild(auth.email.replace('@scarletmail.rutgers.edu',''))",
+    ".write": "auth !== null && auth.provider === 'google' && root.child('Admins').hasChild(auth.email.replace('@scarletmail.rutgers.edu',''))",
     "Organizations": {
       "$org": {
         "$year": {

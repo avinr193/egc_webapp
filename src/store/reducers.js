@@ -46,6 +46,10 @@ const organizations = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_ORGS && action.organizations) ? action.organizations : state
 }
 
+const years = (state = [], action) => {
+    return (action.type === ActionTypes.FETCH_YEARS && action.years) ? action.years : state
+}
+
 const attendance = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_ATT && action.attendance) ? action.attendance : state
 }
@@ -62,11 +66,15 @@ const currentDate = (state = '', action) => {
     return (action.type === ActionTypes.FETCH_DATE && action.date) ? action.date : state
 }
 
+const currentYear = (state = '', action) => {
+    return (action.type === ActionTypes.FETCH_YEAR && action.year) ? action.year : state
+}
+
 const currentEvent = (state = '', action) => {
     return (action.type === ActionTypes.SET_EVENT && action.newEvent) ? action.newEvent : state
 }
 
-const currentOrg = (state = 'Engineering Governing Council', action) => {
+const currentOrg = (state = '', action) => {
     return (action.type === ActionTypes.SET_ORG && action.newOrg) ? action.newOrg : state
 }
 
@@ -81,5 +89,5 @@ const currentPoll = (state = { question: '', options: [] }, action) => {
 export default combineReducers({
     events, organizations, attendance, currentDate, currentEvent,
     currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath,
-    polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin, currentOption
+    polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin, currentOption, currentYear, years
 })

@@ -8,12 +8,13 @@ import MenuItem from 'material-ui/MenuItem';
 import firebase, { addAtt, isLiveEvent, signIn } from '../firebase'
 import 'firebase/auth'
 
-import { setLiveEvent, fetchAttendanceThunk, fetchLiveEventsThunk } from '../store/actions'
+import { setLiveEvent, fetchAttendanceThunk, fetchLiveEventsThunk, fetchDateThunk } from '../store/actions'
 
-const Attendance = ({ liveEvents, currentDate, onChangeEvent, currentLiveEvent }) => (
+const Attendance = ({ liveEvents, currentDate, onChangeEvent, currentLiveEvent, currentOrg, currentYear }) => (
   <div className='attendance'>
     <AttendanceWindow liveEvents={liveEvents} currentDate={currentDate}
-      currentLiveEvent={currentLiveEvent} onChangeEvent={onChangeEvent} />
+      currentLiveEvent={currentLiveEvent} onChangeEvent={onChangeEvent} currentOrg={currentOrg}
+      currentYear={currentYear} />
   </div>
 );
 
@@ -107,8 +108,9 @@ class AttendanceWindow extends React.Component {
     if (!isLiveEvent(this.props.currentDate + this.props.currentLiveEvent.event + this.props.currentLiveEvent.organization, this.props.currentLiveEvent.attPath)) {
       return this.loginFailure(2);
     }
-    addAtt(this.props.currentDate, this.props.currentLiveEvent.event, this.state.user.displayName.toUpperCase(), timestamp,
-      this.state.user.email, userLat, userLong, distToEvent, this.props.currentLiveEvent.attPath, this.state.user.uid);
+    addAtt(this.props.currentLiveEvent.organization, this.props.currentDate, this.props.currentLiveEvent.event, 
+      this.state.user.displayName.toUpperCase(), timestamp, this.state.user.email, userLat, userLong, 
+      distToEvent, this.props.currentLiveEvent.attPath, this.state.user.uid, this.props.currentYear);
     this.setState({
       logged: true,
       lat: userLat,
@@ -186,11 +188,14 @@ class AttendanceWindow extends React.Component {
 const mapState = (state) => ({
   liveEvents: state.liveEvents,
   currentDate: state.currentDate,
-  currentLiveEvent: state.currentLiveEvent
+  currentLiveEvent: state.currentLiveEvent,
+  currentOrg: state.currentOrg,
+  currentYear: state.currentYear
 })
 
 const mapDispatch = (dispatch) => {
   dispatch(fetchLiveEventsThunk());
+  dispatch(fetchDateThunk());
   return {
     onChangeEvent(newLiveEvent) { dispatch(setLiveEvent(newLiveEvent)); dispatch(fetchAttendanceThunk()) }
   }
