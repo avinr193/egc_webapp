@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll, setIsAdminThunk, 
 	fetchLivePollsThunk, fetchYear, watchAttendanceAdded, watchPollAdded, offWatchAttendanceAdded,
-	offWatchPollAdded } from '../../store/actions'
+	offWatchPollAdded, fetchYearsThunk } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -364,6 +364,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(offWatchAttendanceAdded());
 			dispatch(offWatchPollAdded());
 			dispatch(setOrg(newOrg));
+			dispatch(fetchYearsThunk());
 			dispatch(fetchPollsThunk());
 			dispatch(watchAttendanceAdded());
 			dispatch(watchPollAdded());

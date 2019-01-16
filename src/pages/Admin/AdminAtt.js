@@ -16,7 +16,7 @@ import styled from 'styled-components';
 
 import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, 
   setAttPath, setIsAdminThunk, fetchLiveEventsThunk, setOrg, fetchEventsThunk, fetchYear, 
-  offWatchAttendanceAdded, offWatchPollAdded, watchAttendanceAdded, watchPollAdded } from '../../store/actions'
+  offWatchAttendanceAdded, offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -314,6 +314,7 @@ const mapDispatch = (dispatch) => {
       dispatch(offWatchAttendanceAdded());
       dispatch(offWatchPollAdded());
       dispatch(setOrg(newOrg));
+      dispatch(fetchYearsThunk());
       dispatch(fetchEventsThunk());
       dispatch(watchAttendanceAdded());
       dispatch(watchPollAdded());

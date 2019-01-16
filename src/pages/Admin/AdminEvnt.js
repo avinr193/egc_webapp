@@ -16,7 +16,7 @@ import Checkbox from 'material-ui/Checkbox';
 import styled from 'styled-components';
 
 import { setOrg, fetchEventsThunk, setIsAdminThunk, fetchYear, offWatchAttendanceAdded, 
-	offWatchPollAdded, watchAttendanceAdded, watchPollAdded } from '../../store/actions'
+	offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -223,6 +223,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(offWatchAttendanceAdded());
 			dispatch(offWatchPollAdded());
 			dispatch(setOrg(newOrg));
+			dispatch(fetchYearsThunk());
 			dispatch(fetchEventsThunk());
 			dispatch(watchAttendanceAdded());
 			dispatch(watchPollAdded());

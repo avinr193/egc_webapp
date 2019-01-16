@@ -237,7 +237,7 @@ export function fetchAllOrgsThunk() {
     }
 }
 
-export function fetchAdminsThunk() {
+export function fetchAdminsThunk(newAdmin=null) {
     return (dispatch) => {        
         let admins = [];
         database.ref(`/Admins/`).once('value', snap => {
@@ -248,8 +248,8 @@ export function fetchAdminsThunk() {
             .then(() => {
                 admins.splice( admins.indexOf('dummy'), 1 );
                 dispatch(fetchAdmins(admins))})
-            .then(() => admins[0] ? dispatch(setAdmin(admins[0])) : null)
-            .then(() => dispatch(fetchOrgsThunk(admins[0])))
+            .then(() => admins[0] ? newAdmin ? dispatch(setAdmin(newAdmin)) : dispatch(setAdmin(admins[0])) : null)
+            .then(() => newAdmin ? dispatch(fetchOrgsThunk(newAdmin)) : dispatch(fetchOrgsThunk(admins[0])))
     }
 }
 

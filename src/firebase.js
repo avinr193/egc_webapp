@@ -17,6 +17,16 @@ export function isGeneralAdmin(email) {
     }).then(() => { return isGeneralAdmin; })
 }
 
+export function isSpecificAdmin(email) {
+    let netID = email.split('@')[0];
+    let isSpecificAdmin = false;
+    return database.ref('/Admins/').once('value', snap => {
+        isSpecificAdmin = snap.hasChild(netID);
+    }).then(() => { 
+        isSpecificAdmin = (netID === "nbb29" || netID === "sss309" || netID === "aja193")
+        return isSpecificAdmin; })
+}
+
 export const currentUser = () => {
     firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
@@ -58,6 +68,25 @@ export const addAtt = (currentOrg, currentDate, currentEvent, displayName, times
         })
 }
 
+export const addOrg = (newOrg, year) => {
+    database.ref('/Organizations/').child(newOrg).child(year).set({
+        events: 'null',
+        polls: 'null'
+    });
+}
+
+export const addAdminOrg = (newOrg, admin) => {
+    database.ref(`/Admins/${admin}`).update({
+        [newOrg]: newOrg.match(/\b(\w)/g).join(''),
+    });
+}
+
+export const addAdmin = (admin) => {
+    database.ref(`/Admins/`).update({
+        [admin]: 'null',
+    });
+}
+
 export const logOption = (livePoll, option, user, timestamp, userLat, userLong, distToEvent,
     currentYear) => {
     database.ref(`/Organizations/${livePoll.organization}/${currentYear}/polls/${livePoll.uuid}/people/`)
@@ -72,6 +101,11 @@ export const logOption = (livePoll, option, user, timestamp, userLat, userLong, 
 
 export const addEvent = (currentOrganization, year, date, timeStart, timeEnd, name,
     eventLat = 1, eventLong = 1, radius = 1, closingAtt = false) => {
+    let today = new Date();
+    let currentYear = today.getFullYear().toString();
+    if(year !== currentYear){
+        return;
+    }
     database.ref(`/Organizations/${currentOrganization}/${year}/events/${name}/${date}/`)
         .child("properties").set({
             time_start: timeStart,
@@ -86,6 +120,11 @@ export const addEvent = (currentOrganization, year, date, timeStart, timeEnd, na
 
 export const addPoll = (currentOrganization, currentYear, question, options, pollLat, pollLong, radius) => {
     const id = uuid();
+    let today = new Date();
+    let year = today.getFullYear().toString();
+    if(year !== currentYear){
+        return;
+    }
     database.ref(`/Organizations/${currentOrganization}/${currentYear}/polls/${id}/`).set({
         question: question,
         options: options,
