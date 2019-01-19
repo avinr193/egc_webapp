@@ -28,7 +28,7 @@ const Container = styled.div`
 
 const Admin = ({ events, attendance, currentEvent, onChangeOrg, onAddEvent, onChangeDate, eventDate, eventDates,
 	currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin,
-	isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, onChangeYear, currentYear }) => (
+	isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, onChangeYear, currentYear, onMount }) => (
 		<div className="admin">
 			<AdminEvntWindow events={events} attendance={attendance} onAddEvent={onAddEvent}
 				currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
@@ -36,7 +36,7 @@ const Admin = ({ events, attendance, currentEvent, onChangeOrg, onAddEvent, onCh
 				onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}
 				onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin}
 				currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate} orgs={orgs}
-				years={years} currentYear={currentYear} onChangeOrg={onChangeOrg}
+				years={years} currentYear={currentYear} onChangeOrg={onChangeOrg} onMount={onMount}
 				onChangeYear={onChangeYear} />
 		</div>
 	);
@@ -64,6 +64,7 @@ class AdminEvntWindow extends React.Component {
 	}
 
 	componentDidMount() {
+		this.props.onMount();
 		firebase.auth().onAuthStateChanged((user) => {
 			if (user) {
 				this.setState({
@@ -128,20 +129,14 @@ class AdminEvntWindow extends React.Component {
 
 	changeOrg(event, index, value) {
 		if (value) {
-			this.setState({
-				submitted: false,
-				error: false
-			})
+			this.clearState();
 			this.props.onChangeOrg(value);
 		}
 	}
 
 	changeYear(event, index, value) {
 		if (value) {
-			this.setState({
-				submitted: false,
-				error: false
-			})
+			this.clearState();
 			this.props.onChangeYear(value);
 		}
 	}
@@ -151,6 +146,13 @@ class AdminEvntWindow extends React.Component {
 			lat: position.lat,
 			long: position.lng,
 			radius: radius
+		})
+	}
+
+	clearState = () => {
+		this.setState({
+			submitted: false,
+			error: false
 		})
 	}
 
@@ -219,7 +221,7 @@ class AdminEvntWindow extends React.Component {
 									onChangeAtt={this.props.onChangeAtt} onSetEventLive={this.props.onSetEventLive} isEventLive={this.props.isEventLive}
 									onSetAttPath={this.props.onSetAttPath} attPath={this.props.attPath} onIsAdmin={this.props.onIsAdmin} isAdmin={this.props.isAdmin}
 									currentLiveEvent={this.props.currentLiveEvent} onLiveEventUpdate={this.props.onLiveEventUpdate} orgs={this.props.orgs}
-									years={this.props.years} currentYear={this.props.currentYear} />
+									years={this.props.years} currentYear={this.props.currentYear} clearState={this.clearState}/>
 								<div></div>
 							</div>
 						</div>
@@ -256,6 +258,9 @@ const mapDispatch = (dispatch) => {
 		},
 		onAddEvent(eventName) {
 			dispatch(fetchEventsThunk(null,eventName));
+		},
+		onMount(){
+			dispatch(fetchEventsThunk());
 		}
 	}
 }

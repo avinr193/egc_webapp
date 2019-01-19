@@ -26,7 +26,7 @@ const Container = styled.div`
 
 const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
   currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin, 
-  isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, currentYear }) => (
+  isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, currentYear, clearState }) => (
     <div className="admin">
       <AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
         currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
@@ -34,7 +34,7 @@ const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, 
         onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}
         onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin} 
         currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate} orgs={orgs} 
-        years={years} currentYear={currentYear}/>
+        years={years} currentYear={currentYear} clearState={clearState}/>
     </div>
   );
 
@@ -75,6 +75,7 @@ class AdminWindow extends React.Component {
 
   changeEvent(event, index, value) {
     if (value) {
+      this.props.clearState();
       this.props.onChangeEvent(value);
     }
     this.props.onSetAttPath("opening");

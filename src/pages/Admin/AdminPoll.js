@@ -29,13 +29,13 @@ const Container = styled.div`
 
 const Admin = ({ orgs, currentOrg, onChangeOrg, polls, currentPoll, onChangePoll,
 	isPollLive, onSetPollLive, fetchAndSetPoll, onIsAdmin, isAdmin, currentLivePoll, onLivePollUpdate,
-	currentYear, years, onChangeYear }) => (
+	currentYear, years, onChangeYear, onMount }) => (
 		<div className="admin">
 			<AdminPollWindow orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
 				polls={polls} currentPoll={currentPoll} onChangePoll={onChangePoll} isPollLive={isPollLive}
 				onSetPollLive={onSetPollLive} fetchAndSetPoll={fetchAndSetPoll} onIsAdmin={onIsAdmin}
 				isAdmin={isAdmin} currentLivePoll={currentLivePoll} onLivePollUpdate={onLivePollUpdate} 
-				currentYear={currentYear} years={years} onChangeYear={onChangeYear}/>
+				currentYear={currentYear} years={years} onChangeYear={onChangeYear} onMount={onMount}/>
 		</div>
 	);
 
@@ -69,6 +69,7 @@ class AdminPollWindow extends React.Component {
 	}
 
 	componentDidMount() {
+		this.props.onMount();
 		firebase.auth().onAuthStateChanged((user) => {
 			if (user) {
 				this.setState({
@@ -120,6 +121,7 @@ class AdminPollWindow extends React.Component {
 	changePoll = (event, index, value) => {
 		let newPoll = this.props.polls[index];
 		if (this.props.polls[index].question === value) {
+			this.clearState();
 			this.props.onChangePoll(newPoll);
 		}
 		else {
@@ -129,22 +131,23 @@ class AdminPollWindow extends React.Component {
 
 	changeOrg(event, index, value) {
 		if (value) {
-		  this.setState({
-			  submitted: false,
-			  error: false
-		  })
-		  this.props.onChangeOrg(value);
+			this.clearState();
+		  	this.props.onChangeOrg(value);
 		}
 	  }
 	
 	  changeYear(event, index, value) {
 		if (value) {
-			this.setState({
-				submitted: false,
-				error: false
-			})
-		  this.props.onChangeYear(value);
+			this.clearState();
+		  	this.props.onChangeYear(value);
 		}
+	  }
+
+	  clearState = () => {
+		this.setState({
+			submitted: false,
+			error: false
+		})
 	  }
 
 	trySubmit(e) {
@@ -399,6 +402,9 @@ const mapDispatch = (dispatch) => {
 		},
 		onLivePollUpdate() {
 			dispatch(fetchLivePollsThunk());
+		},
+		onMount(){
+			dispatch(fetchPollsThunk());
 		}
 	}
 }
