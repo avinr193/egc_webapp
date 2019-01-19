@@ -108,20 +108,14 @@ class AdminPopover extends React.Component {
           onRequestClose={this.handleRequestClose}
         >
           <Menu>
-            <Link exact="true" to='/admin/attendance' style={{ textDecoration: 'none' }}>
-              <MenuItem primaryText="Attendance"></MenuItem>
+          <Link exact="true" to='/admin/events' style={{ textDecoration: 'none' }}>
+              <MenuItem primaryText="Events"></MenuItem>
             </Link>
             <Link exact="true" to='/admin/polling' style={{ textDecoration: 'none' }}>
               <MenuItem primaryText="Polls"></MenuItem>
             </Link>
-            <Link exact="true" to='/admin/events' style={{ textDecoration: 'none' }}>
-              <MenuItem primaryText="Events"></MenuItem>
-            </Link>
             <Link exact="true" to='/admin/adorgs' style={{ textDecoration: 'none' }}>
               <MenuItem primaryText="Admins/Orgs"></MenuItem>
-            </Link>
-            <Link exact="true" to='/admin/reports' style={{ textDecoration: 'none' }}>
-              <MenuItem primaryText="Reports"></MenuItem>
             </Link>
             <MenuItem primaryText="Close" onClick={this.handleRequestClose} />
           </Menu>

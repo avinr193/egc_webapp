@@ -59,7 +59,9 @@ class AdminPollWindow extends React.Component {
 			number_poll_options: 2,
 			lat: 1,
 			long: 1,
-			radius: 50
+			radius: 50,
+			submitted: false,
+			error: false
 		}
 
 		this.handleEvent = this.handleEvent.bind(this);
@@ -127,12 +129,20 @@ class AdminPollWindow extends React.Component {
 
 	changeOrg(event, index, value) {
 		if (value) {
+		  this.setState({
+			  submitted: false,
+			  error: false
+		  })
 		  this.props.onChangeOrg(value);
 		}
 	  }
 	
 	  changeYear(event, index, value) {
 		if (value) {
+			this.setState({
+				submitted: false,
+				error: false
+			})
 		  this.props.onChangeYear(value);
 		}
 	  }
@@ -215,7 +225,7 @@ class AdminPollWindow extends React.Component {
 			optionsList.push(<div key={k}><TextField name="poll_question" value={this.state.poll_options[k].text}
 				onChange={(e) => this.setPollOption(e, k)} hintText="e.g. Rutgers Red"
 				floatingLabelText={"Poll Option " + (k + 1).toString()} key={k} style={{ "marginTop": "0px" }} />
-				<Close onClick={this.decrementOptions} />
+				<Close color="#d3d3d3" hoverColor="#F44336" onClick={this.decrementOptions} />
 			</div>);
 		}
 
@@ -254,7 +264,6 @@ class AdminPollWindow extends React.Component {
 				});
 			}
 		}
-
 		return (
 			(!this.state.enabled ?
 				<div>
@@ -305,18 +314,20 @@ class AdminPollWindow extends React.Component {
 							: <div style={{ "flex": "1" }}>Must be in current year to add polls.</div>}
 							<div style={{ "flex": "1" }}>
 								<div style={{ "fontWeight": "bold" }}>View Polls</div>
+								<div style={{"display":"flex","justifyContent":"center"}}>
 								<DropDownMenu maxHeight={300} value={this.props.currentPoll.question} onChange={this.changePoll}>
 									{pollsList}
 								</DropDownMenu>
 								{this.props.currentYear === today.getFullYear().toString() && this.props.polls.length > 0 ?
 								<Container>
 									<div>
-										<div style={{ "marginTop": "10px" }}>
-											<Toggle label="Live:" toggled={this.props.isPollLive} onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle></div>
+										<div style={{ "marginTop": "17px" }}></div>
+										<Toggle label="Live:" toggled={this.props.isPollLive} onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle>
 									</div>
 								</Container>
 								: null}
-								{(this.props.isPollLive && this.props.currentLivePoll) ?
+								</div>
+								{(this.props.isPollLive && this.props.currentLivePoll && this.props.polls.length > 0) ?
 									<div>
 										<div style={{ "marginTop": "10px" }}>Live Poll Radius: {this.props.currentLivePoll.location.radius}m</div>
 										<Container>
@@ -332,11 +343,11 @@ class AdminPollWindow extends React.Component {
 									: null}
 								<p></p>
 								<div style={{ "fontWeight": "bold" }}>Vote Count:</div>
-								<List>
+								<List style={{ "maxHeight": "200px", "overflow": "scroll" }}>
 									{currentPollOptions}
 								</List>
 								<div style={{ "fontWeight": "bold" }}>People:</div>
-								<List style={{ "maxHeight": "400px", "overflow": "scroll" }}>
+								<List style={{ "maxHeight": "200px", "overflow": "scroll" }}>
 									{currentPollPeople}
 								</List>
 							</div>
@@ -364,10 +375,10 @@ const mapDispatch = (dispatch) => {
 			dispatch(offWatchAttendanceAdded());
 			dispatch(offWatchPollAdded());
 			dispatch(setOrg(newOrg));
-			dispatch(fetchYearsThunk());
-			dispatch(fetchPollsThunk());
-			dispatch(watchAttendanceAdded());
-			dispatch(watchPollAdded());
+			dispatch(fetchYearsThunk(newOrg,"polls"));
+			dispatch(watchAttendanceAdded(newOrg));
+			dispatch(watchPollAdded(newOrg));
+			dispatch(checkPollLive());
 		},
 		onChangePoll(newPoll) {
 			dispatch(setPoll(newPoll));

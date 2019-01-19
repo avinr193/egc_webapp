@@ -1,9 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import 'firebase/auth'
-import firebase, { signIn, isSpecificAdmin, addOrg, addAdminOrg, addAdmin } from '../../firebase'
+import firebase, { signIn, isSpecificAdmin, addOrg, addAdminOrg, addAdmin, deleteAdminOrg } from '../../firebase'
 
 import FlatButton from 'material-ui/FlatButton';
+import IconButton from 'material-ui/IconButton';
+import Close from 'material-ui/svg-icons/navigation/close';
 import { List, ListItem } from 'material-ui/List';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
@@ -63,6 +65,9 @@ class AdminAdOrgsWindow extends React.Component {
     
     changeAdmin(event, index, value) {
       if (value) {
+        this.setState({
+          adminOrgError: ""
+        })
         this.props.onChangeAdmin(value);
       }
       }
@@ -133,6 +138,17 @@ class AdminAdOrgsWindow extends React.Component {
       }
     }
 
+  handleAdminOrgDelete(e){
+    if(this.props.orgs.length === 1 & this.props.currentAdmin === this.state.user.email.split('@')[0]){
+      this.setState({
+        adminOrgError: "Deleting your last organization will demote you from admin and lock you out. Another user must do this."
+      })
+    } else {
+      deleteAdminOrg(this.props.currentAdmin, e);
+      this.props.onChangeAdmin(this.props.currentAdmin);
+    }
+  }
+
   render() {
 
     let allOrgsList = [];
@@ -147,7 +163,10 @@ class AdminAdOrgsWindow extends React.Component {
 
     let orgsList = [];
 		for (let j = 0; j < this.props.orgs.length; j++) {
-			orgsList.push(<ListItem key={j} value={this.props.orgs[j]} primaryText={this.props.orgs[j]}></ListItem>);
+      orgsList.push(<div key={j} style={{"display":"flex","justifyContent":"center"}}><ListItem value={this.props.orgs[j]} 
+      primaryText={this.props.orgs[j]} style={{"width":"300px"}}></ListItem>
+      <IconButton value={this.props.orgs[j]} onClick={(e) => this.handleAdminOrgDelete(e)}>
+      <Close color="#d3d3d3" hoverColor="#F44336" /></IconButton></div>);
     }
 
     return (
@@ -186,7 +205,7 @@ class AdminAdOrgsWindow extends React.Component {
 						backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
             <div style={{"color":"red","padding":"25px"}}>{this.state.addAdminError}</div>
             <div style={{"fontWeight":"bold"}}>Accessible Organizations</div>
-            <List style={{"maxHeight":"20.3%", "overflow":"scroll"}}>
+            <List style={{"maxHeight":"22%", "overflow":"scroll"}}>
 							{orgsList}
 						</List>
             <TextField name="newAdminOrg" value={this.state.newAdminOrgName} onChange={(e) => this.setNewAdminOrgName(e)}

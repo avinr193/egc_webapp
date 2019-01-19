@@ -35,7 +35,8 @@ class VotingWindow extends React.Component {
       att: "Pending",
       lat: null,
       long: null,
-      err: ""
+      err: "",
+      enabledSubmit: false
     }
   }
 
@@ -175,7 +176,9 @@ class VotingWindow extends React.Component {
         :
         (this.props.livePolls[0] ?
           <div>
-            <DropDownMenu maxHeight={300} value={JSON.stringify(this.props.currentLivePoll)} onChange={this.changePoll.bind(this)}>
+            <DropDownMenu maxHeight={300} value={JSON.stringify(this.props.currentLivePoll)} 
+            onChange={this.changePoll.bind(this)} openImmediately={!(this.props.livePolls.length === 1)}
+            onClose={() => this.setState({enabledSubmit: true})}>
               {this.props.livePolls.map((poll, index) => {
                 return (<MenuItem key={index}
                   value={JSON.stringify(poll)} primaryText={poll.question
@@ -184,6 +187,8 @@ class VotingWindow extends React.Component {
               })}
             </DropDownMenu>
             <p></p>
+            {this.props.liveEvents === 1 || this.state.enabledSubmit === true ?
+            <div>
             {this.props.currentLivePoll.options ?
               <Container>
                 <div>
@@ -209,6 +214,7 @@ class VotingWindow extends React.Component {
             <p></p>
             {(this.state.logged ? <p style={{ color: 'green' }}> Success! </p> : null)}
             <p style={{ color: 'red' }}> {this.state.err} </p>
+            </div> : null}
           </div>
           : <div>No live polls at this time.</div>)
       )

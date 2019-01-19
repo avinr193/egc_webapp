@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import 'firebase/auth'
-import firebase, { addLiveEvent, removeLiveEvent, signIn, isGeneralAdmin } from '../../firebase'
+import firebase, { addLiveEvent, removeLiveEvent, isGeneralAdmin } from '../../firebase'
 
 import { List, ListItem } from 'material-ui/List';
 import DropDownMenu from 'material-ui/DropDownMenu';
@@ -15,8 +15,7 @@ import Slider from 'material-ui/Slider'
 import styled from 'styled-components';
 
 import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, 
-  setAttPath, setIsAdminThunk, fetchLiveEventsThunk, setOrg, fetchEventsThunk, fetchYear, 
-  offWatchAttendanceAdded, offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk } from '../../store/actions'
+  setAttPath, setIsAdminThunk, fetchLiveEventsThunk } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -25,17 +24,17 @@ const Container = styled.div`
  margin-top: 10px;
 `;
 
-const Admin = ({ events, attendance, currentEvent, onChangeOrg, onChangeEvent, onChangeDate, eventDate, eventDates,
+const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
   currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin, 
-  isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, onChangeYear, currentYear }) => (
+  isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, currentYear }) => (
     <div className="admin">
       <AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
         currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
-        onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
+        onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg}
         onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}
         onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin} 
         currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate} orgs={orgs} 
-        years={years} onChangeYear={onChangeYear} currentYear={currentYear}/>
+        years={years} currentYear={currentYear}/>
     </div>
   );
 
@@ -79,18 +78,6 @@ class AdminWindow extends React.Component {
       this.props.onChangeEvent(value);
     }
     this.props.onSetAttPath("opening");
-  }
-
-  changeOrg(event, index, value) {
-    if (value) {
-      this.props.onChangeOrg(value);
-    }
-  }
-
-  changeYear(event, index, value) {
-    if (value) {
-      this.props.onChangeYear(value);
-    }
   }
 
   changeDate(event, index, value) {
@@ -184,11 +171,6 @@ class AdminWindow extends React.Component {
       (this.props.attendance[i]).location.distance.toFixed(3)}></ListItem>);
     }
 
-    let orgsList = [];
-		for (let i = 0; i < this.props.orgs.length; i++) {
-			orgsList.push(<MenuItem key={i} value={this.props.orgs[i]} primaryText={this.props.orgs[i]}></MenuItem>);
-		}
-
     let eventsList = [];
     for (let j = 0; j < this.props.events.length; j++) {
       eventsList.push(<MenuItem key={j} value={this.props.events[j]} primaryText={this.props.events[j]}></MenuItem>);
@@ -199,32 +181,11 @@ class AdminWindow extends React.Component {
       datesList.push(<MenuItem key={k} value={this.props.eventDates[k].key} primaryText={this.props.eventDates[k].key}></MenuItem>);
     }
 
-    let yearsList = [];
-    for (let k = 0; k < this.props.years.length; k++) {
-      yearsList.push(<MenuItem key={k} value={this.props.years[k]} primaryText={this.props.years[k]}></MenuItem>);
-    }
     let today = new Date();
 
     return (
-      (!this.state.enabled ?
-        <div>
-          <FlatButton onClick={() => signIn()} labelStyle={{ color: "#FFFFFF" }} label={"SIGN-IN"}
-            backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
-          <p style={{ color: "#DAA520", "marginTop": "10px" }}>If sign-in button doesn't work, make sure pop-ups are enabled and try again</p>
-          <p style={{ color: "#DAA520" }}>(wait a few seconds after returning from sign-in page for this screen to refresh)</p>
-        </div>
-        :
-        (this.props.isAdmin ?
           <div>
-            <DropDownMenu maxHeight={300} value={this.props.currentOrg} onChange={this.changeOrg.bind(this)}>
-						{orgsList}
-					</DropDownMenu>
-          <DropDownMenu maxHeight={300} value={this.props.currentYear} onChange={this.changeYear.bind(this)}>
-            {yearsList}
-          </DropDownMenu>
 					<div style={{ "padding": "10px" }}></div>
-            <div>Attendance:</div>
-            <p></p>
             <div>Choose event & date below:</div>
             <div style={{ "display": "flex", "justifyContent": "center" }}>
               <div>
@@ -245,7 +206,7 @@ class AdminWindow extends React.Component {
                 </div> : null}
             </div>
             {(this.props.eventDate.props) ?
-              (this.props.eventDate.props.closingAtt) ?
+              (this.props.eventDate.props.closingAtt && this.props.eventDates.length !== 0) ?
                 <div>
                   <Container>
                     <RadioButtonGroup name="whichAtt" defaultSelected="opening" valueSelected={this.props.attPath}
@@ -285,9 +246,8 @@ class AdminWindow extends React.Component {
             <List style={{"maxHeight":"400px", "overflow":"scroll"}}>
               {namesList}
             </List>
-          </div> : <div>You are not an admin.</div>)
+          </div> 
       )
-    )
   }
 }
 
@@ -310,19 +270,6 @@ const mapState = (state) => ({
 const mapDispatch = (dispatch) => {
   dispatch(checkEventLive());
   return {
-    onChangeOrg(newOrg) {
-      dispatch(offWatchAttendanceAdded());
-      dispatch(offWatchPollAdded());
-      dispatch(setOrg(newOrg));
-      dispatch(fetchYearsThunk());
-      dispatch(fetchEventsThunk());
-      dispatch(watchAttendanceAdded());
-      dispatch(watchPollAdded());
-    },
-    onChangeYear(newYear) {
-      dispatch(fetchYear(newYear));
-      dispatch(fetchEventsThunk());
-    },
     onChangeEvent(newEvent) {
       dispatch(setEvent(newEvent));
       dispatch(fetchEventDatesThunk());

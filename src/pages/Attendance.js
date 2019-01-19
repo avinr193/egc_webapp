@@ -28,7 +28,8 @@ class AttendanceWindow extends React.Component {
       att: "Pending",
       lat: null,
       long: null,
-      err: ""
+      err: "",
+      enabledSubmit: false
     }
   }
 
@@ -163,10 +164,14 @@ class AttendanceWindow extends React.Component {
         :
         (this.props.liveEvents[0] ?
           <div>
-            <DropDownMenu maxHeight={300} value={JSON.stringify(this.props.currentLiveEvent)} onChange={this.changeEvent.bind(this)}>
+            <DropDownMenu maxHeight={300} value={JSON.stringify(this.props.currentLiveEvent)} 
+            onChange={this.changeEvent.bind(this)} openImmediately={!(this.props.liveEvents.length === 1)}
+            onClose={() => this.setState({enabledSubmit: true})}>
               {eventsList}
             </DropDownMenu>
             <p></p>
+            {this.props.liveEvents === 1 || this.state.enabledSubmit === true ?
+            <div>
             <p> Signed-In: {this.state.user.displayName} </p>
             <p> Attendance Logged: {this.state.att} </p>
             <p> Longitude: {!this.state.logged ? "Pending" : this.state.long} </p>
@@ -177,8 +182,8 @@ class AttendanceWindow extends React.Component {
                 backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
             )}
             <p></p>
-            <p style={{ color: 'red' }}> {this.state.err} </p>
-          </div>
+            <p style={{ color: 'red' }}> {this.state.err} </p></div> : null}
+          </div> 
           : <div>No live events at this time.</div>)
       )
     )

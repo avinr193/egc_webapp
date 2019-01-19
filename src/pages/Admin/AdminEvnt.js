@@ -4,9 +4,8 @@ import { connect } from 'react-redux'
 import firebase, { addEvent, signIn, isGeneralAdmin } from '../../firebase'
 import 'firebase/auth'
 
-import {LocationPickerExample} from './Map'
+import { LocationPickerExample } from './Map'
 import FlatButton from 'material-ui/FlatButton';
-import { List, ListItem } from 'material-ui/List';
 import DatePicker from 'material-ui/DatePicker';
 import TimePicker from 'material-ui/TimePicker';
 import DropDownMenu from 'material-ui/DropDownMenu';
@@ -15,20 +14,32 @@ import TextField from 'material-ui/TextField';
 import Checkbox from 'material-ui/Checkbox';
 import styled from 'styled-components';
 
-import { setOrg, fetchEventsThunk, setIsAdminThunk, fetchYear, offWatchAttendanceAdded, 
-	offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk } from '../../store/actions'
+import {
+	setOrg, fetchEventsThunk, setIsAdminThunk, fetchYear, offWatchAttendanceAdded,
+	offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk
+} from '../../store/actions'
 
+
+import AttendanceWindow from "./AdminAtt";
 const Container = styled.div`
  justify-content: center;
  display: flex;
 `;
 
-const Admin = ({ events, orgs, currentOrg, onChangeOrg, onIsAdmin, isAdmin, onChangeYear, years, currentYear }) => (
-	<div className="admin">
-		<AdminEvntWindow events={events} orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
-		onIsAdmin={onIsAdmin} isAdmin={isAdmin} onChangeYear={onChangeYear} years={years} currentYear={currentYear}/>
-	</div>
-);
+const Admin = ({ events, attendance, currentEvent, onChangeOrg, onAddEvent, onChangeDate, eventDate, eventDates,
+	currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin,
+	isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, onChangeYear, currentYear }) => (
+		<div className="admin">
+			<AdminEvntWindow events={events} attendance={attendance} onAddEvent={onAddEvent}
+				currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
+				onChangeDate={onChangeDate} currentDate={currentDate} currentOrg={currentOrg}
+				onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}
+				onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin}
+				currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate} orgs={orgs}
+				years={years} currentYear={currentYear} onChangeOrg={onChangeOrg}
+				onChangeYear={onChangeYear} />
+		</div>
+	);
 
 class AdminEvntWindow extends React.Component {
 	constructor(props) {
@@ -41,9 +52,11 @@ class AdminEvntWindow extends React.Component {
 			event_time_start: {},
 			event_time_end: {},
 			closingAtt: false,
-			lat:1,
-			long:1,
-			radius:50
+			lat: 1,
+			long: 1,
+			radius: 50,
+			submitted: false,
+			error: false
 		}
 
 		this.handleEvent = this.handleEvent.bind(this);
@@ -52,29 +65,29 @@ class AdminEvntWindow extends React.Component {
 
 	componentDidMount() {
 		firebase.auth().onAuthStateChanged((user) => {
-		  if (user) {
-			this.setState({
-			  enabled: true,
-			  user: user
-			})
-			if(!this.props.isAdmin){
-				isGeneralAdmin(user.email).then(isGenAdmin => {
-			 		this.props.onIsAdmin(isGenAdmin, user.email);
+			if (user) {
+				this.setState({
+					enabled: true,
+					user: user
 				})
-		  	}
-		  }
-		  else {
-			if(this.props.isAdmin){
-			  this.props.onIsAdmin(false);
+				if (!this.props.isAdmin) {
+					isGeneralAdmin(user.email).then(isGenAdmin => {
+						this.props.onIsAdmin(isGenAdmin, user.email);
+					})
+				}
 			}
-			this.setState({
-			  enabled: false,
-			  user: null
-			})
-		  }
+			else {
+				if (this.props.isAdmin) {
+					this.props.onIsAdmin(false);
+				}
+				this.setState({
+					enabled: false,
+					user: null
+				})
+			}
 		});
-	  }
-	
+	}
+
 
 	handleEvent(e) {
 		this.setState({ [e.target.name]: e.target.value });
@@ -109,21 +122,29 @@ class AdminEvntWindow extends React.Component {
 			event_time_end: {},
 			closingAtt: false
 		});
-		this.props.onChangeOrg(this.props.currentOrg);
+		this.props.onAddEvent(name);
 		return true;
 	}
 
 	changeOrg(event, index, value) {
 		if (value) {
-		  this.props.onChangeOrg(value);
+			this.setState({
+				submitted: false,
+				error: false
+			})
+			this.props.onChangeOrg(value);
 		}
-	  }
-	
-	  changeYear(event, index, value) {
+	}
+
+	changeYear(event, index, value) {
 		if (value) {
-		  this.props.onChangeYear(value);
+			this.setState({
+				submitted: false,
+				error: false
+			})
+			this.props.onChangeYear(value);
 		}
-	  }
+	}
 
 	updateLocation = (e, position, radius) => {
 		this.setState({
@@ -134,20 +155,15 @@ class AdminEvntWindow extends React.Component {
 	}
 
 	render() {
-		let eventsList = [];
-		for (let j = 0; j < this.props.events.length; j++) {
-			eventsList.push(<ListItem key={j} value={this.props.events[j]} primaryText={this.props.events[j]}></ListItem>);
-		}
-
 		let orgsList = [];
 		for (let i = 0; i < this.props.orgs.length; i++) {
 			orgsList.push(<MenuItem key={i} value={this.props.orgs[i]} primaryText={this.props.orgs[i]}></MenuItem>);
 		}
 
 		let yearsList = [];
-    	for (let k = 0; k < this.props.years.length; k++) {
-      		yearsList.push(<MenuItem key={k} value={this.props.years[k]} primaryText={this.props.years[k]}></MenuItem>);
-    	}
+		for (let k = 0; k < this.props.years.length; k++) {
+			yearsList.push(<MenuItem key={k} value={this.props.years[k]} primaryText={this.props.years[k]}></MenuItem>);
+		}
 		let today = new Date();
 
 		return (
@@ -165,41 +181,45 @@ class AdminEvntWindow extends React.Component {
 							{orgsList}
 						</DropDownMenu>
 						<DropDownMenu maxHeight={300} value={this.props.currentYear} onChange={this.changeYear.bind(this)}>
-            				{yearsList}
-          				</DropDownMenu>
+							{yearsList}
+						</DropDownMenu>
 						<div style={{ "padding": "10px" }}></div>
 						<div style={{ "display": "flex" }}>
-							{this.props.currentYear === today.getFullYear().toString() ? 
+							{this.props.currentYear === today.getFullYear().toString() ?
+								<div style={{ "flex": "1" }}>
+									<div style={{ "fontWeight": "bold" }}>Add Event</div>
+									<form onSubmit={this.trySubmit}>
+										<div></div>
+										<TextField name="event_name" value={this.state.event_name} onChange={this.handleEvent}
+											hintText="e.g. General Council" floatingLabelText="Event Name" style={{ "marginTop": "0px" }} />
+										<TimePicker value={this.state.event_time_start} hintText="Choose Start Time (default: now)" onChange={this.setTimeStart} />
+										<TimePicker value={this.state.event_time_end} hintText="Choose End Time (default: now)" onChange={this.setTimeEnd} />
+										<DatePicker value={this.state.event_date} firstDayOfWeek={0} hintText="Choose Date (default: today)" onChange={this.setDate} />
+										<Container>
+											<div style={{ "maxWidth": "40px", "marginRight": "110px" }}>
+												<Checkbox label="Closing Attendance" checked={this.state.closingAtt}
+													onCheck={this.updateCheck} /></div>
+										</Container>
+										<div style={{ "padding": "10px" }}></div>
+										<div><LocationPickerExample onChange={this.updateLocation} /></div>
+										<div style={{ "padding": "10px" }}></div>
+										{this.state.error ? <div style={{ "color": "red", "padding": "10px" }}>Please fill in all fields, and do not use the following characters for event name: . $ # [ ]</div> : null}
+										{this.state.submitted ? <div style={{ "color": "green", "padding": "10px" }}>Event added successfully!</div> : null}
+										<FlatButton labelStyle={{ color: "#FFFFFF" }} label="Add Event"
+											backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"
+											type="submit" />
+									</form>
+								</div>
+								: <div style={{ "flex": "1" }}>Must be in current year to add events.</div>}
 							<div style={{ "flex": "1" }}>
-								<div style={{ "fontWeight": "bold" }}>Add Event</div>
-								<form onSubmit={this.trySubmit}>
-									<div></div>
-									<TextField name="event_name" value={this.state.event_name} onChange={this.handleEvent}
-										hintText="e.g. General Council" floatingLabelText="Event Name" style={{ "marginTop": "0px" }} />
-									<TimePicker value={this.state.event_time_start} hintText="Choose Start Time (default: now)" onChange={this.setTimeStart} />
-									<TimePicker value={this.state.event_time_end} hintText="Choose End Time (default: now)" onChange={this.setTimeEnd} />
-									<DatePicker value={this.state.event_date} firstDayOfWeek={0} hintText="Choose Date (default: today)" onChange={this.setDate} />
-									<Container>
-										<div style={{ "maxWidth": "40px", "marginRight": "110px" }}>
-											<Checkbox label="Closing Attendance" checked={this.state.closingAtt}
-												onCheck={this.updateCheck} /></div>
-									</Container>
-									<div style={{ "padding": "10px" }}></div>
-									<div><LocationPickerExample onChange={this.updateLocation}/></div>
-									<div style={{ "padding": "10px" }}></div>
-									{this.state.error ? <div style={{ "color": "red", "padding": "10px" }}>Please fill in all fields, and do not use the following characters for event name: . $ # [ ]</div> : null}
-									{this.state.submitted ? <div style={{ "color": "green", "padding": "10px" }}>Event added successfully!</div> : null}
-									<FlatButton labelStyle={{ color: "#FFFFFF" }} label="Add Event"
-										backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336"
-										type="submit" />
-								</form>
-							</div>
-							: <div style={{ "flex": "1" }}>Must be in current year to add events.</div>}
-							<div style={{ "flex": "1" }}>
-								<div style={{ "fontWeight": "bold" }}>View Events</div>
-								<List>
-									{eventsList}
-								</List>
+								<div style={{ "fontWeight": "bold" }}>Attendance</div>
+								<AttendanceWindow events={this.props.events} attendance={this.props.attendance} onChangeEvent={this.props.onChangeEvent}
+									currentEvent={this.props.currentEvent} eventDate={this.props.eventDate} eventDates={this.props.eventDates}
+									onChangeDate={this.props.onChangeDate} currentDate={this.props.currentDate} currentOrg={this.props.currentOrg}
+									onChangeAtt={this.props.onChangeAtt} onSetEventLive={this.props.onSetEventLive} isEventLive={this.props.isEventLive}
+									onSetAttPath={this.props.onSetAttPath} attPath={this.props.attPath} onIsAdmin={this.props.onIsAdmin} isAdmin={this.props.isAdmin}
+									currentLiveEvent={this.props.currentLiveEvent} onLiveEventUpdate={this.props.onLiveEventUpdate} orgs={this.props.orgs}
+									years={this.props.years} currentYear={this.props.currentYear} />
 								<div></div>
 							</div>
 						</div>
@@ -223,17 +243,19 @@ const mapDispatch = (dispatch) => {
 			dispatch(offWatchAttendanceAdded());
 			dispatch(offWatchPollAdded());
 			dispatch(setOrg(newOrg));
-			dispatch(fetchYearsThunk());
-			dispatch(fetchEventsThunk());
-			dispatch(watchAttendanceAdded());
-			dispatch(watchPollAdded());
+			dispatch(fetchYearsThunk(newOrg, "events"));
+			dispatch(watchAttendanceAdded(newOrg));
+			dispatch(watchPollAdded(newOrg));
 		},
 		onChangeYear(newYear) {
 			dispatch(fetchYear(newYear));
 			dispatch(fetchEventsThunk());
 		},
-		onIsAdmin(isGenAdmin, email){
-		  dispatch(setIsAdminThunk(isGenAdmin, email));
+		onIsAdmin(isGenAdmin, email) {
+			dispatch(setIsAdminThunk(isGenAdmin, email));
+		},
+		onAddEvent(eventName) {
+			dispatch(fetchEventsThunk(null,eventName));
 		}
 	}
 }

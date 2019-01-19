@@ -57,6 +57,10 @@ export const addTaskToFirebase = (task) => {
     })
 }
 
+export const deleteAdminOrg = (admin, e) => {
+    database.ref(`/Admins/${admin}/`).child(e.currentTarget.value).remove();
+}
+
 export const addAtt = (currentOrg, currentDate, currentEvent, displayName, timestamp, email, 
     userLat, userLong, distToEvent, attPath, uid, currentYear) => {
     database.ref(`/Organizations/${currentOrg}/${currentYear}/events/${currentEvent}/${currentDate}/attendance/${attPath}/people`)

@@ -101,10 +101,14 @@ export function checkEventLive() {
 export function checkPollLive() {
     return (dispatch, getState) => {
         let state = getState();
-        if (!state.currentPoll) { dispatch(setIsPollLive(false)); };
-        isLivePoll(state.currentPoll.uuid)
+        if (!state.currentPoll) { 
+            dispatch(setIsPollLive(false));
+        }
+        else{
+            isLivePoll(state.currentPoll.uuid)
             .then((isPollLive) => dispatch(setIsPollLive(isPollLive)))
             .then(() => dispatch(setLivePollByID()));
+        }
     }
 }
 
@@ -127,32 +131,33 @@ export function fetchEventDatesThunk() {
                     return b.key.split('-')[0] - a.key.split('-')[0] || b.key.split('-')[1] - a.key.split('-')[1];
                 });
                 dispatch(fetchEventDates(eventDates))})
-            .then(() => dispatch(setEventDate(eventDates[0])))
+            .then(() => eventDates[0] ? dispatch(setEventDate(eventDates[0])): dispatch(setEventDate('')))
             .then(() => dispatch(fetchAttendanceThunk()))
     }
 }
 
-export function fetchEventsThunk() {
+export function fetchEventsThunk(newOrg=null, eventName=null) {
     return (dispatch, getState) => {
         let state = getState();
+        let org = newOrg ? newOrg : state.currentOrg;
         let events = [];
-        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/`).once('value', snap => {
+        database.ref(`/Organizations/${org}/${state.currentYear}/events/`).once('value', snap => {
             snap.forEach(data => {
                 events.push(data.key)
             })
         })
             .then(() => dispatch(fetchEvents(events)))
-            .then(() => events[0] ? dispatch(setEvent(events[0])) : null)
+            .then(() => eventName ? dispatch(setEvent(eventName)) : events[0] ? dispatch(setEvent(events[0])) : null)
             .then(() => dispatch(fetchEventDatesThunk())) 
-            .then(() => dispatch(fetchPollsThunk()))
     }
 }
 
-export function fetchPollsThunk() {
+export function fetchPollsThunk(newOrg=null) {
     return (dispatch, getState) => {
         let state = getState();
+        let org = newOrg ? newOrg : state.currentOrg;
         let polls = [];
-        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/`).once('value', snap => {
+        database.ref(`/Organizations/${org}/${state.currentYear}/polls/`).once('value', snap => {
             snap.forEach(data => {
                 let dataVal = data.val();
                 const pollObj = {
@@ -177,7 +182,8 @@ export function fetchPollsThunk() {
                     return null;
                 }
             })
-            .then((newPoll) => (polls[0]) ? (newPoll ? dispatch(setPoll(newPoll)) : dispatch(setPoll(polls[0]))) : null)
+            .then((newPoll) => (polls[0]) ? (newPoll ? dispatch(setPoll(newPoll)) 
+            : dispatch(setPoll(polls[0]))) : dispatch(setPoll({question:'', options:[]})))
             .then(() => polls[0] ? dispatch(checkPollLive()) : null)
     }
 }
@@ -220,6 +226,7 @@ export function fetchOrgsThunk(netID) {
             .then(() => organizations[0] ? dispatch(setOrg(organizations[0])) : null)
             .then(() => dispatch(fetchYearsThunk()))
             .then(() => dispatch(fetchEventsThunk()))
+            .then(() => dispatch(fetchPollsThunk()))
             .then(() => dispatch(watchPollAdded()))
             .then(() => dispatch(watchAttendanceAdded()))
     }
@@ -253,14 +260,15 @@ export function fetchAdminsThunk(newAdmin=null) {
     }
 }
 
-export function fetchYearsThunk() {
+export function fetchYearsThunk(newOrg=null,path=null) {
     let today = new Date();
     let currentYear = today.getFullYear().toString();
     return (dispatch, getState) => {
         let state = getState();
+        let org = newOrg ? newOrg : state.currentOrg;
         let years = [];
         if(state.currentOrg.length > 0){
-            database.ref(`/Organizations/${state.currentOrg}/`).once('value', snap => {
+            database.ref(`/Organizations/${org}/`).once('value', snap => {
                 snap.forEach(data => {
                     years.push(data.key);
                 })
@@ -272,6 +280,8 @@ export function fetchYearsThunk() {
                     years.sort(function(a, b){return b-a}); 
                     dispatch(fetchYears(years))})
                 .then(() => years[0] ? dispatch(fetchYear(years[0])) : null)
+                .then(() => path ? path === "events" ? dispatch(fetchEventsThunk(newOrg)) : 
+                path === "polls" ? dispatch(fetchPollsThunk(newOrg)) : null : null)
         }
     }
 }
@@ -363,10 +373,11 @@ export function fetchLivePollsThunk() {
 
 /*LISTENERS*/
 
-export function watchAttendanceAdded() {
+export function watchAttendanceAdded(newOrg=null) {
     return (dispatch, getState) => {
         let state = getState();
-        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/`).on('child_added', () => {
+        let org = newOrg ? newOrg : state.currentOrg;
+        database.ref(`/Organizations/${org}/${state.currentYear}/events/`).on('child_added', () => {
             dispatch(fetchAttendanceThunk());
         });
         database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/events/`).on('child_changed', () => {
@@ -394,10 +405,11 @@ export function watchLiveEvents() {
     }
 }
 
-export function watchPollAdded() {
+export function watchPollAdded(newOrg=null) {
     return (dispatch, getState) => {
         let state = getState();
-        database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/`).on('child_added', () => {
+        let org = newOrg ? newOrg : state.currentOrg;
+        database.ref(`/Organizations/${org}/${state.currentYear}/polls/`).on('child_added', () => {
             dispatch(updatePollCounts());
         });
         database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/`).on('child_changed', () => {
