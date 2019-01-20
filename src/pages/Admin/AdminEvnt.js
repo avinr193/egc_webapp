@@ -186,9 +186,9 @@ class AdminEvntWindow extends React.Component {
 							{yearsList}
 						</DropDownMenu>
 						<div style={{ "padding": "10px" }}></div>
-						<div style={{ "display": "flex" }}>
+						<div style={{ "display": "flex", "overflow":"hidden", "height":"77vh" }}>
 							{this.props.currentYear === today.getFullYear().toString() ?
-								<div style={{ "flex": "1" }}>
+								<div style={{ "flex": "1","overflow":"scroll" }}>
 									<div style={{ "fontWeight": "bold" }}>Add Event</div>
 									<form onSubmit={this.trySubmit}>
 										<div></div>
@@ -203,7 +203,8 @@ class AdminEvntWindow extends React.Component {
 													onCheck={this.updateCheck} /></div>
 										</Container>
 										<div style={{ "padding": "10px" }}></div>
-										<div><LocationPickerExample onChange={this.updateLocation} /></div>
+										<div style={{"display":"flex","justifyContent":"center"}}>
+										<LocationPickerExample onChange={this.updateLocation} /></div>
 										<div style={{ "padding": "10px" }}></div>
 										{this.state.error ? <div style={{ "color": "red", "padding": "10px" }}>Please fill in all fields, and do not use the following characters for event name: . $ # [ ]</div> : null}
 										{this.state.submitted ? <div style={{ "color": "green", "padding": "10px" }}>Event added successfully!</div> : null}
@@ -213,7 +214,7 @@ class AdminEvntWindow extends React.Component {
 									</form>
 								</div>
 								: <div style={{ "flex": "1" }}>Must be in current year to add events.</div>}
-							<div style={{ "flex": "1" }}>
+							<div style={{ "flex": "1","overflow":"scroll" }}>
 								<div style={{ "fontWeight": "bold" }}>Attendance</div>
 								<AttendanceWindow events={this.props.events} attendance={this.props.attendance} onChangeEvent={this.props.onChangeEvent}
 									currentEvent={this.props.currentEvent} eventDate={this.props.eventDate} eventDates={this.props.eventDates}

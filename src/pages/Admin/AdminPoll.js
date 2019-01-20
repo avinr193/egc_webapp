@@ -285,9 +285,9 @@ class AdminPollWindow extends React.Component {
             				{yearsList}
           				</DropDownMenu>
 						<div style={{ "padding": "10px" }}></div>
-						<div style={{ "display": "flex" }}>
+						<div style={{ "display": "flex", "overflow":"hidden", "height":"77vh" }}>
 						{this.props.currentYear === today.getFullYear().toString() ? 
-							<div style={{ "flex": "1" }}>
+							<div style={{ "flex": "1","overflow":"scroll" }}>
 								<div style={{ "fontWeight": "bold" }}>Add Poll</div>
 								<form onSubmit={this.trySubmit}>
 									<div>
@@ -305,7 +305,8 @@ class AdminPollWindow extends React.Component {
 										</FloatingActionButton>
 										: null}
 									<p></p>
-									<div><LocationPickerExample onChange={this.updateLocation} /></div>
+									<div style={{"display":"flex","justifyContent":"center","overflow":"scroll"}}>
+									<LocationPickerExample onChange={this.updateLocation} /></div>
 									<div style={{ "padding": "10px" }}></div>
 									{this.state.error ? <div style={{ "color": "red", "padding": "10px" }}>Please fill in all fields.</div> : null}
 									{this.state.submitted ? <div style={{ "color": "green", "padding": "10px" }}>Poll added successfully!</div> : null}
@@ -346,11 +347,11 @@ class AdminPollWindow extends React.Component {
 									: null}
 								<p></p>
 								<div style={{ "fontWeight": "bold" }}>Vote Count:</div>
-								<List style={{ "maxHeight": "200px", "overflow": "scroll" }}>
+								<List style={{ "maxHeight": "30vh", "overflow": "scroll" }}>
 									{currentPollOptions}
 								</List>
 								<div style={{ "fontWeight": "bold" }}>People:</div>
-								<List style={{ "maxHeight": "200px", "overflow": "scroll" }}>
+								<List style={{ "maxHeight": "30vh", "overflow": "scroll" }}>
 									{currentPollPeople}
 								</List>
 							</div>

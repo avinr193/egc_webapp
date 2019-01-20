@@ -214,7 +214,8 @@ class VotingWindow extends React.Component {
             <p></p>
             {(this.state.logged ? <p style={{ color: 'green' }}> Success! </p> : null)}
             <p style={{ color: 'red' }}> {this.state.err} </p>
-            </div> : null}
+            </div> : <div style={{"position":"absolute", "bottom":"50px","margin-left":"auto","margin-right":"auto",
+            "left":"0", "right":"0"}}>Choose a poll!</div>}
           </div>
           : <div>No live polls at this time.</div>)
       )

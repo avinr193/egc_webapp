@@ -13,7 +13,13 @@ import Popover from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 
 const Navigation = () => (
-  <nav>
+  <nav style={{
+    "position": "fixed",
+    "top": "0",
+    "width": "100%",
+    "zIndex": "10",
+    "height":"60px"
+}}>
     <ul id="paginate">
       <li style={{ padding: 5 }}><NavLink exact to='/home'><img style={{ height: "90%", width: "100%" }} src={require('../egc.png')} alt="egc logo" /></NavLink></li>
       <li><NavLink exact activeClassName="current" to='/attendance'>Attendance</NavLink></li>
@@ -55,7 +61,7 @@ class SignInButton extends React.Component {
       (this.state.enabled ?
         null
         :
-        <div>
+        <div> 
           <IconMenu
             iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
             anchorOrigin={{ horizontal: 'right', vertical: 'top' }}

@@ -182,7 +182,9 @@ class AttendanceWindow extends React.Component {
                 backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
             )}
             <p></p>
-            <p style={{ color: 'red' }}> {this.state.err} </p></div> : null}
+            <p style={{ color: 'red' }}> {this.state.err} </p></div> : 
+            <div style={{"position":"absolute", "bottom":"50px","margin-left":"auto","margin-right":"auto",
+            "left":"0", "right":"0"}}>Choose an event!</div>}
           </div> 
           : <div>No live events at this time.</div>)
       )

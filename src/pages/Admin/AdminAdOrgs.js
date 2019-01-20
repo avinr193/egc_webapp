@@ -182,7 +182,7 @@ class AdminAdOrgsWindow extends React.Component {
         <div style = {{"display":"flex"}}>
             <div style={{"flex":"1"}}>
             <div style={{ "fontWeight": "bold" }}>Organizations</div>
-            <List style={{"maxHeight":"52%", "overflow":"scroll"}}>
+            <List style={{"maxHeight":"65vh", "overflow":"scroll"}}>
 							{allOrgsList}
 						</List>
             <TextField name="newOrg" value={this.state.newOrgName} onChange={(e) => this.setNewOrgName(e)}
@@ -205,7 +205,7 @@ class AdminAdOrgsWindow extends React.Component {
 						backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
             <div style={{"color":"red","padding":"25px"}}>{this.state.addAdminError}</div>
             <div style={{"fontWeight":"bold"}}>Accessible Organizations</div>
-            <List style={{"maxHeight":"22%", "overflow":"scroll"}}>
+            <List style={{"maxHeight":"28vh", "overflow":"scroll"}}>
 							{orgsList}
 						</List>
             <TextField name="newAdminOrg" value={this.state.newAdminOrgName} onChange={(e) => this.setNewAdminOrgName(e)}

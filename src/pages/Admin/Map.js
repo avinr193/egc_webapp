@@ -53,11 +53,12 @@ class LocationPickerExtended extends Component {
 
   render () {
     return (
-      <div>
+      <div style={{"maxWidth":"90%"}}>
         <p style={{"marginBottom":"0px"}}>Range: {this.state.radius}m within: {this.state.address}</p>
         <div>
         <Slider defaultValue={50} max={250} min={10} onChange={this.changeRadius}
         sliderStyle={{"marginBottom": "9px", "marginTop":"9px"}}></Slider>
+        <div style={{"border":"groove"}}>
           <LocationPicker
             style={{"marginTop":"0px"}}
             containerElement={ <div style={ {height: '100%'} } /> }
@@ -67,6 +68,7 @@ class LocationPickerExtended extends Component {
             zoom={17}
             onChange={this.handleLocationChange}
           />
+          </div>
         </div>
       </div>
     )

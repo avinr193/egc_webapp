@@ -27,9 +27,11 @@ firebase.auth().getRedirectResult().then(function(result) {
 //main code
 const App = () => (
   <MuiThemeProvider>
-  <div className='app'>
-  <Navigation />
+  <div className='app' style={{"overflow":"hidden"}}>
+  <Navigation/>
+  <div style={{"marginTop":"75px"}}>
   <Main/>
+  </div>
   </div>
   </MuiThemeProvider>
 );
