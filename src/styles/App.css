@@ -35,7 +35,7 @@ nav ul {
   list-style: none;
   display:flex;
   display: -webkit-flex;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 nav ul li {
   padding: 20px;
@@ -59,8 +59,9 @@ nav ul li a {
   width: 30%;
   position: absolute;
   right:0;
+  top:0;
   text-align: right;
-  padding: 11px;
+  padding: 5px;
 }
 
 .current {
@@ -69,5 +70,4 @@ nav ul li a {
 
 .attendance, .admin, .voting, .about, .home{
   text-align: center;
-  marginTop:10%;
 }

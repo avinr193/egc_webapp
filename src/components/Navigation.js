@@ -13,15 +13,10 @@ import Popover from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 
 const Navigation = () => (
-  <nav style={{
-    "position": "fixed",
-    "top": "0",
-    "width": "100%",
-    "zIndex": "10",
-    "height":"60px"
-}}>
+  <nav>
     <ul id="paginate">
-      <li style={{ padding: 5 }}><NavLink exact to='/home'><img style={{ height: "90%", width: "100%" }} src={require('../egc.png')} alt="egc logo" /></NavLink></li>
+      <li style={{ padding: 0 }}><NavLink exact to='/home'>
+      <img style={{ height: "80%", width: "100%", marginTop:"11%", marginBottom: "0%" }} src={require('../egc.png')} alt="egc logo" /></NavLink></li>
       <li><NavLink exact activeClassName="current" to='/attendance'>Attendance</NavLink></li>
       <li><NavLink exact activeClassName="current" to='/voting'>Voting</NavLink></li>
       <li>
