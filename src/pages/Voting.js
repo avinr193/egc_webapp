@@ -1,5 +1,7 @@
-import React from 'react'
-import { connect } from 'react-redux'
+import React from 'react';
+import { connect } from 'react-redux';
+
+import Loader from 'react-loader-spinner';
 
 import FlatButton from 'material-ui/FlatButton';
 import DropDownMenu from 'material-ui/DropDownMenu';
@@ -212,6 +214,7 @@ class VotingWindow extends React.Component {
             <FlatButton onClick={() => this.logAtt()} labelStyle={{ color: "#FFFFFF" }} label="Submit"
               backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
             <p></p>
+            {this.state.att === "Logging In..." ? <Loader type="Triangle" color="#F44336" height={80} width={80}/> : null}
             {(this.state.logged ? <p style={{ color: 'green' }}> Success! </p> : null)}
             <p style={{ color: 'red' }}> {this.state.err} </p>
             </div> : <div style={{"position":"absolute", "bottom":"50px","margin-left":"auto","margin-right":"auto",
