@@ -234,7 +234,7 @@ class AdminAdOrgsWindow extends React.Component {
     dispatch(fetchAllOrgsThunk());
     dispatch(fetchAdminsThunk());
     return {
-      onIsAdmin(isGenAdmin, email){
+      onIsAdmin(isGenAdmin, email=null){
         dispatch(setIsAdminThunk(isGenAdmin, email));
       },
       onChangeAdmin(newAdmin){

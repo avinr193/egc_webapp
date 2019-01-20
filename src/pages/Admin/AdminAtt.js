@@ -15,7 +15,7 @@ import Slider from 'material-ui/Slider'
 import styled from 'styled-components';
 
 import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, 
-  setAttPath, setIsAdminThunk, fetchLiveEventsThunk } from '../../store/actions'
+  setAttPath, fetchLiveEventsThunk } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -296,7 +296,7 @@ const mapDispatch = (dispatch) => {
       dispatch(setAttPath(attPath));
     },
     onIsAdmin(isGenAdmin, email){
-      dispatch(setIsAdminThunk(isGenAdmin, email));
+      //dispatch(setIsAdminThunk(isGenAdmin, email));
     },
     onLiveEventUpdate(){
       dispatch(fetchLiveEventsThunk());

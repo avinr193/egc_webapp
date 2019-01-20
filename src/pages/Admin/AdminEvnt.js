@@ -254,7 +254,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(fetchYear(newYear));
 			dispatch(fetchEventsThunk());
 		},
-		onIsAdmin(isGenAdmin, email) {
+		onIsAdmin(isGenAdmin, email=null) {
 			dispatch(setIsAdminThunk(isGenAdmin, email));
 		},
 		onAddEvent(eventName) {

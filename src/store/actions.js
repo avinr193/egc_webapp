@@ -57,12 +57,12 @@ export const fetchAdmins = (admins) => ({ type: ActionTypes.FETCH_ADMINS, admins
 export const setAdmin = (newAdmin) => ({ type: ActionTypes.SET_ADMIN, newAdmin })
 
 /*THUNKS*/
-export function setIsAdminThunk(isAdmin, email = null) {
+export function setIsAdminThunk(isAdmin, email=null) {
     let netID = email.split('@')[0];
     return (dispatch, getState) => {
         let state = getState();
         dispatch(setIsAdmin(isAdmin));
-        if (isAdmin && state.organizations.length === 0) {
+        if (isAdmin && state.organizations.length === 0 && email) {
             dispatch(fetchOrgsThunk(netID));
         }
     }

@@ -403,7 +403,7 @@ const mapDispatch = (dispatch) => {
 		fetchAndSetPoll(id, org) {
 			dispatch(fetchAndSetPoll(id, org))
 		},
-		onIsAdmin(isGenAdmin, email) {
+		onIsAdmin(isGenAdmin, email=null) {
 			dispatch(setIsAdminThunk(isGenAdmin, email));
 		},
 		onLivePollUpdate() {
