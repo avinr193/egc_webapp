@@ -46,16 +46,16 @@ class AdminPollWindow extends React.Component {
 			enabled: false,
 			user: null,
 			poll_question: '',
-			poll_options: [{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 }],
+			poll_options: [{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 }],
 			number_poll_options: 2,
 			lat: 1,
 			long: 1,
@@ -172,16 +172,16 @@ class AdminPollWindow extends React.Component {
 			'submitted': true,
 			'error': false,
 			poll_question: '',
-			poll_options: [{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 },
-			{ text: '', count: 0 }],
+			poll_options: [{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 },
+			{ text: '', count: 0, percent: 0 }],
 			number_poll_options: 2
 		});
 		return true;
@@ -245,11 +245,14 @@ class AdminPollWindow extends React.Component {
 
 		let currentPollOptions = [];
 		for (let y = 0; y < this.props.currentPoll.options.length; y++) {
+			let percentString = "";
+			if(this.props.currentPoll.options[y].percent){
+				percentString = " - " + this.props.currentPoll.options[y].percent.toString() + "%";
+			}
 			currentPollOptions.push(
 				<div key={y}>
 					<ListItem value={this.props.currentPoll.options[y].text} primaryText={this.props.currentPoll.options[y].text}
-						secondaryText={this.props.currentPoll.options[y].count.toString() + " - " 
-						+ this.props.currentPoll.options[y].percent.toString() + "%"}></ListItem>
+						secondaryText={this.props.currentPoll.options[y].count.toString() + percentString}></ListItem>
 				</div>
 			)
 		}
