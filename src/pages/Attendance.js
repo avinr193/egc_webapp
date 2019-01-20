@@ -170,7 +170,7 @@ class AttendanceWindow extends React.Component {
               {eventsList}
             </DropDownMenu>
             <p></p>
-            {this.props.liveEvents === 1 || this.state.enabledSubmit === true ?
+            {this.props.liveEvents.length === 1 || this.state.enabledSubmit === true ?
             <div>
             <p> Signed-In: {this.state.user.displayName} </p>
             <p> Attendance Logged: {this.state.att} </p>

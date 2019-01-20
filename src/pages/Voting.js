@@ -187,7 +187,7 @@ class VotingWindow extends React.Component {
               })}
             </DropDownMenu>
             <p></p>
-            {this.props.liveEvents === 1 || this.state.enabledSubmit === true ?
+            {this.props.livePolls.length === 1 || this.state.enabledSubmit === true ?
             <div>
             {this.props.currentLivePoll.options ?
               <Container>

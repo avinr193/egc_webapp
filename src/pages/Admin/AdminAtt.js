@@ -244,9 +244,16 @@ class AdminWindow extends React.Component {
             <p></p>
             <FlatButton onClick={() => this.downloadReport()} labelStyle={{ color: "#FFFFFF" }} label="Download Report"
               backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
-            <List style={{"maxHeight":"40vh", "overflow":"scroll"}}>
+            {this.props.attendance ? <div style={{"padding":"20px", "fontWeight":"bold"}}>
+            Attendance Count: {this.props.attendance.length}</div> : null}
+            {(this.props.eventDate.props) ? this.props.eventDate.props.closingAtt ?
+            <List style={{"maxHeight":"32vh", "overflow":"scroll"}}>
               {namesList}
-            </List>
+            </List> :
+            <List style={{"maxHeight":"44vh", "overflow":"scroll"}}>
+              {namesList}
+            </List> : 
+            null}
           </div> 
       )
   }

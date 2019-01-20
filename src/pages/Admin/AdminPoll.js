@@ -248,7 +248,8 @@ class AdminPollWindow extends React.Component {
 			currentPollOptions.push(
 				<div key={y}>
 					<ListItem value={this.props.currentPoll.options[y].text} primaryText={this.props.currentPoll.options[y].text}
-						secondaryText={this.props.currentPoll.options[y].count.toString()}></ListItem>
+						secondaryText={this.props.currentPoll.options[y].count.toString() + " - " 
+						+ this.props.currentPoll.options[y].percent.toString() + "%"}></ListItem>
 				</div>
 			)
 		}
@@ -346,7 +347,8 @@ class AdminPollWindow extends React.Component {
 									</div>
 									: null}
 								<p></p>
-								<div style={{ "fontWeight": "bold" }}>Vote Count:</div>
+								<div style={{ "fontWeight": "bold" }}>Vote Count: &nbsp;
+								{this.props.currentPoll.people ? this.props.currentPoll.people.length : null}</div> 
 								<List style={{ "maxHeight": "30vh", "overflow": "scroll" }}>
 									{currentPollOptions}
 								</List>

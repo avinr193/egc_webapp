@@ -193,16 +193,24 @@ export function updatePollCounts() {
         let state = getState();
         database.ref('/livePolls/').once('value', snap => {
             snap.forEach(data => {
+                let totalCount = 0;
                 database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/${data.key}/options/`).once('value', snap => {
                     let options = snap.val();
                     for (let key in options) {
                         options[key].count = 0;
+                        options[key].percent = 0;
                     }
                     database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/${data.key}/people/`).once('value', snap => {
                         snap.forEach(data => {
                             options.filter(obj => { return obj.text === data.val().option })[0].count += 1;
+                            totalCount++;
                         })
                     })
+                    if(totalCount > 0){
+                        for (let key in options) {
+                            options[key].percent = ((options[key].count * 100) / (totalCount * 100)) * 100;
+                        }
+                    }
                     database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/${data.key}/options/`).set(options);
                 })
             })
