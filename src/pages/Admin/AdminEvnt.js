@@ -92,6 +92,7 @@ class AdminEvntWindow extends React.Component {
 
 	handleEvent(e) {
 		this.setState({ [e.target.name]: e.target.value });
+		this.clearState();
 	}
 
 	setTimeStart = (e, time_start) => { this.setState({ 'event_time_start': time_start }) }
@@ -196,7 +197,7 @@ class AdminEvntWindow extends React.Component {
 											hintText="e.g. General Council" floatingLabelText="Event Name" style={{ "marginTop": "0px" }} />
 										<TimePicker value={this.state.event_time_start} hintText="Choose Start Time (default: now)" onChange={this.setTimeStart} />
 										<TimePicker value={this.state.event_time_end} hintText="Choose End Time (default: now)" onChange={this.setTimeEnd} />
-										<DatePicker value={this.state.event_date} firstDayOfWeek={0} hintText="Choose Date (default: today)" onChange={this.setDate} />
+										<DatePicker minDate={today} value={this.state.event_date} firstDayOfWeek={0} hintText="Choose Date (default: today)" onChange={this.setDate} />
 										<Container>
 											<div style={{ "maxWidth": "40px", "marginRight": "110px" }}>
 												<Checkbox label="Closing Attendance" checked={this.state.closingAtt}
@@ -215,7 +216,8 @@ class AdminEvntWindow extends React.Component {
 								</div>
 								: <div style={{ "flex": "1" }}>Must be in current year to add events.</div>}
 							<div style={{ "flex": "1","overflow":"scroll" }}>
-								<div style={{ "fontWeight": "bold" }}>Attendance</div>
+								<div style={{ "fontWeight": "bold" }}>View Events</div>
+								{this.props.events.length > 0 ? 
 								<AttendanceWindow events={this.props.events} attendance={this.props.attendance} onChangeEvent={this.props.onChangeEvent}
 									currentEvent={this.props.currentEvent} eventDate={this.props.eventDate} eventDates={this.props.eventDates}
 									onChangeDate={this.props.onChangeDate} currentDate={this.props.currentDate} currentOrg={this.props.currentOrg}
@@ -223,7 +225,7 @@ class AdminEvntWindow extends React.Component {
 									onSetAttPath={this.props.onSetAttPath} attPath={this.props.attPath} onIsAdmin={this.props.onIsAdmin} isAdmin={this.props.isAdmin}
 									currentLiveEvent={this.props.currentLiveEvent} onLiveEventUpdate={this.props.onLiveEventUpdate} orgs={this.props.orgs}
 									years={this.props.years} currentYear={this.props.currentYear} clearState={this.clearState}/>
-								<div></div>
+								: <div style={{"padding":"25px"}}>No events to view.</div>}
 							</div>
 						</div>
 					</div> : <div>You are not an admin.</div>)

@@ -61,6 +61,29 @@ export const deleteAdminOrg = (admin, e) => {
     database.ref(`/Admins/${admin}/`).child(e.currentTarget.value).remove();
 }
 
+export const deleteEventDate = (currentOrg, currentYear, currentEvent, eventDate, user) => {
+    let today = new Date();
+    database.ref(`/Organizations/${currentOrg}/${currentYear}/events/${currentEvent}/${eventDate.key}/`).remove();
+    database.ref(`/deletions/events/${user.email.split('@')[0]}`).child(`${today.getHours()}-${today.getMinutes()}-${today.getSeconds()}-${today.getMilliseconds()}-${today.getMonth()+1}-${today.getDate()}-${today.getFullYear()}`)
+    .update({
+        organization: currentOrg,
+        year: currentYear,
+        event: currentEvent,
+        date: eventDate
+    });
+}
+
+export const deletePoll = (currentYear, currentPoll, user) => {
+    let today = new Date();
+    database.ref(`/Organizations/${currentPoll.organization}/${currentYear}/polls/${currentPoll.uuid}/`).remove();
+    database.ref(`/deletions/polls/${user.email.split('@')[0]}`).child(`${today.getHours()}-${today.getMinutes()}-${today.getSeconds()}-${today.getMilliseconds()}-${today.getMonth()+1}-${today.getDate()}-${today.getFullYear()}`)
+    .update({
+        organization: currentPoll.organization,
+        year: currentYear,
+        poll: currentPoll
+    })
+}
+
 export const addAtt = (currentOrg, currentDate, currentEvent, displayName, timestamp, email, 
     userLat, userLong, distToEvent, attPath, uid, currentYear) => {
     database.ref(`/Organizations/${currentOrg}/${currentYear}/events/${currentEvent}/${currentDate}/attendance/${attPath}/people`)
@@ -75,7 +98,8 @@ export const addAtt = (currentOrg, currentDate, currentEvent, displayName, times
 export const addOrg = (newOrg, year) => {
     database.ref('/Organizations/').child(newOrg).child(year).set({
         events: 'null',
-        polls: 'null'
+        polls: 'null',
+        dummy: 'null'
     });
 }
 

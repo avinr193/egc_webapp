@@ -58,11 +58,14 @@ export const setAdmin = (newAdmin) => ({ type: ActionTypes.SET_ADMIN, newAdmin }
 
 /*THUNKS*/
 export function setIsAdminThunk(isAdmin, email=null) {
-    let netID = email.split('@')[0];
+    let netID = null;
+    if(email){
+        netID = email.split('@')[0];
+    }
     return (dispatch, getState) => {
         let state = getState();
         dispatch(setIsAdmin(isAdmin));
-        if (isAdmin && state.organizations.length === 0 && email) {
+        if (isAdmin && state.organizations.length === 0) {
             dispatch(fetchOrgsThunk(netID));
         }
     }
@@ -75,6 +78,7 @@ export function fetchDateThunk() {
         let currentYear = today.getFullYear().toString();
         dispatch(fetchDate(currentDate));
         dispatch(fetchYear(currentYear));
+        dispatch(fetchYears([currentYear]));
     }
 }
 
@@ -230,13 +234,16 @@ export function fetchOrgsThunk(netID) {
                 organizations.push(data.key)
             })
         })
-            .then(() => dispatch(fetchOrgs(organizations)))
-            .then(() => organizations[0] ? dispatch(setOrg(organizations[0])) : null)
-            .then(() => dispatch(fetchYearsThunk()))
-            .then(() => dispatch(fetchEventsThunk()))
-            .then(() => dispatch(fetchPollsThunk()))
-            .then(() => dispatch(watchPollAdded()))
-            .then(() => dispatch(watchAttendanceAdded()))
+            .then(() => {
+                if(organizations[0]){
+                    dispatch(fetchOrgs(organizations))
+                    dispatch(setOrg(organizations[0]))
+                    dispatch(fetchYearsThunk(organizations[0]))
+                    dispatch(fetchEventsThunk(organizations[0]))
+                    dispatch(fetchPollsThunk(organizations[0]))
+                    dispatch(watchPollAdded())
+                    dispatch(watchAttendanceAdded())
+                }})
     }
 }
 
@@ -275,19 +282,21 @@ export function fetchYearsThunk(newOrg=null,path=null) {
         let state = getState();
         let org = newOrg ? newOrg : state.currentOrg;
         let years = [];
-        if(state.currentOrg.length > 0){
+        if(org.length > 0){
             database.ref(`/Organizations/${org}/`).once('value', snap => {
                 snap.forEach(data => {
                     years.push(data.key);
                 })
             })
                 .then(() => {
+                    if(years[0]){
                     if (years.filter(function(e) { return e === currentYear; }).length === 0) {
                         years.push(currentYear);
                       }
                     years.sort(function(a, b){return b-a}); 
-                    dispatch(fetchYears(years))})
-                .then(() => years[0] ? dispatch(fetchYear(years[0])) : null)
+                    dispatch(fetchYears(years))
+                    dispatch(fetchYear(years[0]))}
+                    })
                 .then(() => path ? path === "events" ? dispatch(fetchEventsThunk(newOrg)) : 
                 path === "polls" ? dispatch(fetchPollsThunk(newOrg)) : null : null)
         }

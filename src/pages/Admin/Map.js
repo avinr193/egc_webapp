@@ -38,7 +38,7 @@ class LocationPickerExtended extends Component {
   changeRadius = (e, newVal) => { this.setState({ 'radius': newVal }); 
   this.props.onChange(this.props.id, this.state.position,this.state.radius);}
 
-  componentDidMount () {
+  componentWillMount () {
     navigator && navigator.geolocation.getCurrentPosition(position => {
       const { latitude, longitude } = position.coords;
       this.setState({

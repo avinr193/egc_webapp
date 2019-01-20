@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import 'firebase/auth'
-import firebase, { addLiveEvent, removeLiveEvent, isGeneralAdmin } from '../../firebase'
+import firebase, { addLiveEvent, removeLiveEvent, isGeneralAdmin, deleteEventDate } from '../../firebase'
 
 import { List, ListItem } from 'material-ui/List';
 import DropDownMenu from 'material-ui/DropDownMenu';
@@ -11,11 +11,13 @@ import IconButton from 'material-ui/IconButton';
 import Toggle from 'material-ui/Toggle';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 import AllInclusive from 'material-ui/svg-icons/places/all-inclusive';
-import Slider from 'material-ui/Slider'
+import Slider from 'material-ui/Slider';
+import Close from 'material-ui/svg-icons/navigation/close';
+import Dialog from 'material-ui/Dialog';
 import styled from 'styled-components';
 
 import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, 
-  setAttPath, fetchLiveEventsThunk } from '../../store/actions'
+  setAttPath, fetchLiveEventsThunk, fetchEventsThunk } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -26,7 +28,7 @@ const Container = styled.div`
 
 const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
   currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin, 
-  isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, currentYear, clearState }) => (
+  isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, currentYear, clearState, onDeleteLastDate }) => (
     <div className="admin">
       <AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
         currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
@@ -34,7 +36,7 @@ const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, 
         onChangeAtt={onChangeAtt} onSetEventLive={onSetEventLive} isEventLive={isEventLive}
         onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin} 
         currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate} orgs={orgs} 
-        years={years} currentYear={currentYear} clearState={clearState}/>
+        years={years} currentYear={currentYear} clearState={clearState} onDeleteLastDate={onDeleteLastDate}/>
     </div>
   );
 
@@ -188,7 +190,7 @@ class AdminWindow extends React.Component {
           <div>
 					<div style={{ "padding": "10px" }}></div>
             <div>Choose event & date below:</div>
-            <div style={{ "display": "flex", "justifyContent": "center" }}>
+            <div style={{ "display": "flex", "justifyContent": "center", "flexWrap":"wrap" }}>
               <div>
                 <DropDownMenu maxHeight={300} value={this.props.currentEvent} onChange={this.changeEvent.bind(this)}>
                   {eventsList}
@@ -199,11 +201,18 @@ class AdminWindow extends React.Component {
                   {datesList}
                 </DropDownMenu>
               </div>
+              {!this.props.isEventLive ?
+              <DeleteDialog currentEvent={this.props.currentEvent} eventDate={this.props.eventDate}
+              currentYear={this.props.currentYear} currentOrg={this.props.currentOrg} eventDates={this.props.eventDates}
+              onChangeEvent={this.props.onChangeEvent} onDeleteLastDate={this.props.onDeleteLastDate}
+              user={this.state.user}/>
+              : null}
+              <div style={{"padding":"10px"}}></div>
               {((this.props.eventDate.key === this.props.currentDate &&
               this.props.currentYear === today.getFullYear().toString()) || this.props.isEventLive === true) ?
                 <div style={{ "display": "flex" }}>
-                  <div style={{ "marginTop": "19px" }}>Live:</div>
-                  <div style={{ "marginTop": "17px" }}><Toggle toggled={this.props.isEventLive} onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle></div>
+                  <div style={{ "marginTop": "21px" }}>Live:</div>
+                  <div style={{ "marginTop": "18px" }}><Toggle toggled={this.props.isEventLive} onToggle={(e, isInputChecked) => this.addRemoveLive(e, isInputChecked)}></Toggle></div>
                 </div> : null}
             </div>
             {(this.props.eventDate.props) ?
@@ -298,9 +307,72 @@ const mapDispatch = (dispatch) => {
     onIsAdmin(isGenAdmin, email){
       //dispatch(setIsAdminThunk(isGenAdmin, email));
     },
+    onDeleteLastDate(){
+      dispatch(fetchEventsThunk());
+    },
     onLiveEventUpdate(){
       dispatch(fetchLiveEventsThunk());
     }
   }
 }
 export default connect(mapState, mapDispatch)(Admin);
+
+class DeleteDialog extends React.Component {
+
+  state = {
+    open: false
+  }
+
+  handleOpen = () => {
+    this.setState({open: true});
+  };
+
+  handleClose = () => {
+    this.setState({open: false});
+    let eventDates = this.props.eventDates;
+    deleteEventDate(this.props.currentOrg, this.props.currentYear,
+      this.props.currentEvent, this.props.eventDate, this.props.user);
+    if(eventDates.length !== 1){
+      this.props.onChangeEvent(this.props.currentEvent);
+    }
+    else{
+      this.props.onDeleteLastDate();
+    }
+  };
+
+  handleCancel = () => {
+    this.setState({open: false});
+  };
+
+  render() {
+    const actions = [
+      <FlatButton
+        label="Delete"
+        secondary={true}
+        onClick={this.handleClose}
+      />,
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={this.handleCancel}
+      />
+    ];
+
+    return (
+      <div>
+        <Close color="#d3d3d3" hoverColor="#F44336" style={{"marginTop":"17px"}}
+        onClick={this.handleOpen} label="Modal Dialog"/>
+        <Dialog
+          title="Are you sure you want to delete?"
+          actions={actions}
+          modal={true}
+          open={this.state.open}
+        >
+          <strong>Event:</strong> {this.props.currentEvent} &nbsp; 
+          <strong>Date:</strong> {this.props.eventDate.key}-{this.props.currentYear} <br/><br/>
+          <strong>Organization:</strong>  {this.props.currentOrg}
+        </Dialog>
+      </div>
+    );
+  }
+}

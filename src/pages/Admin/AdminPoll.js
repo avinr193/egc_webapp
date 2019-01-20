@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import firebase, { addPoll, signIn, isGeneralAdmin, addLivePoll, removeLivePoll } from '../../firebase'
+import firebase, { addPoll, signIn, isGeneralAdmin, addLivePoll, removeLivePoll, deletePoll } from '../../firebase'
 import 'firebase/auth'
 
 import { LocationPickerExample } from './Map'
@@ -15,6 +15,7 @@ import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
 import Slider from 'material-ui/Slider';
+import Dialog from 'material-ui/Dialog';
 import AllInclusive from 'material-ui/svg-icons/places/all-inclusive';
 import styled from 'styled-components';
 
@@ -107,6 +108,7 @@ class AdminPollWindow extends React.Component {
 
 	handleEvent(e) {
 		this.setState({ [e.target.name]: e.target.value });
+		this.clearState();
 	}
 
 	setPollOption = (e, key) => {
@@ -321,11 +323,17 @@ class AdminPollWindow extends React.Component {
 							</div>
 							: <div style={{ "flex": "1" }}>Must be in current year to add polls.</div>}
 							<div style={{ "flex": "1" }}>
-								<div style={{ "fontWeight": "bold" }}>View Polls</div>
+							<div style={{ "fontWeight": "bold" }}>View Polls</div>
+							{this.props.polls.length > 0 ?
+							<div>
 								<div style={{"display":"flex","justifyContent":"center"}}>
 								<DropDownMenu maxHeight={300} value={this.props.currentPoll.question} onChange={this.changePoll}>
 									{pollsList}
 								</DropDownMenu>
+								{!this.props.isPollLive ? 
+								<DeleteDialog currentYear={this.props.currentYear} user={this.state.user}
+								currentPoll={this.props.currentPoll} onMount={this.props.onMount}/>: null}
+								<div style={{"padding":"10px"}}></div>
 								{this.props.currentYear === today.getFullYear().toString() && this.props.polls.length > 0 ?
 								<Container>
 									<div>
@@ -359,7 +367,8 @@ class AdminPollWindow extends React.Component {
 								<List style={{ "maxHeight": "30vh", "overflow": "scroll" }}>
 									{currentPollPeople}
 								</List>
-							</div>
+								</div> : <div style={{"padding":"25px"}}>No polls to view.</div>}
+							</div> 
 						</div>
 					</div> : <div>You are not an admin.</div>)
 			)
@@ -416,3 +425,56 @@ const mapDispatch = (dispatch) => {
 }
 
 export default connect(mapState, mapDispatch)(Admin);
+
+class DeleteDialog extends React.Component {
+
+	state = {
+	  open: false
+	}
+  
+	handleOpen = () => {
+	  this.setState({open: true});
+	};
+  
+	handleClose = () => {
+	  this.setState({open: false});
+	  deletePoll(this.props.currentYear, this.props.currentPoll, this.props.user);
+	  this.props.onMount();
+	};
+  
+	handleCancel = () => {
+	  this.setState({open: false});
+	};
+  
+	render() {
+	  const actions = [
+		<FlatButton
+		  label="Delete"
+		  secondary={true}
+		  onClick={this.handleClose}
+		/>,
+		<FlatButton
+		  label="Cancel"
+		  primary={true}
+		  onClick={this.handleCancel}
+		/>
+	  ];
+  
+	  return (
+		<div>
+		  <Close color="#d3d3d3" hoverColor="#F44336" style={{"marginTop":"17px"}}
+		  onClick={this.handleOpen} label="Modal Dialog"/>
+		  <Dialog
+			title="Are you sure you want to delete?"
+			actions={actions}
+			modal={true}
+			open={this.state.open}
+		  >
+			<strong>Poll:</strong> {this.props.currentPoll.question} &nbsp; 
+			<strong>Year:</strong> {this.props.currentYear} <br/><br/>
+			<strong>Organization:</strong>  {this.props.currentPoll.organization}
+		  </Dialog>
+		</div>
+	  );
+	}
+  }
