@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import firebase, { addPoll, signIn, isGeneralAdmin, addLivePoll, removeLivePoll, deletePoll } from '../../firebase'
 import 'firebase/auth'
 
+import Loader from 'react-loader-spinner';
+
 import { LocationPickerExample } from './Map'
 import FlatButton from 'material-ui/FlatButton';
 import IconButton from 'material-ui/IconButton';
@@ -30,13 +32,14 @@ const Container = styled.div`
 
 const Admin = ({ orgs, currentOrg, onChangeOrg, polls, currentPoll, onChangePoll,
 	isPollLive, onSetPollLive, fetchAndSetPoll, onIsAdmin, isAdmin, currentLivePoll, onLivePollUpdate,
-	currentYear, years, onChangeYear, onMount }) => (
+	currentYear, years, onChangeYear, onMount, loading }) => (
 		<div className="admin">
 			<AdminPollWindow orgs={orgs} currentOrg={currentOrg} onChangeOrg={onChangeOrg}
 				polls={polls} currentPoll={currentPoll} onChangePoll={onChangePoll} isPollLive={isPollLive}
 				onSetPollLive={onSetPollLive} fetchAndSetPoll={fetchAndSetPoll} onIsAdmin={onIsAdmin}
 				isAdmin={isAdmin} currentLivePoll={currentLivePoll} onLivePollUpdate={onLivePollUpdate} 
-				currentYear={currentYear} years={years} onChangeYear={onChangeYear} onMount={onMount}/>
+				currentYear={currentYear} years={years} onChangeYear={onChangeYear} onMount={onMount}
+				loading={loading}/>
 		</div>
 	);
 
@@ -330,7 +333,7 @@ class AdminPollWindow extends React.Component {
 								<DropDownMenu maxHeight={300} value={this.props.currentPoll.question} onChange={this.changePoll}>
 									{pollsList}
 								</DropDownMenu>
-								{!this.props.isPollLive ? 
+								{(!this.props.isPollLive  && this.props.currentYear === today.getFullYear().toString()) ? 
 								<DeleteDialog currentYear={this.props.currentYear} user={this.state.user}
 								currentPoll={this.props.currentPoll} onMount={this.props.onMount}/>: null}
 								<div style={{"padding":"10px"}}></div>
@@ -367,7 +370,9 @@ class AdminPollWindow extends React.Component {
 								<List style={{ "maxHeight": "30vh", "overflow": "scroll" }}>
 									{currentPollPeople}
 								</List>
-								</div> : <div style={{"padding":"25px"}}>No polls to view.</div>}
+								</div> : (this.props.loading ? <div style={{"padding":"25px"}}>
+								<Loader type="Triangle" color="#F44336" height={80} width={80}/></div> 
+								: <div style={{"padding":"25px"}}>No polls to view.</div>)}
 							</div> 
 						</div>
 					</div> : <div>You are not an admin.</div>)
@@ -385,7 +390,8 @@ const mapState = (state) => ({
 	isAdmin: state.isAdmin,
 	currentLivePoll: state.currentLivePoll,
 	currentYear: state.currentYear,
-	years: state.years
+	years: state.years,
+	loading: state.loading
 })
 const mapDispatch = (dispatch) => {
 	return {

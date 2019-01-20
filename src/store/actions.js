@@ -27,7 +27,8 @@ export const ActionTypes = {
     SET_CURRENT_OPTION: "SET_CURRENT_OPTION",
     FETCH_ADMINS: "FETCH_ADMINS",
     SET_ADMIN: "SET_ADMIN",
-    FETCH_ALL_ORGS: "FETCH_ALL_ORGS"
+    FETCH_ALL_ORGS: "FETCH_ALL_ORGS",
+    SET_LOADING: "SET_LOADING"
 }
 
 /*ACTION CREATORS*/
@@ -55,6 +56,7 @@ export const setIsAdmin = (isAdmin) => ({ type: ActionTypes.SET_IS_ADMIN, isAdmi
 export const setCurrentOption = (newOption) => ({ type: ActionTypes.SET_CURRENT_OPTION, newOption })
 export const fetchAdmins = (admins) => ({ type: ActionTypes.FETCH_ADMINS, admins })
 export const setAdmin = (newAdmin) => ({ type: ActionTypes.SET_ADMIN, newAdmin })
+export const setLoading = (newLoading) => ({ type: ActionTypes.SET_LOADING, newLoading })
 
 /*THUNKS*/
 export function setIsAdminThunk(isAdmin, email=null) {
@@ -152,7 +154,7 @@ export function fetchEventsThunk(newOrg=null, eventName=null) {
         })
             .then(() => dispatch(fetchEvents(events)))
             .then(() => eventName ? dispatch(setEvent(eventName)) : events[0] ? dispatch(setEvent(events[0])) : null)
-            .then(() => dispatch(fetchEventDatesThunk())) 
+            .then(() => dispatch(fetchEventDatesThunk()))
     }
 }
 
@@ -289,6 +291,7 @@ export function fetchYearsThunk(newOrg=null,path=null) {
                 })
             })
                 .then(() => {
+                    dispatch(setLoading(false));
                     if(years[0]){
                     if (years.filter(function(e) { return e === currentYear; }).length === 0) {
                         years.push(currentYear);

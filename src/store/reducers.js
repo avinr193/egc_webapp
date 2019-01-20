@@ -98,9 +98,13 @@ const currentAdmin = (state = '', action) => {
     return (action.type === ActionTypes.SET_ADMIN && action.newAdmin) ? action.newAdmin : state
 }
 
+const loading = (state = true, action) => {
+    return (action.type === ActionTypes.SET_LOADING) ? action.newLoading : state
+}
+
 export default combineReducers({
     events, organizations, attendance, currentDate, currentEvent,
     currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath,
     polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin, currentOption, currentYear, 
-    years, admins, currentAdmin, allOrganizations
+    years, admins, currentAdmin, allOrganizations, loading
 })

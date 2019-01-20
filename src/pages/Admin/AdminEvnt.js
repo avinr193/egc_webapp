@@ -4,6 +4,8 @@ import { connect } from 'react-redux'
 import firebase, { addEvent, signIn, isGeneralAdmin } from '../../firebase'
 import 'firebase/auth'
 
+import Loader from 'react-loader-spinner';
+
 import { LocationPickerExample } from './Map'
 import FlatButton from 'material-ui/FlatButton';
 import DatePicker from 'material-ui/DatePicker';
@@ -28,7 +30,7 @@ const Container = styled.div`
 
 const Admin = ({ events, attendance, currentEvent, onChangeOrg, onAddEvent, onChangeDate, eventDate, eventDates,
 	currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin,
-	isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, onChangeYear, currentYear, onMount }) => (
+	isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, onChangeYear, currentYear, onMount, loading }) => (
 		<div className="admin">
 			<AdminEvntWindow events={events} attendance={attendance} onAddEvent={onAddEvent}
 				currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
@@ -37,7 +39,7 @@ const Admin = ({ events, attendance, currentEvent, onChangeOrg, onAddEvent, onCh
 				onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin}
 				currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate} orgs={orgs}
 				years={years} currentYear={currentYear} onChangeOrg={onChangeOrg} onMount={onMount}
-				onChangeYear={onChangeYear} />
+				onChangeYear={onChangeYear} loading={loading}/>
 		</div>
 	);
 
@@ -225,7 +227,9 @@ class AdminEvntWindow extends React.Component {
 									onSetAttPath={this.props.onSetAttPath} attPath={this.props.attPath} onIsAdmin={this.props.onIsAdmin} isAdmin={this.props.isAdmin}
 									currentLiveEvent={this.props.currentLiveEvent} onLiveEventUpdate={this.props.onLiveEventUpdate} orgs={this.props.orgs}
 									years={this.props.years} currentYear={this.props.currentYear} clearState={this.clearState}/>
-								: <div style={{"padding":"25px"}}>No events to view.</div>}
+								: (this.props.loading ? <div style={{"padding":"25px"}}>
+								<Loader type="Triangle" color="#F44336" height={80} width={80}/></div> 
+								: <div style={{"padding":"25px"}}>No events to view.</div>)}
 							</div>
 						</div>
 					</div> : <div>You are not an admin.</div>)
@@ -240,7 +244,8 @@ const mapState = (state) => ({
 	currentOrg: state.currentOrg,
 	isAdmin: state.isAdmin,
 	currentYear: state.currentYear,
-	years: state.years
+	years: state.years,
+	loading: state.loading
 })
 const mapDispatch = (dispatch) => {
 	return {

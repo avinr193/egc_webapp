@@ -201,7 +201,7 @@ class AdminWindow extends React.Component {
                   {datesList}
                 </DropDownMenu>
               </div>
-              {!this.props.isEventLive ?
+              {(!this.props.isEventLive  && this.props.currentYear === today.getFullYear().toString()) ?
               <DeleteDialog currentEvent={this.props.currentEvent} eventDate={this.props.eventDate}
               currentYear={this.props.currentYear} currentOrg={this.props.currentOrg} eventDates={this.props.eventDates}
               onChangeEvent={this.props.onChangeEvent} onDeleteLastDate={this.props.onDeleteLastDate}
