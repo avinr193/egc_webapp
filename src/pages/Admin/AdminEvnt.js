@@ -18,7 +18,7 @@ import styled from 'styled-components';
 
 import {
 	setOrg, fetchEventsThunk, setIsAdminThunk, fetchYear, offWatchAttendanceAdded,
-	offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk
+	offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk, fetchDateThunk
 } from '../../store/actions'
 
 
@@ -30,7 +30,8 @@ const Container = styled.div`
 
 const Admin = ({ events, attendance, currentEvent, onChangeOrg, onAddEvent, onChangeDate, eventDate, eventDates,
 	currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin,
-	isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, onChangeYear, currentYear, onMount, loading }) => (
+	isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, onChangeYear, currentYear, onMount, loading,
+	isOppEventLive }) => (
 		<div className="admin">
 			<AdminEvntWindow events={events} attendance={attendance} onAddEvent={onAddEvent}
 				currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
@@ -39,7 +40,7 @@ const Admin = ({ events, attendance, currentEvent, onChangeOrg, onAddEvent, onCh
 				onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin}
 				currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate} orgs={orgs}
 				years={years} currentYear={currentYear} onChangeOrg={onChangeOrg} onMount={onMount}
-				onChangeYear={onChangeYear} loading={loading}/>
+				onChangeYear={onChangeYear} loading={loading} isOppEventLive={isOppEventLive}/>
 		</div>
 	);
 
@@ -226,7 +227,8 @@ class AdminEvntWindow extends React.Component {
 									onChangeAtt={this.props.onChangeAtt} onSetEventLive={this.props.onSetEventLive} isEventLive={this.props.isEventLive}
 									onSetAttPath={this.props.onSetAttPath} attPath={this.props.attPath} onIsAdmin={this.props.onIsAdmin} isAdmin={this.props.isAdmin}
 									currentLiveEvent={this.props.currentLiveEvent} onLiveEventUpdate={this.props.onLiveEventUpdate} orgs={this.props.orgs}
-									years={this.props.years} currentYear={this.props.currentYear} clearState={this.clearState}/>
+									years={this.props.years} currentYear={this.props.currentYear} clearState={this.clearState}
+									isOppEventLive={this.props.isOppEventLive}/>
 								: (this.props.loading ? <div style={{"padding":"25px"}}>
 								<Loader type="Triangle" color="#F44336" height={80} width={80}/></div> 
 								: <div style={{"padding":"25px"}}>No events to view.</div>)}
@@ -245,7 +247,8 @@ const mapState = (state) => ({
 	isAdmin: state.isAdmin,
 	currentYear: state.currentYear,
 	years: state.years,
-	loading: state.loading
+	loading: state.loading,
+	isOppEventLive: state.isOppEventLive
 })
 const mapDispatch = (dispatch) => {
 	return {
@@ -253,6 +256,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(offWatchAttendanceAdded());
 			dispatch(offWatchPollAdded());
 			dispatch(setOrg(newOrg));
+			dispatch(fetchDateThunk());
 			dispatch(fetchYearsThunk(newOrg, "events"));
 			dispatch(watchAttendanceAdded(newOrg));
 			dispatch(watchPollAdded(newOrg));

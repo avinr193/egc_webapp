@@ -23,7 +23,7 @@ import styled from 'styled-components';
 
 import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll, setIsAdminThunk, 
 	fetchLivePollsThunk, fetchYear, watchAttendanceAdded, watchPollAdded, offWatchAttendanceAdded,
-	offWatchPollAdded, fetchYearsThunk } from '../../store/actions'
+	offWatchPollAdded, fetchYearsThunk, fetchDateThunk } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -252,12 +252,12 @@ class AdminPollWindow extends React.Component {
 		for (let y = 0; y < this.props.currentPoll.options.length; y++) {
 			let percentString = "";
 			if(this.props.currentPoll.options[y].percent){
-				percentString = " - " + this.props.currentPoll.options[y].percent.toString() + "%";
+				percentString = this.props.currentPoll.options[y].percent.toString() + "% - ";
 			}
 			currentPollOptions.push(
 				<div key={y}>
 					<ListItem value={this.props.currentPoll.options[y].text} primaryText={this.props.currentPoll.options[y].text}
-						secondaryText={this.props.currentPoll.options[y].count.toString() + percentString}></ListItem>
+						secondaryText={percentString + this.props.currentPoll.options[y].count.toString() }></ListItem>
 				</div>
 			)
 		}
@@ -399,6 +399,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(offWatchAttendanceAdded());
 			dispatch(offWatchPollAdded());
 			dispatch(setOrg(newOrg));
+			dispatch(fetchDateThunk());
 			dispatch(fetchYearsThunk(newOrg,"polls"));
 			dispatch(watchAttendanceAdded(newOrg));
 			dispatch(watchPollAdded(newOrg));

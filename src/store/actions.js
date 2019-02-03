@@ -28,7 +28,8 @@ export const ActionTypes = {
     FETCH_ADMINS: "FETCH_ADMINS",
     SET_ADMIN: "SET_ADMIN",
     FETCH_ALL_ORGS: "FETCH_ALL_ORGS",
-    SET_LOADING: "SET_LOADING"
+    SET_LOADING: "SET_LOADING",
+    SET_IS_OPP_EVENT_LIVE: "SET_IS_OPP_EVENT_LIVE"
 }
 
 /*ACTION CREATORS*/
@@ -48,6 +49,7 @@ export const setLiveEvent = (newLiveEvent) => ({ type: ActionTypes.SET_LIVE_EVEN
 export const fetchLivePolls = (livePolls) => ({ type: ActionTypes.FETCH_LIVE_POLLS, livePolls })
 export const setLivePoll = (newLivePoll) => ({ type: ActionTypes.SET_LIVE_POLL, newLivePoll })
 export const setIsEventLive = (isEventLive) => ({ type: ActionTypes.SET_IS_EVENT_LIVE, isEventLive })
+export const setIsOppEventLive = (isOppEventLive) => ({ type: ActionTypes.SET_IS_OPP_EVENT_LIVE, isOppEventLive })
 export const setIsPollLive = (isPollLive) => ({ type: ActionTypes.SET_IS_POLL_LIVE, isPollLive })
 export const setAttPath = (newAttPath) => ({ type: ActionTypes.SET_ATT_PATH, newAttPath })
 export const fetchPolls = (polls) => ({ type: ActionTypes.FETCH_POLLS, polls })
@@ -98,9 +100,12 @@ export function checkEventLive() {
     return (dispatch, getState) => {
         let state = getState();
         if (!state.currentEvent) { dispatch(setIsEventLive(false)); };
+        let oppAttPath = state.attPath === "opening" ? "closing" : "opening";
         isLiveEvent(state.eventDate.key + state.currentEvent + state.currentOrg, state.attPath)
             .then((isEventLive) => dispatch(setIsEventLive(isEventLive)))
             .then(() => dispatch(setLiveEventByString()))
+        isLiveEvent(state.eventDate.key + state.currentEvent + state.currentOrg, oppAttPath)
+            .then((isOppEventLive) => dispatch(setIsOppEventLive(isOppEventLive)))
     }
 }
 
@@ -168,7 +173,8 @@ export function fetchPollsThunk(newOrg=null) {
                 let dataVal = data.val();
                 const pollObj = {
                     question: dataVal.question,
-                    options: dataVal.options,
+                    options: dataVal.options ? dataVal.options[0].percent ? sortBy(dataVal.options, "percent").reverse()
+                            : dataVal.options : dataVal.options,
                     organization: dataVal.properties.organization,
                     location: dataVal.properties.location,
                     people: dataVal.people ? sortBy(dataVal.people, "name") : { none: "null" },
@@ -214,7 +220,7 @@ export function updatePollCounts() {
                     })
                     if(totalCount > 0){
                         for (let key in options) {
-                            options[key].percent = ((options[key].count * 100) / (totalCount * 100)) * 100;
+                            options[key].percent = +((((options[key].count * 100) / (totalCount * 100)) * 100).toFixed(2));
                         }
                     }
                     database.ref(`/Organizations/${state.currentOrg}/${state.currentYear}/polls/${data.key}/options/`).set(options);

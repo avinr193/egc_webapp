@@ -176,8 +176,8 @@ class AttendanceWindow extends React.Component {
             <div>
             <p> Signed-In: {this.state.user.displayName} </p>
             <p> Attendance Logged: {this.state.att} </p>
-            <p> Longitude: {!this.state.logged ? "Pending" : this.state.long} </p>
             <p> Latitude: {!this.state.logged ? "Pending" : this.state.lat} </p>
+            <p> Longitude: {!this.state.logged ? "Pending" : this.state.long} </p>
             <div> </div>
             {(this.state.logged ? <p style={{ color: 'green' }}> Success! </p> :
               <FlatButton onClick={() => this.logAtt()} labelStyle={{ color: "#FFFFFF" }} label="Log Attendance"

@@ -34,6 +34,10 @@ const isEventLive = (state = false, action) => {
     return (action.type === ActionTypes.SET_IS_EVENT_LIVE) ? action.isEventLive : state
 }
 
+const isOppEventLive = (state = false, action) => {
+    return (action.type === ActionTypes.SET_IS_OPP_EVENT_LIVE) ? action.isOppEventLive : state
+}
+
 const isPollLive = (state = false, action) => {
     return (action.type === ActionTypes.SET_IS_POLL_LIVE) ? action.isPollLive : state
 }
@@ -106,5 +110,5 @@ export default combineReducers({
     events, organizations, attendance, currentDate, currentEvent,
     currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath,
     polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin, currentOption, currentYear, 
-    years, admins, currentAdmin, allOrganizations, loading
+    years, admins, currentAdmin, allOrganizations, loading, isOppEventLive
 })
