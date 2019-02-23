@@ -251,6 +251,8 @@ export function fetchOrgsThunk(netID) {
                     dispatch(fetchPollsThunk(organizations[0]))
                     dispatch(watchPollAdded())
                     dispatch(watchAttendanceAdded())
+                }else {
+                    dispatch(fetchOrgs([]));
                 }})
     }
 }
