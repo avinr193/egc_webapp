@@ -125,17 +125,18 @@ class AdminWindow extends React.Component {
     var dataArr = this.props.attendance;
     for (var key in dataArr) {
       const attObj = {
-        NAME: (dataArr[key]).name.toUpperCase(),
-        EMAIL: (dataArr[key]).email,
-        TIME_SUCCESS: (dataArr[key]).time
+        Name: (dataArr[key]).name.toLowerCase().replace(/\b(\s\w|^\w)/g, function (txt) { return txt.toUpperCase(); }),
+        Email: (dataArr[key]).email,
+        Time: (dataArr[key]).time
       }
       jsonArr.push(attObj);
     }
     const Json2csvParser = require('json2csv').Parser;
-    const fields = ['NAME', 'EMAIL', 'TIME_SUCCESS'];
+    const fields = ['Name', 'Email', 'Time'];
     const json2csvParser = new Json2csvParser({ fields });
     const csv = json2csvParser.parse(jsonArr);
-    this.download("test.csv", csv);
+    this.download(this.props.eventDate.key + "_" + this.props.currentEvent.replace(/ /g,"-")
+    + "_" + this.props.currentOrg.match(/[A-Z]/g).join('') + "_att.csv", csv);
   }
 
   addRemoveLive(e, isInputChecked) {
@@ -172,7 +173,7 @@ class AdminWindow extends React.Component {
     let namesList = [];
     for (let i = 0; i < this.props.attendance.length; i++) {
       namesList.push(<ListItem key={i} primaryText={(this.props.attendance[i]).name} 
-      secondaryText={"Time Logged: " + (this.props.attendance[i]).time + ", Distance: " + 
+      secondaryText={"Time: " + (this.props.attendance[i]).time + ", Distance: " + 
       (this.props.attendance[i]).location.distance.toFixed(3)}></ListItem>);
     }
 

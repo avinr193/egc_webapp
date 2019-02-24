@@ -107,12 +107,12 @@ class AttendanceWindow extends React.Component {
 
   loginSuccess(userLat, userLong, distToEvent) {
     var today = new Date();
-    var timestamp = today.getHours().toString() + ":" + today.getMinutes().toString();
+    var timestamp = today.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
     if (!isLiveEvent(this.props.currentDate + this.props.currentLiveEvent.event + this.props.currentLiveEvent.organization, this.props.currentLiveEvent.attPath)) {
       return this.loginFailure(2);
     }
     addAtt(this.props.currentLiveEvent.organization, this.props.currentDate, this.props.currentLiveEvent.event, 
-      this.state.user.displayName.toUpperCase(), timestamp, this.state.user.email, userLat, userLong, 
+      this.state.user.displayName.toLowerCase().replace(/\b(\s\w|^\w)/g, function (txt) { return txt.toUpperCase(); }), timestamp, this.state.user.email, userLat, userLong, 
       distToEvent, this.props.currentLiveEvent.attPath, this.state.user.uid, this.props.currentYear);
     this.setState({
       logged: true,
@@ -174,7 +174,7 @@ class AttendanceWindow extends React.Component {
             <p></p>
             {this.props.liveEvents.length === 1 || this.state.enabledSubmit === true ?
             <div>
-            <p> Signed-In: {this.state.user.displayName} </p>
+            <p> Signed-In: {this.state.user.displayName.toLowerCase().replace(/\b(\s\w|^\w)/g, function (txt) { return txt.toUpperCase(); })} </p>
             <p> Attendance Logged: {this.state.att} </p>
             <p> Latitude: {!this.state.logged ? "Pending" : this.state.lat} </p>
             <p> Longitude: {!this.state.logged ? "Pending" : this.state.long} </p>

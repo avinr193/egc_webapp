@@ -268,7 +268,8 @@ class AdminPollWindow extends React.Component {
 				Object.keys(this.props.currentPoll.people).forEach(key => {
 					currentPollPeople.push(
 						<div key={key}>
-							<ListItem value={this.props.currentPoll.people[key].name} primaryText={this.props.currentPoll.people[key].name}
+							<ListItem value={this.props.currentPoll.people[key].name.toLowerCase().replace(/\b(\s\w|^\w)/g, function (txt) { return txt.toUpperCase(); })} 
+							primaryText={this.props.currentPoll.people[key].name.toLowerCase().replace(/\b(\s\w|^\w)/g, function (txt) { return txt.toUpperCase(); })}
 								secondaryText={"Time Logged: " + this.props.currentPoll.people[key].time_logged + ", Distance: "
 									+ this.props.currentPoll.people[key].location.distance.toFixed(3)}></ListItem>
 						</div>

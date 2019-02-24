@@ -115,7 +115,7 @@ class VotingWindow extends React.Component {
 
   loginSuccess(userLat, userLong, distToEvent) {
     var today = new Date();
-    var timestamp = today.getHours().toString() + ":" + today.getMinutes().toString();
+    var timestamp = today.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
     if (!isLivePoll(this.props.currentLivePoll.uuid)) {
       return this.loginFailure(2);
     }

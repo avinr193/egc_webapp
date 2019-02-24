@@ -154,7 +154,7 @@ export function fetchEventsThunk(newOrg=null, eventName=null) {
         let events = [];
         database.ref(`/Organizations/${org}/${state.currentYear}/events/`).once('value', snap => {
             snap.forEach(data => {
-                events.push(data.key)
+                events.push(data.key);
             })
         })
             .then(() => dispatch(fetchEvents(events)))
@@ -177,7 +177,11 @@ export function fetchPollsThunk(newOrg=null) {
                             : dataVal.options : dataVal.options,
                     organization: dataVal.properties.organization,
                     location: dataVal.properties.location,
-                    people: dataVal.people ? sortBy(dataVal.people, "name") : { none: "null" },
+                    people: dataVal.people ? sortBy(dataVal.people,"name").sort(function(a, b) {
+                        let lastNameCompare = a.name.split(" ").pop().localeCompare(b.name.split(" ").pop());
+                        let firstNameCompare = a.name.split(" ")[0].localeCompare(b.name.split(" ")[0]);
+                        return lastNameCompare === 0 ? firstNameCompare : lastNameCompare;
+                    }) : { none: "null" },
                     uuid: data.key
                 }
                 polls.push(pollObj);
@@ -322,14 +326,18 @@ export function fetchAttendanceThunk() {
             snap.forEach(data => {
                 let dataVal = data.val();
                 const attObj = {
-                    name: dataVal.name.toUpperCase(),
+                    name: dataVal.name.toLowerCase().replace(/\b(\s\w|^\w)/g, function (txt) { return txt.toUpperCase(); }),
                     email: dataVal.email,
                     time: dataVal.time_logged.toString(),
                     location: dataVal.location
                 }
                 attendance.push(attObj);
             })
-            attendance = sortBy(attendance, "name")
+            attendance.sort(function(a, b) {
+                let lastNameCompare = a.name.split(" ").pop().localeCompare(b.name.split(" ").pop());
+                let firstNameCompare = a.name.split(" ")[0].localeCompare(b.name.split(" ")[0]);
+                return lastNameCompare === 0 ? firstNameCompare : lastNameCompare;
+            });
         })
             .then(() => dispatch(fetchAtt(attendance)))
             .then(() => dispatch(checkEventLive()))

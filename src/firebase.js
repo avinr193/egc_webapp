@@ -122,7 +122,7 @@ export const logOption = (livePoll, option, user, timestamp, userLat, userLong, 
             time_logged: timestamp,
             email: user.email,
             location: { latitude: userLat, longitude: userLong, distance: distToEvent },
-            name: user.displayName.toUpperCase(),
+            name: user.displayName.toLowerCase().replace(/\b(\s\w|^\w)/g, function (txt) { return txt.toUpperCase(); }),
             option: option
         })
 }
