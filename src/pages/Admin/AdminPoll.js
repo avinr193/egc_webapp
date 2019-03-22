@@ -23,7 +23,7 @@ import styled from 'styled-components';
 
 import { setOrg, setPoll, fetchPollsThunk, checkPollLive, fetchAndSetPoll, setIsAdminThunk, 
 	fetchLivePollsThunk, fetchYear, watchAttendanceAdded, watchPollAdded, offWatchAttendanceAdded,
-	offWatchPollAdded, fetchYearsThunk, fetchDateThunk } from '../../store/actions'
+	offWatchPollAdded, fetchYearsThunk, fetchDateThunk, setAttPath } from '../../store/actions'
 
 const Container = styled.div`
  justify-content: center;
@@ -405,6 +405,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(watchAttendanceAdded(newOrg));
 			dispatch(watchPollAdded(newOrg));
 			dispatch(checkPollLive());
+			dispatch(setAttPath("opening"));
 		},
 		onChangePoll(newPoll) {
 			dispatch(setPoll(newPoll));

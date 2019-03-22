@@ -76,13 +76,16 @@ export function setIsAdminThunk(isAdmin, email=null) {
 }
 
 export function fetchDateThunk() {
-    return dispatch => {
+    return (dispatch, getState) => {
+        let state = getState();
         let today = new Date();
         let currentDate = (today.getMonth() + 1).toString() + "-" + today.getDate().toString();
         let currentYear = today.getFullYear().toString();
         dispatch(fetchDate(currentDate));
         dispatch(fetchYear(currentYear));
-        dispatch(fetchYears([currentYear]));
+        if(state.years === []){
+            dispatch(fetchYears([currentYear]));
+        }
     }
 }
 

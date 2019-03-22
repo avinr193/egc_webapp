@@ -18,7 +18,8 @@ import styled from 'styled-components';
 
 import {
 	setOrg, fetchEventsThunk, setIsAdminThunk, fetchYear, offWatchAttendanceAdded,
-	offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk, fetchDateThunk
+	offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk, fetchDateThunk,
+	setAttPath
 } from '../../store/actions'
 
 
@@ -260,6 +261,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(fetchYearsThunk(newOrg, "events"));
 			dispatch(watchAttendanceAdded(newOrg));
 			dispatch(watchPollAdded(newOrg));
+			dispatch(setAttPath("opening"));
 		},
 		onChangeYear(newYear) {
 			dispatch(fetchYear(newYear));
