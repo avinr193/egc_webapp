@@ -5,6 +5,7 @@
   "dependencies": {
     "ajv": "^6.5.1",
     "firebase": "^5.1.0",
+    "firebase-tools": "^6.7.1",
     "json2csv": "^4.2.1",
     "material-datetime-picker": "^2.4.0",
     "material-ui-datetimepicker": "^1.0.7",

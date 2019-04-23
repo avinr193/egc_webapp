@@ -20,10 +20,13 @@ export function isGeneralAdmin(email) {
 export function isSpecificAdmin(email) {
     let netID = email.split('@')[0];
     let isSpecificAdmin = false;
+    let isChild = false;
     return database.ref('/Admins/').once('value', snap => {
-        isSpecificAdmin = snap.hasChild(netID);
+        isChild = snap.hasChild(netID);
     }).then(() => { 
-        isSpecificAdmin = (netID === "nbb29" || netID === "sss309" || netID === "aja193")
+        if(isChild){
+            isSpecificAdmin = (netID === "nbb29" || netID === "sss309" || netID === "aja193");
+        }
         return isSpecificAdmin; })
 }
 

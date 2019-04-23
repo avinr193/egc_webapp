@@ -44,7 +44,8 @@ class AdminAdOrgsWindow extends React.Component {
 			this.setState({
 			  enabled: true,
 			  user: user
-			})
+      })
+      this.props.onIsAdmin(false);
 			if(!this.props.isAdmin){
 				isSpecificAdmin(user.email).then(isSpecAdmin => {
 			 		this.props.onIsAdmin(isSpecAdmin, user.email);
@@ -216,7 +217,7 @@ class AdminAdOrgsWindow extends React.Component {
             <div style={{"color":"red","padding":"25px"}}>{this.state.adminOrgError}</div>
             </div>
         </div>
-        : <div>You are not an admin.</div>)
+        : <div>You are not an elevated admin.</div>)
       )
     )
   }
