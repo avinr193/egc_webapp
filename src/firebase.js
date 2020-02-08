@@ -19,15 +19,11 @@ export function isGeneralAdmin(email) {
 
 export function isSpecificAdmin(email) {
     let netID = email.split('@')[0];
-    let isSpecificAdmin = false;
     let isChild = false;
-    return database.ref('/Admins/').once('value', snap => {
+    return database.ref('/ElevatedAdmins/').once('value', snap => {
         isChild = snap.hasChild(netID);
     }).then(() => { 
-        if(isChild){
-            isSpecificAdmin = (netID === "nbb29" || netID === "sss309" || netID === "aja193");
-        }
-        return isSpecificAdmin; })
+        return isChild; })
 }
 
 export const currentUser = () => {
@@ -115,6 +111,12 @@ export const addAdminOrg = (newOrg, admin) => {
 export const addAdmin = (admin) => {
     database.ref(`/Admins/`).update({
         [admin]: 'null',
+    });
+}
+
+export const addElevatedAdmin = (elevAdmin) => {
+    database.ref(`/ElevatedAdmins/`).update({
+        [elevAdmin]: 'null',
     });
 }
 

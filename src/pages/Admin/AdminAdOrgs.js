@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import 'firebase/auth'
-import firebase, { signIn, isSpecificAdmin, addOrg, addAdminOrg, addAdmin, deleteAdminOrg } from '../../firebase'
+import firebase, { signIn, isSpecificAdmin, addOrg, addAdminOrg, addAdmin, deleteAdminOrg, addElevatedAdmin } from '../../firebase'
 
 import FlatButton from 'material-ui/FlatButton';
 import IconButton from 'material-ui/IconButton';
@@ -11,15 +11,15 @@ import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
 
-import { setIsAdminThunk, fetchAllOrgsThunk, fetchAdminsThunk, setAdmin, fetchOrgsThunk, fetchOrgs } from '../../store/actions'
+import { setIsAdminThunk, fetchAllOrgsThunk, fetchAdminsThunk, setAdmin, fetchOrgsThunk, fetchOrgs, fetchElevatedAdminsThunk } from '../../store/actions'
 
 const Admin = ({onIsAdmin, isAdmin, orgs, currentYear, admins, currentAdmin, onChangeAdmin, allOrgs, 
-  resetOrgs, onAddOrg, onAddAdmin}) => (
+  resetOrgs, onAddOrg, onAddAdmin, elevAdmins, onAddElevatedAdmin}) => (
 	<div className = "admin">
     <AdminAdOrgsWindow onIsAdmin={onIsAdmin} isAdmin={isAdmin} orgs={orgs} 
     currentYear={currentYear} admins={admins} currentAdmin={currentAdmin}
     onChangeAdmin={onChangeAdmin} allOrgs={allOrgs} resetOrgs={resetOrgs} onAddOrg={onAddOrg}
-    onAddAdmin={onAddAdmin}/>
+    onAddAdmin={onAddAdmin} elevAdmins={elevAdmins} onAddElevatedAdmin={onAddElevatedAdmin}/>
     </div>
 );
 
@@ -34,7 +34,9 @@ class AdminAdOrgsWindow extends React.Component {
       allOrgError: '',
       adminOrgError: '',
       addAdminError: '',
-      newAdminName: ''
+      newAdminName: '',
+      newElevatedAdminName: '',
+      addElevatedAdminError: ''
     }
   }
 
@@ -89,6 +91,10 @@ class AdminAdOrgsWindow extends React.Component {
       this.setState({ 'newAdminName': e.target.value })
     }
 
+    setNewElevatedAdminName = (e) => {
+      this.setState({ 'newElevatedAdminName': e.target.value })
+    }
+
     checkAddOrg() {
       let newOrg = this.state.newOrgName.replace(/\b\w/g, function(l){ return l.toUpperCase() });
       if(this.props.allOrgs.includes(newOrg)){
@@ -139,6 +145,22 @@ class AdminAdOrgsWindow extends React.Component {
       }
     }
 
+    checkElevatedAdmin() {
+      if(!this.state.newElevatedAdminName.length > 0){
+        this.setState({
+          addElevatedAdminError: 'No netID entered.'
+        })
+      }
+      else{
+        this.setState({
+          addElevatedAdminError: ''
+        })
+        addElevatedAdmin(this.state.newElevatedAdminName);
+        this.props.onAddElevatedAdmin();
+        this.setNewElevatedAdminName({target: {value: ''}})
+      }
+    }
+
   handleAdminOrgDelete(e){
     if(this.props.orgs.length === 1 & this.props.currentAdmin === this.state.user.email.split('@')[0]){
       this.setState({
@@ -162,6 +184,11 @@ class AdminAdOrgsWindow extends React.Component {
     		adminsList.push(<MenuItem key={k} value={this.props.admins[k]} primaryText={this.props.admins[k]}></MenuItem>);
     }
 
+    let elevAdminsList = [];
+    for (let k = 0; k < this.props.elevAdmins.length; k++) {
+    		elevAdminsList.push(<ListItem key={k} value={this.props.elevAdmins[k]} primaryText={this.props.elevAdmins[k]}></ListItem>);
+    }
+
     let orgsList = [];
 		for (let j = 0; j < this.props.orgs.length; j++) {
       orgsList.push(<div key={j} style={{"display":"flex","justifyContent":"center"}}><ListItem value={this.props.orgs[j]} 
@@ -182,8 +209,20 @@ class AdminAdOrgsWindow extends React.Component {
 				(this.props.isAdmin ?
         <div style = {{"display":"flex"}}>
             <div style={{"flex":"1"}}>
+            <div style={{ "fontWeight": "bold" }}>Elevated Admins</div>
+            <div style={{"fontStyle":"italic","color":"grey"}}>able to add orgs and designate admins (e.g. access this page)</div>
+            <List style={{"maxHeight":"15vh", "overflow":"scroll"}}>
+            	{elevAdminsList}
+          	</List>
+            <TextField name="newElevatedAdmin" value={this.state.newElevatedAdminName} onChange={(e) => this.setNewElevatedAdminName(e)}
+				    hintText="e.g. ru098" floatingLabelText={"Add Elevated Admin (enter netID)"} key={3} style={{ "marginTop": "0px" }} />
+            <div style={{"padding":"5px"}}></div>
+            <FlatButton onClick={() => {this.checkElevatedAdmin()}} labelStyle={{ color: "#FFFFFF" }} label={"Submit"}
+						backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
+            <div>{this.state.addElevatedAdminError}</div>
+            <div style={{"padding":"25px"}}></div>
             <div style={{ "fontWeight": "bold" }}>Organizations</div>
-            <List style={{"maxHeight":"65vh", "overflow":"scroll"}}>
+            <List style={{"maxHeight":"28vh", "overflow":"scroll"}}>
 							{allOrgsList}
 						</List>
             <TextField name="newOrg" value={this.state.newOrgName} onChange={(e) => this.setNewOrgName(e)}
@@ -195,18 +234,22 @@ class AdminAdOrgsWindow extends React.Component {
             </div>
             <div style={{"flex":"1"}}>
             <div style={{ "fontWeight": "bold" }}>Admins</div>
-            <DropDownMenu maxHeight={300} value={this.props.currentAdmin} onChange={this.changeAdmin.bind(this)}>
+            <div style={{"fontStyle":"italic","color":"grey"}}>able to create/delete events/polls for specified orgs</div>
+            <List style={{"maxHeight":"15vh", "overflow":"scroll"}}>
             	{adminsList}
-          	</DropDownMenu>
+          	</List>
             <div></div>
             <TextField name="newAdmin" value={this.state.newAdminName} onChange={(e) => this.setNewAdminName(e)}
-				    hintText="e.g. Rutgers Red Club" floatingLabelText={"Add Admin (enter netID, e.g. ru098)"} key={3} style={{ "marginTop": "0px" }} />
+				    hintText="e.g. ru098" floatingLabelText={"Add Admin (enter netID)"} key={3} style={{ "marginTop": "0px" }} />
             <div style={{"padding":"5px"}}></div>
             <FlatButton onClick={() => {this.checkAdmin()}} labelStyle={{ color: "#FFFFFF" }} label={"Submit"}
 						backgroundColor="#F44336" hoverColor="#FFCDD2" rippleColor="#F44336" />
             <div style={{"color":"red","padding":"25px"}}>{this.state.addAdminError}</div>
-            <div style={{"fontWeight":"bold"}}>Accessible Organizations</div>
-            <List style={{"maxHeight":"28vh", "overflow":"scroll"}}>
+        <div style={{"fontWeight":"bold"}}>Organizations accessible by:</div>
+        <DropDownMenu maxHeight={300} value={this.props.currentAdmin} onChange={this.changeAdmin.bind(this)}>
+            	{adminsList}
+          	</DropDownMenu>
+            <List style={{"maxHeight":"20vh", "overflow":"scroll"}}>
 							{orgsList}
 						</List>
             <TextField name="newAdminOrg" value={this.state.newAdminOrgName} onChange={(e) => this.setNewAdminOrgName(e)}
@@ -229,11 +272,13 @@ class AdminAdOrgsWindow extends React.Component {
     isAdmin: state.isAdmin,
     currentYear: state.currentYear,
     admins: state.admins,
-    currentAdmin: state.currentAdmin
+    currentAdmin: state.currentAdmin,
+    elevAdmins: state.elevAdmins
   })
   const mapDispatch = (dispatch) => {
     dispatch(fetchAllOrgsThunk());
     dispatch(fetchAdminsThunk());
+    dispatch(fetchElevatedAdminsThunk());
     return {
       onIsAdmin(isGenAdmin, email=null){
         dispatch(setIsAdminThunk(isGenAdmin, email));
@@ -245,6 +290,9 @@ class AdminAdOrgsWindow extends React.Component {
       onAddAdmin(newAdmin){
         dispatch(fetchAdminsThunk(newAdmin));
         dispatch(fetchOrgsThunk(newAdmin));
+      },
+      onAddElevatedAdmin(){
+        dispatch(fetchElevatedAdminsThunk())
       },
       resetOrgs(){
         dispatch(fetchOrgs([]));

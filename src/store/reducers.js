@@ -98,6 +98,11 @@ const admins = (state = [], action) => {
     return (action.type === ActionTypes.FETCH_ADMINS && action.admins) ? action.admins : state
 }
 
+const elevAdmins = (state = [], action) => {
+    return (action.type === ActionTypes.FETCH_ELEVATED_ADMINS && action.elevAdmins) ? action.elevAdmins : state
+}
+
+
 const currentAdmin = (state = '', action) => {
     return (action.type === ActionTypes.SET_ADMIN && action.newAdmin) ? action.newAdmin : state
 }
@@ -110,5 +115,5 @@ export default combineReducers({
     events, organizations, attendance, currentDate, currentEvent,
     currentOrg, eventDates, eventDate, liveEvents, currentLiveEvent, isEventLive, attPath,
     polls, currentPoll, isPollLive, livePolls, currentLivePoll, isAdmin, currentOption, currentYear, 
-    years, admins, currentAdmin, allOrganizations, loading, isOppEventLive
+    years, admins, currentAdmin, allOrganizations, loading, isOppEventLive, elevAdmins
 })

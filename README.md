@@ -4,16 +4,16 @@ Simple web-app usable by organizations to facilitate and track attendance, and h
 To run locally:
 1. Create a new file called *config.json* in the src folder under the root directory. Populate it as follows:
 ```
-export default config = {
-    apiKey: "",
-    authDomain: "",
-    databaseURL: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: ""
-  }
- ```
+export default {
+  apiKey: "",
+  authDomain: "",
+  databaseURL: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+}
+```
  To obtain the config object you will need to set-up a firebase project and initialize an app under that project.
  See here for more info: https://support.google.com/firebase/answer/7015592?hl=en
  Follow the directions for *Obtain config object for your web-app*
@@ -28,9 +28,8 @@ export default config = {
 
 COMING SOON:
 1. How to set-up the database from scratch (structure)
-2. How to define admins (must be reworked in the app, currently hardcoded)
-3. How to modify the app to run with different schools
-4. How to deal with dependency issues (a little messy currently)
+2. How to modify the app to run with different schools
+3. How to deal with dependency issues (a little messy currently)
 
 Other TO-DO:
 1. Rework all React components to proper usage (big optimization potential)

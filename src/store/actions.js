@@ -26,6 +26,7 @@ export const ActionTypes = {
     SET_IS_ADMIN: "SET_IS_ADMIN",
     SET_CURRENT_OPTION: "SET_CURRENT_OPTION",
     FETCH_ADMINS: "FETCH_ADMINS",
+    FETCH_ELEVATED_ADMINS: "FETCH_ELEVATED_ADMINS",
     SET_ADMIN: "SET_ADMIN",
     FETCH_ALL_ORGS: "FETCH_ALL_ORGS",
     SET_LOADING: "SET_LOADING",
@@ -57,6 +58,7 @@ export const setPoll = (poll) => ({ type: ActionTypes.SET_POLL, poll })
 export const setIsAdmin = (isAdmin) => ({ type: ActionTypes.SET_IS_ADMIN, isAdmin })
 export const setCurrentOption = (newOption) => ({ type: ActionTypes.SET_CURRENT_OPTION, newOption })
 export const fetchAdmins = (admins) => ({ type: ActionTypes.FETCH_ADMINS, admins })
+export const fetchElevatedAdmins = (elevAdmins) => ({ type: ActionTypes.FETCH_ELEVATED_ADMINS, elevAdmins })
 export const setAdmin = (newAdmin) => ({ type: ActionTypes.SET_ADMIN, newAdmin })
 export const setLoading = (newLoading) => ({ type: ActionTypes.SET_LOADING, newLoading })
 
@@ -289,6 +291,20 @@ export function fetchAdminsThunk(newAdmin=null) {
                 dispatch(fetchAdmins(admins))})
             .then(() => admins[0] ? newAdmin ? dispatch(setAdmin(newAdmin)) : dispatch(setAdmin(admins[0])) : null)
             .then(() => newAdmin ? dispatch(fetchOrgsThunk(newAdmin)) : dispatch(fetchOrgsThunk(admins[0])))
+    }
+}
+
+export function fetchElevatedAdminsThunk() {
+    return (dispatch) => {        
+        let elevAdmins = [];
+        database.ref(`/ElevatedAdmins/`).once('value', snap => {
+            snap.forEach(data => {
+                elevAdmins.push(data.key)
+            })
+        })
+            .then(() => {
+                elevAdmins.splice( elevAdmins.indexOf('dummy'), 1 );
+                dispatch(fetchElevatedAdmins(elevAdmins))})
     }
 }
 
