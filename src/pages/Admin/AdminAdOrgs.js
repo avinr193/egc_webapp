@@ -14,12 +14,12 @@ import TextField from 'material-ui/TextField';
 import { setIsAdminThunk, fetchAllOrgsThunk, fetchAdminsThunk, setAdmin, fetchOrgsThunk, fetchOrgs, fetchElevatedAdminsThunk } from '../../store/actions'
 
 const Admin = ({onIsAdmin, isAdmin, orgs, currentYear, admins, currentAdmin, onChangeAdmin, allOrgs, 
-  resetOrgs, onAddOrg, onAddAdmin, elevAdmins, onAddElevatedAdmin}) => (
+  resetOrgs, onAddOrg, onAddAdmin, elevAdmins, onAddElevatedAdmin, onMount}) => (
 	<div className = "admin">
     <AdminAdOrgsWindow onIsAdmin={onIsAdmin} isAdmin={isAdmin} orgs={orgs} 
     currentYear={currentYear} admins={admins} currentAdmin={currentAdmin}
     onChangeAdmin={onChangeAdmin} allOrgs={allOrgs} resetOrgs={resetOrgs} onAddOrg={onAddOrg}
-    onAddAdmin={onAddAdmin} elevAdmins={elevAdmins} onAddElevatedAdmin={onAddElevatedAdmin}/>
+    onAddAdmin={onAddAdmin} elevAdmins={elevAdmins} onAddElevatedAdmin={onAddElevatedAdmin} onMount={onMount}/>
     </div>
 );
 
@@ -41,6 +41,7 @@ class AdminAdOrgsWindow extends React.Component {
   }
 
   componentDidMount() {
+    this.props.onMount();
 		firebase.auth().onAuthStateChanged((user) => {
 		  if (user) {
 			this.setState({
@@ -50,7 +51,10 @@ class AdminAdOrgsWindow extends React.Component {
       this.props.onIsAdmin(false);
 			if(!this.props.isAdmin){
 				isSpecificAdmin(user.email).then(isSpecAdmin => {
-			 		this.props.onIsAdmin(isSpecAdmin, user.email);
+           this.props.onIsAdmin(isSpecAdmin, user.email);
+           if(isSpecAdmin){
+            this.props.onMount();
+          }
 				})
 		  	}
 		  }
@@ -276,9 +280,6 @@ class AdminAdOrgsWindow extends React.Component {
     elevAdmins: state.elevAdmins
   })
   const mapDispatch = (dispatch) => {
-    dispatch(fetchAllOrgsThunk());
-    dispatch(fetchAdminsThunk());
-    dispatch(fetchElevatedAdminsThunk());
     return {
       onIsAdmin(isGenAdmin, email=null){
         dispatch(setIsAdminThunk(isGenAdmin, email));
@@ -300,6 +301,11 @@ class AdminAdOrgsWindow extends React.Component {
       },
       onAddOrg(){
         dispatch(fetchAllOrgsThunk())
+      },
+      onMount(){
+        dispatch(fetchAllOrgsThunk());
+        dispatch(fetchAdminsThunk());
+        dispatch(fetchElevatedAdminsThunk());
       }
     }
   }
