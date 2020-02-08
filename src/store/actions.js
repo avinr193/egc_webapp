@@ -155,6 +155,7 @@ export function fetchEventDatesThunk() {
 export function fetchEventsThunk(newOrg=null, eventName=null) {
     return (dispatch, getState) => {
         let state = getState();
+        if(!state.isAdmin) return;
         let org = newOrg ? newOrg : state.currentOrg;
         let events = [];
         database.ref(`/Organizations/${org}/${state.currentYear}/events/`).once('value', snap => {
@@ -171,6 +172,7 @@ export function fetchEventsThunk(newOrg=null, eventName=null) {
 export function fetchPollsThunk(newOrg=null) {
     return (dispatch, getState) => {
         let state = getState();
+        if(!state.isAdmin) return;
         let org = newOrg ? newOrg : state.currentOrg;
         let polls = [];
         database.ref(`/Organizations/${org}/${state.currentYear}/polls/`).once('value', snap => {
@@ -267,7 +269,9 @@ export function fetchOrgsThunk(netID) {
 }
 
 export function fetchAllOrgsThunk() {
-    return (dispatch) => {        
+    return (dispatch, getState) => {  
+        let state = getState();
+        if(!state.isAdmin) return;
         let allOrganizations = [];
         database.ref(`/Organizations/`).once('value', snap => {
             snap.forEach(data => {
@@ -279,7 +283,9 @@ export function fetchAllOrgsThunk() {
 }
 
 export function fetchAdminsThunk(newAdmin=null) {
-    return (dispatch) => {        
+    return (dispatch, getState) => {
+        let state = getState();
+        if(!state.isAdmin) return;
         let admins = [];
         database.ref(`/Admins/`).once('value', snap => {
             snap.forEach(data => {
@@ -295,7 +301,9 @@ export function fetchAdminsThunk(newAdmin=null) {
 }
 
 export function fetchElevatedAdminsThunk() {
-    return (dispatch) => {        
+    return (dispatch, getState) => { 
+        let state = getState();
+        if(!state.isAdmin) return;
         let elevAdmins = [];
         database.ref(`/ElevatedAdmins/`).once('value', snap => {
             snap.forEach(data => {
@@ -460,6 +468,13 @@ export function watchLiveEvents() {
     }
 }
 
+export function offWatchLiveEvents() {
+    return () => {
+        database.ref(`/liveEvents/`).off('child_added');
+        database.ref(`/liveEvents/`).off('child_changed');
+    }
+}
+
 export function watchPollAdded(newOrg=null) {
     return (dispatch, getState) => {
         let state = getState();
@@ -489,5 +504,12 @@ export function watchLivePolls() {
         database.ref(`/livePolls/`).on('child_removed', () => {
             dispatch(fetchLivePollsThunk());
         });
+    }
+}
+
+export function offWatchLivePolls() {
+    return () => {
+        database.ref(`/livePolls/`).off('child_added');
+        database.ref(`/livePolls/`).off('child_changed');
     }
 }

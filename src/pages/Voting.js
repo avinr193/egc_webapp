@@ -12,18 +12,19 @@ import styled from 'styled-components';
 import 'firebase/auth'
 import firebase, { logOption, isLivePoll, signIn } from '../firebase'
 
-import { setLivePoll, fetchLivePollsThunk, setCurrentOption, fetchDateThunk } from '../store/actions'
+import { setLivePoll, fetchLivePollsThunk, setCurrentOption, fetchDateThunk, watchLivePolls, offWatchLivePolls } from '../store/actions'
 
 const Container = styled.div`
  justify-content: center;
  display: flex;
 `;
 
-const Voting = ({ livePolls, onChangePoll, currentLivePoll, currentOption, onChangeOption, currentYear }) => (
+const Voting = ({ livePolls, onChangePoll, currentLivePoll, currentOption, onChangeOption, currentYear, onUserLogin, onUserLogoff }) => (
   <div className='attendance'>
     <VotingWindow livePolls={livePolls}
       currentLivePoll={currentLivePoll} onChangePoll={onChangePoll} 
-      currentOption={currentOption} onChangeOption={onChangeOption} currentYear={currentYear}/>
+      currentOption={currentOption} onChangeOption={onChangeOption} currentYear={currentYear} onUserLogin={onUserLogin}
+      onUserLogoff={onUserLogoff}/>
   </div>
 );
 
@@ -45,12 +46,14 @@ class VotingWindow extends React.Component {
   componentDidMount() {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
+        this.props.onUserLogin();
         this.setState({
           enabled: true,
           user: user
         })
       }
       else {
+        this.props.onUserLogoff();
         this.setState({
           enabled: false,
           user: null
@@ -234,13 +237,19 @@ const mapState = (state) => ({
 })
 
 const mapDispatch = (dispatch) => {
-  dispatch(fetchLivePollsThunk());
   dispatch(fetchDateThunk());
   return {
     onChangePoll(newLivePoll) { 
       dispatch(setLivePoll(newLivePoll)); 
       dispatch(setCurrentOption(newLivePoll.options[0].text)) },
-    onChangeOption(newOption) { dispatch(setCurrentOption(newOption)); }
+    onChangeOption(newOption) { dispatch(setCurrentOption(newOption)); }, 
+    onUserLogin(){
+      dispatch(fetchLivePollsThunk());
+      dispatch(watchLivePolls());
+    },
+    onUserLogoff(){
+      dispatch(offWatchLivePolls());
+    }
   }
 }
 export default connect(mapState, mapDispatch)(Voting);

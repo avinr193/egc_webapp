@@ -7,9 +7,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Main from './components/Main'
 import Navigation from './components/Navigation'
 
-import { fetchDateThunk,
-  watchLiveEvents,
-  watchLivePolls} from './store/actions'
+import { fetchDateThunk} from './store/actions'
 
 import './styles/App.css';
 
@@ -43,8 +41,6 @@ const mapState = () => {
 }
  const mapDispatch = dispatch => {
   dispatch(fetchDateThunk())
-  dispatch(watchLiveEvents())
-  dispatch(watchLivePolls())
   return {
   }
 }
