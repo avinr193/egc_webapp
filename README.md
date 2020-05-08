@@ -1,7 +1,8 @@
 # Meeting Manager for Rutgers Engineering Governing Council
 Simple web-app usable by organizations to facilitate and track attendance, and hold polls. Members can log-in with their school email and vote all from the mobile optimized website at egc-webapp.firebaseapp.com
-
-##### Currently compatible with: Node v12
+```diff
+!Compatible with: Node v12
+```
 To run locally:
 1. Create a new file called *config.json* in the src folder under the root directory. Populate it as follows:
 ```
