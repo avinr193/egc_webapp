@@ -347,7 +347,7 @@ class AdminPollWindow extends React.Component {
 								</Container>
 								: null}
 								</div>
-								{(this.props.isPollLive && this.props.currentLivePoll && this.props.polls.length > 0) ?
+								{(this.props.isPollLive && this.props.currentLivePoll && this.props.polls.length > 0 && this.props.currentLivePoll.location) ?
 									<div>
 										<div style={{ "marginTop": "10px" }}>Live Poll Radius: {this.props.currentLivePoll.location.radius}m</div>
 										<Container>

@@ -5,7 +5,7 @@ const About = () => (
         <pre>Contact Info:</pre>
 		<pre>---------</pre>
     <pre>Avin Abraham</pre>
-    <pre>avin.abraham@rutgers.edu</pre>
+    <pre>avinabraham17@gmail.com</pre>
       </div>
     );
 

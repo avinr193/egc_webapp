@@ -16,7 +16,7 @@ import Close from 'material-ui/svg-icons/navigation/close';
 import Dialog from 'material-ui/Dialog';
 import styled from 'styled-components';
 
-import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk, checkEventLive, 
+import { setEvent, fetchAttendanceThunk, setEventDate, fetchEventDatesThunk,
   setAttPath, fetchLiveEventsThunk, fetchEventsThunk } from '../../store/actions'
 
 const Container = styled.div`
@@ -29,7 +29,7 @@ const Container = styled.div`
 const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, eventDate, eventDates,
   currentDate, currentOrg, onChangeAtt, onSetEventLive, isEventLive, onSetAttPath, attPath, onIsAdmin, 
   isAdmin, currentLiveEvent, onLiveEventUpdate, orgs, years, currentYear, clearState, onDeleteLastDate,
-  isOppEventLive }) => (
+  isOppEventLive, onMount }) => (
     <div className="admin">
       <AdminWindow events={events} attendance={attendance} onChangeEvent={onChangeEvent}
         currentEvent={currentEvent} eventDate={eventDate} eventDates={eventDates}
@@ -38,7 +38,7 @@ const Admin = ({ events, attendance, currentEvent, onChangeEvent, onChangeDate, 
         onSetAttPath={onSetAttPath} attPath={attPath} onIsAdmin={onIsAdmin} isAdmin={isAdmin} 
         currentLiveEvent={currentLiveEvent} onLiveEventUpdate={onLiveEventUpdate} orgs={orgs} 
         years={years} currentYear={currentYear} clearState={clearState} 
-        onDeleteLastDate={onDeleteLastDate} isOppEventLive={isOppEventLive}/>
+        onDeleteLastDate={onDeleteLastDate} isOppEventLive={isOppEventLive} onMount={onMount}/>
     </div>
   );
 
@@ -53,6 +53,7 @@ class AdminWindow extends React.Component {
   }
 
   componentDidMount() {
+    this.props.onMount();
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.setState({
@@ -239,7 +240,7 @@ class AdminWindow extends React.Component {
                   </Container>
                 </div> : null : this.props.onSetAttPath("opening")
             }
-            {(this.props.isEventLive && this.props.currentLiveEvent) ? 
+            {(this.props.isEventLive && this.props.currentLiveEvent && this.props.events.length > 0 && this.props.currentLiveEvent.location) ? 
             <div>
             <div style={{"marginTop":"10px"}}>Live Event Radius: {this.props.currentLiveEvent.location.radius}m</div>
             <Container>
@@ -288,7 +289,6 @@ const mapState = (state) => ({
   currentYear: state.currentYear
 })
 const mapDispatch = (dispatch) => {
-  dispatch(checkEventLive());
   return {
     onChangeEvent(newEvent) {
       dispatch(setEvent(newEvent));
@@ -314,6 +314,9 @@ const mapDispatch = (dispatch) => {
       dispatch(fetchEventsThunk());
     },
     onLiveEventUpdate(){
+      dispatch(fetchLiveEventsThunk());
+    },
+    onMount(){
       dispatch(fetchLiveEventsThunk());
     }
   }
