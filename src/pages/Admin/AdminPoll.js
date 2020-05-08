@@ -416,7 +416,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(fetchPollsThunk());
 		},
 		onSetPollLive() {
-			dispatch(checkPollLive());
+			dispatch(fetchLivePollsThunk());
 		},
 		fetchAndSetPoll(id, org) {
 			dispatch(fetchAndSetPoll(id, org))
@@ -428,6 +428,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(fetchLivePollsThunk());
 		},
 		onMount(){
+			dispatch(fetchLivePollsThunk());
 			dispatch(fetchPollsThunk());
 		}
 	}
