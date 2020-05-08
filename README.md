@@ -1,6 +1,7 @@
 # Meeting Manager for Rutgers Engineering Governing Council
 Simple web-app usable by organizations to facilitate and track attendance, and hold polls. Members can log-in with their school email and vote all from the mobile optimized website at egc-webapp.firebaseapp.com
 
+## Guaranteed compatible with Node v12
 To run locally:
 1. Create a new file called *config.json* in the src folder under the root directory. Populate it as follows:
 ```
@@ -29,8 +30,9 @@ export default {
 COMING SOON:
 1. How to set-up the database from scratch (structure)
 2. How to modify the app to run with different schools
-3. How to deal with dependency issues (a little messy currently)
+3. How to deal with dependency issues (a little messy currently, need Node v12)
+4. Hide scrollbars for Windows/Linux users
 
 Other TO-DO:
-1. Rework all React components to proper usage (big optimization potential)
-2. Migrate from Firebase Real-time Database to Cloud Firestore (more reliability speed), or move the whole thing to AWS
+1. Rework all React components for proper usage (big optimization potential)
+2. Migrate from Firebase Real-time Database to Cloud Firestore (more reliability/speed), or move the whole thing to AWS
