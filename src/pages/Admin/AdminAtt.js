@@ -157,7 +157,7 @@ class AdminWindow extends React.Component {
     else {
       removeLiveEvent(liveEvent)
     }
-    this.props.onSetEventLive(this.props.attPath);
+    this.props.onSetEventLive();
     this.props.onLiveEventUpdate();
   }
 
@@ -301,8 +301,8 @@ const mapDispatch = (dispatch) => {
     onChangeAtt(newAttPath) {
       dispatch(fetchAttendanceThunk(newAttPath));
     },
-    onSetEventLive(attPath) {
-      dispatch(checkEventLive(attPath))
+    onSetEventLive() {
+      dispatch(fetchLiveEventsThunk())
     },
     onSetAttPath(attPath) {
       dispatch(setAttPath(attPath));

@@ -19,7 +19,8 @@ import styled from 'styled-components';
 import {
 	setOrg, fetchEventsThunk, setIsAdminThunk, fetchYear, offWatchAttendanceAdded,
 	offWatchPollAdded, watchAttendanceAdded, watchPollAdded, fetchYearsThunk, fetchDateThunk,
-	setAttPath
+	setAttPath,
+	fetchLiveEventsThunk
 } from '../../store/actions'
 
 
@@ -274,6 +275,7 @@ const mapDispatch = (dispatch) => {
 			dispatch(fetchEventsThunk(null,eventName));
 		},
 		onMount(){
+			dispatch(fetchLiveEventsThunk());
 			dispatch(fetchEventsThunk());
 		}
 	}
